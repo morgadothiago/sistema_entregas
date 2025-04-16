@@ -1,9 +1,20 @@
+<style>
+post {
+  color: white;
+  background: blue;
+  font-weight: 900;
+  padding: .2rem .4rem;
+  border-radius: .5rem;
+}
 
+</style>
 # Quick - funcionalidades
 
 ## Autenticacao
 
-- [ ] login
+- [X] login
+  - [X] api
+    - <post>POST</post> /auth/login
   - EMAIL, PASSWORD
 - [ ] autorização
   - header
