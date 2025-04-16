@@ -14,6 +14,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
+      include: { balance: true, Extract: true },
     });
 
     if (!user) {
@@ -29,15 +30,17 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { id: user.id };
 
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      token: await this.jwtService.signAsync(payload),
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
+        Balance: user.balance,
+        extract: user.Extract,
       },
     };
   }
