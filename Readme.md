@@ -10,7 +10,7 @@
   - token em campo authorization
   
 ## GPS
-- [ ] 
+- [ ] local
 
 <!-- - pra que taxa da saque, se pix é gratuito e nao usaremos getway de pagamento ? lucros
 - notificações
