@@ -40,7 +40,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         Balance: user.balance,
-        extract: user.Extract,
+        Extract: user.Extract,
       },
     };
   }
