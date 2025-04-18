@@ -54,3 +54,28 @@ deveria ter :
 
 cadastro e validação por eles
  -->
+
+
+##### Autorização 
+
+1. setar o token
+2. adicionar o token antes de qual quer requisição
+  - contruir o baererToken 
+  - adicionar baererToken ao header
+
+3. fazer a requisição
+  
+
+
+
+- beare Token: 
+```javascript
+  const bearerToken = `Bearer ${token}`
+
+
+```
+
+- Envio
+
+  - propriedade: headers
+  - key: Authorization

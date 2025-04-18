@@ -14,12 +14,43 @@ interface IErrorResponse {
 class ApiService {
   private api: AxiosInstance;
   static instance: ApiService;
+  private token: string;
 
   constructor() {
     this.api = Axios.create({
       baseURL: "http://localhost:3001",
     });
+    this.token = "";
+    this.setupIntercepters();
   }
+
+  setupIntercepters() {
+    this.api.interceptors.request.use(
+      (config) => {
+        if (this.token) {
+          const bearerToken = `Baerer ${this.token}`;
+          config.headers.Authorization = bearerToken;
+        }
+        return config;
+      },
+
+      // se der algum erro na request rejeita a promessa
+      (error) => Promise.reject(error)
+    );
+  }
+
+  setToken(token: string) {
+    this.token = token;
+  }
+
+  cleanToken() {
+    this.token = "";
+  }
+
+  async getInfo() {
+    this.api.get("");
+  }
+
   async login(email: string, password: string) {
     const response = await this.api
       .post("/auth/login", { email, password })

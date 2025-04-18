@@ -11,6 +11,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import type { SignInFormData } from "../types/SingInType";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/";
+import { redirect } from "next/navigation";
 
 export default function SignIn() {
   const { login } = useAuth();
@@ -30,6 +31,9 @@ export default function SignIn() {
           position: "top-right",
           richColors: true,
         });
+        setTimeout(() => {
+          redirect("/dashboard");
+        }, 3000);
       } else {
         toast.error("Erro ao realizar login!", {
           description: "Credenciais inválidas. Por favor, tente novamente.",
