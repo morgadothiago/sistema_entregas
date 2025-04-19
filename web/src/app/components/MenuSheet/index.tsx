@@ -12,9 +12,16 @@ import { LogOutIcon } from "lucide-react";
 import Image from "next/image";
 
 import LogoMenuLateral from "@/app/assets/img2.png";
+import { redirect } from "next/navigation";
 
 export function SideBar() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const handleLogOut = async () => {
+    await logout(); // Await the logout function
+    redirect("/");
+  };
+
   return (
     <Sidebar className=" flex-1 flex h-screen">
       <div className="bg-gradient-to-b from-[#003B73] to-[#5DADE2] flex-1 justify-between flex flex-col">
@@ -49,7 +56,7 @@ export function SideBar() {
         </SidebarContent>
         <SidebarFooter className="">
           <div className="">
-            <Button variant="destructive">
+            <Button variant="destructive" onClick={handleLogOut}>
               <LogOutIcon />
               Sair
             </Button>

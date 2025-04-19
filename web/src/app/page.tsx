@@ -1,8 +1,24 @@
-import SignIn from "./Signin/page";
+/* eslint-disable react-hooks/rules-of-hooks */
+"use client";
 
-export default function Home() {
+import React from "react";
+import SignIn from "./components/Signin";
+import { useAuth } from "./context";
+import { redirect } from "next/navigation";
+
+export default function page() {
+  const { isAuthenticated } = useAuth();
+
+  const redirectToDashboard = async () => {
+    if (isAuthenticated()) {
+      await redirect("/dashboard");
+    }
+  };
+
+  redirectToDashboard();
+
   return (
-    <div className="bg-[#fff] w-full h-screen">
+    <div>
       <SignIn />
     </div>
   );

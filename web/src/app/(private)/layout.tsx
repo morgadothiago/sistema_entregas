@@ -1,19 +1,27 @@
+"use client";
 import React, { ReactNode } from "react";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SideBar } from "../components/MenuSheet";
-import { SidebarButton } from "../components/SidebarButton";
+import { useAuth } from "../context";
+import { redirect } from "next/navigation";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated()) {
+    return redirect("/");
+  }
+
   return (
     <div>
       <SidebarProvider>
         <SideBar />
-        <SidebarButton className=" md:hidden border-none" />
+        <SidebarTrigger className=" w-15  h-15" size="lg" variant="outline" />
         {children}
       </SidebarProvider>
     </div>
