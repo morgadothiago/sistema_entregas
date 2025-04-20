@@ -1,0 +1,23 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { ValidationArguments } from "class-validator";
+
+const message = {
+  isDecimalPlates: (validationArguments: ValidationArguments) => {
+    console.log(validationArguments);
+    return `o campo ${validationArguments.property} deve ser um número com até ${validationArguments.constraints[0]["maxDecimalPlaces"]} casas decimais`;
+  },
+  isNumber: (validationArguments: ValidationArguments) => {
+    return `o campo ${validationArguments.property} deve ser um número`;
+  },
+  isMax: (validationArguments: ValidationArguments) => {
+    return `o campo ${validationArguments.property} deve ser menor ou igual a ${validationArguments.constraints[0]}`;
+  },
+  isMin: (validationArguments: ValidationArguments) => {
+    return `o campo ${validationArguments.property} deve ser maior ou igual a ${validationArguments.constraints[0]}`;
+  },
+  isString: (validationArguments: ValidationArguments) => {
+    return `o campo ${validationArguments.property} deve ser uma string`;
+  },
+};
+
+export { message };
