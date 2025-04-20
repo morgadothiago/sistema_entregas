@@ -13,6 +13,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    console.log("Effect0 -> ");
+
+    if (token && user) {
+      setToken(token);
+      setUser(JSON.parse(user));
+    }
+  }, []);
+
   const login = async (data: SignInFormData): Promise<boolean> => {
     const response = await api.login(data.email, data.password);
 
@@ -22,13 +34,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     saveToken(response.token);
     saveUser(response.user);
-
     return true;
   };
 
   const saveToken = (token: string) => {
     localStorage.setItem("token", token);
+    api.setToken(token);
     setToken(token);
+  };
+
+  const isAuthenticated = (): boolean => {
+    return !!token;
   };
 
   const saveUser = (user: User) => {
@@ -39,25 +55,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    api.cleanToken();
+
     setUser(null);
     setToken(null);
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
-
-    console.log(user);
-    console.log(token);
-
-    if (token && user) {
-      setToken(token);
-      setUser(JSON.parse(user));
-    }
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ user, login, logout, token }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, token, isAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );

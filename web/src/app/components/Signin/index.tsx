@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client";
 
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import { TextInput } from "../components/Input";
+import { TextInput } from "../Input";
 import { Button } from "@/components/ui/button";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import type { SignInFormData } from "../types/SingInType";
+import type { SignInFormData } from "../../types/SingInType";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/";
+import { useRouter } from "next/navigation";
 
 export default function SignIn() {
+  const routes = useRouter();
   const { login } = useAuth();
   const {
     register,
@@ -30,6 +32,7 @@ export default function SignIn() {
           position: "top-right",
           richColors: true,
         });
+        routes.push("/dashboard");
       } else {
         toast.error("Erro ao realizar login!", {
           description: "Credenciais inválidas. Por favor, tente novamente.",
@@ -45,6 +48,8 @@ export default function SignIn() {
         position: "top-right",
         richColors: true,
       });
+
+      console.log(error);
     }
   };
 

@@ -6,4 +6,5 @@ export interface AuthContextType {
   token: string | null;
   login: (data: SignInFormData) => Promise<boolean>;
   logout: () => void;
+  isAuthenticated: () => boolean;
 }
