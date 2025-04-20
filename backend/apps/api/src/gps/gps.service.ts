@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { CurrencyLocationDto } from "./dto/currency-location.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { GpsGateway } from "./gps.gateway";
+import { DeliveryStatus } from "generated/prisma";
 
 @Injectable()
 export class GpsService {
@@ -14,6 +19,14 @@ export class GpsService {
     const delivery = await this.prisma.delivery.findUnique({
       where: { code },
       include: {
+        DeliveryMan: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
         Localization: {
           select: {
             latitude: true,
@@ -41,12 +54,20 @@ export class GpsService {
       where: { code },
       select: {
         id: true,
+        status: true,
       },
     });
 
     if (!delivery)
       throw new NotFoundException(
         `Entrega com codigo '${code}' não foi encontrada`,
+      );
+
+    if (
+      ![DeliveryStatus.IN_PROGRESS].find((status) => status === delivery.status)
+    )
+      throw new ForbiddenException(
+        `Entrega com codigo '${code}' não está em andamento`,
       );
 
     await this.prisma.localization.create({
