@@ -1,8 +1,9 @@
 import { Module } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { JwtModule } from "@nestjs/jwt";
+import { GpsController } from "./gps.controller";
+import { GpsService } from "./gps.service";
 import { PrismaModule } from "../prisma/prisma.module";
-import { AuthController } from "./auth.controller";
+import { GpsGateway } from "./gps.gateway";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { AuthController } from "./auth.controller";
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService],
+  controllers: [GpsController],
+  providers: [GpsService, GpsGateway],
 })
-export class AuthModule {}
+export class GpsModule {}

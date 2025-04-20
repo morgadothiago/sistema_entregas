@@ -126,13 +126,13 @@ exports.Prisma.UserScalarFieldEnum = {
   status: 'status',
   information: 'information',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  balanceId: 'balanceId'
 };
 
 exports.Prisma.BalanceScalarFieldEnum = {
   id: 'id',
   amount: 'amount',
-  userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -141,8 +141,66 @@ exports.Prisma.ExtractScalarFieldEnum = {
   id: 'id',
   amount: 'amount',
   type: 'type',
-  userId: 'userId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+};
+
+exports.Prisma.DeliveryManScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  address: 'address',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId'
+};
+
+exports.Prisma.LocalizationScalarFieldEnum = {
+  id: 'id',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deliveryId: 'deliveryId'
+};
+
+exports.Prisma.DeliveryScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  higth: 'higth',
+  width: 'width',
+  length: 'length',
+  weight: 'weight',
+  price: 'price',
+  info: 'info',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deliveryManId: 'deliveryManId'
+};
+
+exports.Prisma.AddressScalarFieldEnum = {
+  id: 'id',
+  street: 'street',
+  number: 'number',
+  city: 'city',
+  state: 'state',
+  zipCode: 'zipCode',
+  country: 'country',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ClientScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  addressId: 'addressId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -153,6 +211,11 @@ exports.Prisma.SortOrder = {
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
 };
 exports.Role = exports.$Enums.Role = {
   ADMIN: 'ADMIN',
@@ -171,10 +234,22 @@ exports.ExtractType = exports.$Enums.ExtractType = {
   WITHDRAW: 'WITHDRAW'
 };
 
+exports.DeliveryStatus = exports.$Enums.DeliveryStatus = {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELED: 'CANCELED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Balance: 'Balance',
-  Extract: 'Extract'
+  Extract: 'Extract',
+  DeliveryMan: 'DeliveryMan',
+  Localization: 'Localization',
+  Delivery: 'Delivery',
+  Address: 'Address',
+  Client: 'Client'
 };
 
 /**

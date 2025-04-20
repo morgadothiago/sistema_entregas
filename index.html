@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conexão WebSocket com NestJS</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #messages {
+            background: #f4f4f4;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Conexão WebSocket (NestJS)</h1>
+    
+    <div>
+        <label for="room">Sala:</label>
+        <input type="text" id="room" placeholder="Nome da sala" value="AAA">
+        <button onclick="joinRoom()">Entrar na Sala</button>
+    </div>
+
+    <div id="messages"></div>
+
+    <script>
+        const token = 'Baerrer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzQ1MTMwNDY1fQ.79bHi80bgYGouXynW3NhNzFnvVQ98WxBhQx0wOvJs3k'
+        // Conexão com o WebSocket do NestJS
+        const socket = io("http://localhost:2000/gps", {
+            transports: ["websocket"],
+            auth: {
+            token: token,
+        },
+        });
+
+        // Elementos do DOM
+        const messagesDiv = document.getElementById("messages");
+        const messageInput = document.getElementById("messageInput");
+        const roomInput = document.getElementById("room");
+
+        // Log de mensagens na tela
+        function logMessage(message) {
+            messagesDiv.innerHTML += `<p>${message}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Evento quando conectado
+        socket.on("connect", () => {
+            logMessage(`✅ Conectado ao WebSocket! ID: ${socket.id}`);
+        });
+
+        // Evento quando da erro
+        socket.on("connect_error", (error) => {
+            logMessage(`❌ Erro de conexão: ${error.message}`);
+        });
+
+        const getEndereco = async (latitude, longitude) => {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+            
+            if (!response.ok) {
+                return logMessage('Erro ao buscar o endereço');
+            }
+
+            const { address } = await response.json();
+            console.log(address)
+            if (address) {
+            logMessage(`📍 Endereço: ${address.road}, ${address.neighbourhood}, ${address.suburb}, ${address.city}, ${address.state}, ${address.country}`);
+            } else {
+                return logMessage('Endereço não encontrado');
+            }
+        }
+
+         // Escuta o evento "update-location"
+        socket.on("update-location", async (data) => {
+            const { latitude, longitude } = data;
+
+            getEndereco(latitude, longitude)
+
+            logMessage(`📍 Localização atualizada: Latitude ${latitude}, Longitude ${longitude}`);
+        });
+
+         // Escuta o evento "update-location"
+         socket.on("status", (data) => {
+            
+            logMessage(`📍 ${data}`);
+        });
+
+        // Evento quando desconectado
+        socket.on("disconnect", () => {
+            logMessage("❌ Desconectado do servidor.");
+        });
+
+        // Recebe mensagens do servidor
+        socket.on("message", (data) => {
+            logMessage(`📩 Mensagem do servidor: ${data}`);
+        });
+
+        // Entra em uma sala
+        async function joinRoom() {
+            const room  = roomInput.value
+            const response = await fetch(`http://localhost:3000/gps/delivery/${room}?socketId=${socket.id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                }
+            });
+            
+            const data = await response.json()
+
+            if(response.ok){
+                logMessage(`🚪 Entrou na sala: ${room}`);
+                for(const {latitude, longitude} of data.Localization) {
+                    console.log(latitude, longitude)
+                    await getEndereco(latitude, longitude)
+                };
+            }
+        }
+
+        // Envia uma mensagem para o servidor
+        function sendMessage() {
+            const message = messageInput.value;
+            socket.emit("message", message);
+            logMessage(`📤 Você enviou: ${message}`);
+            messageInput.value = "";
+        }
+
+    </script>
+</body>
+</html>
