@@ -16,7 +16,6 @@ datasource db {
 
 model User {
   id          Int          @id @default(autoincrement())
-  name        String
   email       String       @unique
   password    String
   role        Role         @default(COMPANY)
@@ -33,12 +32,29 @@ model User {
   @@map("users")
 }
 
+model Adress {
+  id         Int       @id @default(autoincrement())
+  street     String
+  number     String
+  city       String
+  state      String
+  zipCode    String
+  country    String
+  complement String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Company    Company[]
+
+  @@map("adresses")
+}
+
 model Company {
   id        Int      @id @default(autoincrement())
   name      String
-  email     String   @unique
   phone     String
-  address   String
+  cnpj      String   @unique
+  idAddress Int
+  Adress    Adress   @relation(fields: [idAddress], references: [id])
   idUser    Int      @unique
   User      User     @relation(fields: [idUser], references: [id])
   createdAt DateTime @default(now())

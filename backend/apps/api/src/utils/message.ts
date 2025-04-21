@@ -18,6 +18,15 @@ const message = {
   isString: (validationArguments: ValidationArguments) => {
     return `o campo ${validationArguments.property} deve ser uma string`;
   },
+  minLength: (validationArguments: ValidationArguments) => {
+    return `o campo ${validationArguments.property} deve ter no mínimo ${validationArguments.constraints[0]} caracteres`;
+  },
+  isEmail: (validationArguments: ValidationArguments) => {
+    return `o campo ${validationArguments.property} deve ser um email válido`;
+  },
+  isNotEmpty: (validationArguments: ValidationArguments) => {
+    return `o campo ${validationArguments.property} não pode ser vazio`;
+  },
 };
 
 export { message };

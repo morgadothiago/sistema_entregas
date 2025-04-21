@@ -1,10 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import {
-  Logger,
-  UnprocessableEntityException,
-  ValidationPipe,
-} from "@nestjs/common";
+import { Logger, ValidationPipe } from "@nestjs/common";
 import { exceptionFactory } from "./utils/fn";
 
 async function bootstrap() {
@@ -25,7 +21,7 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   await app.listen(port, () => {
-    new Logger().log(`Server is running on port ${port}`);
+    new Logger("MAIN").log(`Server is running on port ${port}`);
     //console.log(`Swagger UI: http://localhost:${port}/api`);
   });
 }
