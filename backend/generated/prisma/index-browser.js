@@ -119,7 +119,6 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
-  name: 'name',
   email: 'email',
   password: 'password',
   role: 'role',
@@ -128,6 +127,30 @@ exports.Prisma.UserScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   balanceId: 'balanceId'
+};
+
+exports.Prisma.AdressScalarFieldEnum = {
+  id: 'id',
+  street: 'street',
+  number: 'number',
+  city: 'city',
+  state: 'state',
+  zipCode: 'zipCode',
+  country: 'country',
+  complement: 'complement',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CompanyScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  cnpj: 'cnpj',
+  idAddress: 'idAddress',
+  idUser: 'idUser',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.BalanceScalarFieldEnum = {
@@ -243,6 +266,8 @@ exports.DeliveryStatus = exports.$Enums.DeliveryStatus = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Adress: 'Adress',
+  Company: 'Company',
   Balance: 'Balance',
   Extract: 'Extract',
   DeliveryMan: 'DeliveryMan',
