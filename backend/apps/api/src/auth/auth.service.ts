@@ -1,8 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginDto } from './dto/login.dto';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { LoginDto } from "./dto/login.dto";
+import * as bcrypt from "bcrypt";
+import { JwtService } from "@nestjs/jwt";
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class AuthService {
@@ -14,11 +14,11 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
-      include: { balance: true, Extract: true },
+      include: { Balance: true, Extract: true },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException("Credenciais inválidas");
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -27,7 +27,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException("Credenciais inválidas");
     }
 
     const payload = { id: user.id };
@@ -39,7 +39,7 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
-        Balance: user.balance,
+        Balance: user.Balance,
         Extract: user.Extract,
       },
     };
