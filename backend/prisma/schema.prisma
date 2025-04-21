@@ -28,8 +28,23 @@ model User {
   Extract     Extract[]
   balanceId   Int
   DeliveryMan DeliveryMan?
+  Company     Company?
 
   @@map("users")
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phone     String
+  address   String
+  idUser    Int      @unique
+  User      User     @relation(fields: [idUser], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("companies")
 }
 
 enum UserStatus {
