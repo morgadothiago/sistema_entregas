@@ -56,7 +56,6 @@ class ApiService {
       .post("/auth/login", { email, password })
       .then(this.getResponse<ILoginResponse>)
       .catch(this.getError);
-
     return response;
   }
   private getResponse<T>(response: AxiosResponse): T {

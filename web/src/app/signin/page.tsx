@@ -4,7 +4,7 @@
 
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -17,12 +17,18 @@ import { TextInput } from "../components/Input";
 
 export default function SignInPage() {
   const routes = useRouter();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignInFormData>();
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      return routes.push("/dashboard");
+    }
+  }, [isAuthenticated]);
 
   const onSubmit: SubmitHandler<SignInFormData> = async (data) => {
     try {

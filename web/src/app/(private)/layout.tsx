@@ -1,10 +1,10 @@
 "use client";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SideBar } from "../components/MenuSheet";
 import { useAuth } from "../context";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,10 +12,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { isAuthenticated } = useAuth();
+  const routes = useRouter();
 
-  if (!isAuthenticated()) {
-    return redirect("/");
-  }
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      return routes.push("/signin");
+    }
+  }, [isAuthenticated]);
 
   return (
     <div>
