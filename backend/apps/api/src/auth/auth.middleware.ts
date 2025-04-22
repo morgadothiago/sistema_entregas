@@ -8,7 +8,7 @@ import {
 import { Request } from "express";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
-import { Role, User, UserStatus } from "generated/prisma";
+import { Role, User } from "generated/prisma";
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
