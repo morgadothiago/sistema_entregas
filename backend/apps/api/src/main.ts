@@ -1,5 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import type { OpenAPIObject } from "@nestjs/swagger";
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { exceptionFactory } from "./utils/fn";
 
@@ -18,11 +20,24 @@ async function bootstrap() {
     }),
   );
 
+  const config: OpenAPIObject = {
+    ...new DocumentBuilder()
+      .setTitle("API")
+      .setDescription("Documentação da API")
+      .setVersion("1.0")
+      .build(),
+    paths: {},
+  };
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup("docs", app, document);
+
   const port = process.env.PORT || 3000;
 
   await app.listen(port, () => {
     new Logger("MAIN").log(`Server is running on port ${port}`);
-    //console.log(`Swagger UI: http://localhost:${port}/api`);
+    new Logger("Swagger UI").log(`http://localhost:${port}/docs`);
   });
 }
 

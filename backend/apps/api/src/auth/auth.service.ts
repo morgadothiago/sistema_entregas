@@ -8,7 +8,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
 import { CompanyDto } from "./dto/company.dto";
-import { Role } from "generated/prisma";
+import { Balance, Company, Extract, Role } from "generated/prisma";
 
 @Injectable()
 export class AuthService {
@@ -25,6 +25,12 @@ export class AuthService {
     });
 
     if (existingUser) throw new ConflictException("Email já cadastrado");
+
+    const existingCnpj = await this.prisma.user.findFirst({
+      where: { Company: { cnpj: company.cnpj } },
+    });
+
+    if (existingCnpj) throw new ConflictException("CNPj já cadastrado");
 
     await this.prisma.user.create({
       data: {
@@ -61,7 +67,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
-      include: { Balance: true, Extract: true },
+      include: { Balance: true, Extract: true, Company: true },
     });
 
     if (!user) {
@@ -85,8 +91,9 @@ export class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
-        Balance: user.Balance,
-        Extract: user.Extract,
+        Balance: user.Balance as Balance,
+        Extract: (user.Extract ?? []) as Extract[],
+        Company: user.Company as Company,
       },
     };
   }
