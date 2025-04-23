@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/app/context/";
 import { useRouter } from "next/navigation";
 import type { SignInFormData } from "../types/SingInType";
-import { TextInput } from "../components/Input";
+import { TextInput } from "../components/TextInput";
 
 export default function SignInPage() {
   const routes = useRouter();
@@ -72,7 +72,7 @@ export default function SignInPage() {
         </div>
         <div className="flex items-start justify-center text-center">
           <Link
-            href="/create-accounts"
+            href="/signup"
             className="flex gap-2.5 py-2 items-center justify-center"
           >
             <Plus className="text-white" />
