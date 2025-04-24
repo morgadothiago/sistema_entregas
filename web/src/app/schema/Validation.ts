@@ -23,6 +23,6 @@ export const schema = yup.object().shape({
     .min(6, "A senha deve ter pelo menos 6 caracteres"),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), null], "As senhas devem corresponder")
+    .oneOf([yup.ref("password")], "As senhas devem corresponder")
     .required("Confirmação de senha é obrigatória"),
 });

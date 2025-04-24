@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <div>
       <div className="">
-        <h1>Tela do dashboard: {auth.user?.name}</h1>
+        <h1>Tela do dashboard: {auth.user?.email}</h1>
       </div>
       <Button onClick={handleGetUser}>Get Info user</Button>
     </div>

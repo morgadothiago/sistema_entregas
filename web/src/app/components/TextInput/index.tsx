@@ -22,7 +22,15 @@ export function TextInput({
         {labelName}
       </Label>
       <Input
-        className={`w-full border border-blue-500 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out ${rest.classNameInput}`}
+        className={`w-full border ${
+          rest.classNameInput ? rest.classNameInput : "border-blue-500"
+        } rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 ease-in-out ${
+          rest.classNameInput
+        } ${
+          rest.classNameInput && rest.classNameInput.includes("error")
+            ? "border-red-500"
+            : "border-blue-500"
+        }`}
         {...rest}
       />
     </div>
