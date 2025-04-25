@@ -24,7 +24,12 @@ export default function Layout({ children }: LayoutProps) {
     <div>
       <SidebarProvider>
         <SideBar />
-        <SidebarTrigger className=" w-15  h-15" size="lg" variant="outline" />
+
+        <SidebarTrigger
+          className=" w-15  h-15 lg:hidden "
+          size="lg"
+          variant="outline"
+        />
         {children}
       </SidebarProvider>
     </div>
