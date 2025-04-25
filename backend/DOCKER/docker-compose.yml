@@ -14,7 +14,7 @@ services:
     volumes:
       - .data/postgresql:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,21 +29,24 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
+  pgweb:
+    image: sosedoff/pgweb
     ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      - "8083:8081"
+    command: [
+      "--host=postgres",
+      "--user=postgres",
+      "--pass=mysecretpassword",
+      "--db=quick",
+       "--ssl=disable"  
+    ]
     depends_on:
       - postgres
-
 volumes:
   postgres_data:
 
+
 networks:
-  default:
+  defaults:
     name: minha_rede
     driver: bridge
