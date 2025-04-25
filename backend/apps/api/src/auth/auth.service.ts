@@ -8,7 +8,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
 import { CompanyDto } from "./dto/company.dto";
-import { Balance, Company, Extract, Role } from "generated/prisma";
+import { Company, Role, UserStatus } from "generated/prisma";
 
 @Injectable()
 export class AuthService {
@@ -37,6 +37,8 @@ export class AuthService {
         email: company.email,
         password: hashedPassword,
         role: Role.COMPANY,
+        status: UserStatus.BLOCKED,
+        information: "cadastro precisa ser desbloqueado",
         Company: {
           create: {
             name: company.name,
@@ -91,8 +93,8 @@ export class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
-        Balance: user.Balance as Balance,
-        Extract: (user.Extract ?? []) as Extract[],
+        Balance: user.Balance,
+        Extract: user.Extract ?? [],
         Company: user.Company as Company,
       },
     };
