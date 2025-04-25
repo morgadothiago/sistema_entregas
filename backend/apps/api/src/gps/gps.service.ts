@@ -7,6 +7,7 @@ import { CurrencyLocationDto } from "./dto/currency-location.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { GpsGateway } from "./gps.gateway";
 import { DeliveryStatus } from "generated/prisma";
+import { SocketDto } from "../websocket/dto/socket.dto";
 
 @Injectable()
 export class GpsService {
@@ -15,7 +16,15 @@ export class GpsService {
     private gpsWebsocket: GpsGateway,
   ) {}
 
-  async getLocation(code: string) {
+  async getLocation(code: string, socket: SocketDto) {
+    const client = this.gpsWebsocket.getClient(socket.socketId);
+
+    if (!client) {
+      throw new NotFoundException(
+        `Cliente com socketId '${socket.socketId}' não foi encontrado`,
+      );
+    }
+
     const delivery = await this.prisma.delivery.findUnique({
       where: { code },
       include: {
@@ -43,6 +52,8 @@ export class GpsService {
       throw new NotFoundException(
         `Entrega com codigo '${code}' não foi encontrada`,
       );
+
+    await this.gpsWebsocket.handleJoinRoom(client, code);
 
     return delivery;
   }
