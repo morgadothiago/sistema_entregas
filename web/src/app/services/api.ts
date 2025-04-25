@@ -5,6 +5,7 @@ import Axios, {
   type AxiosError,
 } from "axios";
 import type { ILoginResponse } from "../types/SingInType";
+import type { ICreateUser } from "../types/User";
 
 interface IErrorResponse {
   message: string;
@@ -58,12 +59,31 @@ class ApiService {
       .catch(this.getError);
     return response;
   }
+  async newUser(data: ICreateUser) {
+    console.log("Estou enviando para o backend =>", data);
+
+    const response = await this.api
+      .post("/auth/signup/company", data)
+      .then(this.getResponse)
+      .catch(this.getError);
+
+    console.log("Gravou no banco ", response);
+
+    return response;
+  }
+
   private getResponse<T>(response: AxiosResponse): T {
     return response.data;
   }
   private getError(error: AxiosError<any>): IErrorResponse {
     if (error.status === 401) {
       console.error(error.status);
+    }
+    if (error.status === 422) {
+      return {
+        message: error.response?.data?.message,
+        status: error.status,
+      };
     }
 
     return {

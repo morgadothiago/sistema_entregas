@@ -4,27 +4,33 @@ import { Label } from "@/components/ui/label";
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   labelName: string;
-  className: string;
+  className?: string; // Made optional to allow for default styling
   placeholder?: string;
-  required?: boolean; // Corrected 'require' to 'required'
+  required?: boolean;
   classNameInput?: string;
+  labelColor?: string; // New prop for dynamic label color
+  inputBorderColor?: string; // New prop for dynamic input border color
 }
 
-export function TextInput({
-  labelName, // Adicionei esta linha
-  className,
-
+export const TextInput: React.FC<TextInputProps> = ({
+  labelName,
+  className = "", // Default to an empty string if not provided
+  classNameInput = "", // Default to an empty string if not provided
+  labelColor = "#003B73", // Default label color
+  inputBorderColor = "border-blue-500", // Default input border color
   ...rest
-}: TextInputProps) {
+}) => {
   return (
-    <div className={className}>
-      <Label className="mb-3 text-[#003B73] text-base sm:text-lg md:text-xl font-semibold">
+    <div className={`flex flex-col ${className}`}>
+      <Label
+        className={`mb-2 text-[${labelColor}] text-base sm:text-lg md:text-xl font-semibold`}
+      >
         {labelName}
       </Label>
       <Input
-        className={`w-full border border-blue-500 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out ${rest.classNameInput}`}
+        className={`w-full ${inputBorderColor} rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out ${classNameInput}`}
         {...rest}
       />
     </div>
   );
-}
+};

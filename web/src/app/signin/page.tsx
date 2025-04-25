@@ -40,6 +40,7 @@ export default function SignInPage() {
           position: "top-right",
           richColors: true,
         });
+
         routes.push("/dashboard");
       } else {
         toast.error("Erro ao realizar login!", {
@@ -50,8 +51,8 @@ export default function SignInPage() {
         });
       }
     } catch (error: any) {
-      toast.error("Login realizado com sucesso!", {
-        description: "Você está sendo redirecionado para a página inicial",
+      toast.error("Erro ao realizar login!", {
+        description: "Por favor, tente novamente.",
         duration: 3000,
         position: "top-right",
         richColors: true,
@@ -80,19 +81,19 @@ export default function SignInPage() {
           </Link>
         </div>
       </div>
-      <div className="flex items-center justify-center w-full h-screen">
+      <div className="flex items-center justify-center w-full h-screen p-4">
         <form
-          className="flex flex-col items-center justify-center w-full max-w-md gap-1 p-4"
+          className="flex flex-col items-center justify-center w-full max-w-md gap-1"
           onSubmit={handleSubmit(onSubmit)}
         >
           <TextInput
-            className="w-full  xl:w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
+            className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
             labelName="Email"
             placeholder="Digite seu email"
             {...register("email", { required: true })}
           />
           {errors.email && (
-            <span className="text-red-500 text-sm text-left w-[95%]">
+            <span className="text-red-500 text-sm text-left w-full">
               Este campo é obrigatório
             </span>
           )}
@@ -104,23 +105,38 @@ export default function SignInPage() {
             {...register("password", { required: true })}
           />
           {errors.password && (
-            <span className="text-red-500 text-sm text-left  w-[95%]">
+            <span className="text-red-500 text-sm text-left w-full">
               Este campo é obrigatório
             </span>
           )}
-          <div className="flex items-center justify-between w-[95%] mt-10 ">
+          <div className="flex flex-col items-start w-full">
             <Link
               href="/reset-password"
-              className="text-[#5dade2] hover:text-[#024db9] font-bold"
+              className="text-[#5dade2] hover:text-[#024db9] font-bold mb-2"
             >
               Esqueceu a senha
             </Link>
-            <Button
-              className="bg-[#024db9] hover:bg-[#5DADE2] hover:text-black px-5 w-[30%] text-white"
-              type="submit"
+            <div className="flex justify-center w-full mt-5">
+              <Button
+                className="w-full bg-gradient-to-r h-12 from-[#024db9] to-[#5DADE2] hover:bg-[#5DADE2] hover:text-black transition duration-300 ease-in-out px-6 py-3 rounded-md text-white font-semibold shadow-md transform hover:scale-105"
+                type="submit"
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent default to ensure form submission
+                  handleSubmit(onSubmit)(); // Call the submit handler
+                }}
+              >
+                Login
+              </Button>
+            </div>
+          </div>
+          <div className="absolute bottom-0   flex lg:hidden w-full p-4 justify-center items-end ">
+            <Link
+              href="/signup"
+              className="flex gap-2.5 py-2 w-[50%] items-center justify-center bg-[#5DADE2] text-white rounded-md"
             >
-              Login
-            </Button>
+              <Plus className="text-white" />
+              <h4 className="font-bold text-lg">Crie sua conta</h4>
+            </Link>
           </div>
         </form>
       </div>

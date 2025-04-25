@@ -15,3 +15,16 @@ export interface User {
   Balance: IBalance;
   Extract: IExtract[];
 }
+export interface ICreateUser {
+  name: string;
+  email: string;
+  cnpj: string;
+  password: string;
+  phone: string;
+  address: string;
+  city: string;
+  number: string;
+  complement: string;
+  state: string;
+  zipCode: string;
+}
