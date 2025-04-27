@@ -1,39 +1,42 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect } from "react";
-
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { useForm, type SubmitHandler } from "react-hook-form";
-
 import { toast } from "sonner";
-import { useAuth } from "@/app/context/";
 import { useRouter } from "next/navigation";
 import type { SignInFormData } from "../types/SingInType";
 import { TextInput } from "../components/TextInput";
+import { signIn } from "next-auth/react";
 
 export default function SignInPage() {
   const routes = useRouter();
-  const { login, isAuthenticated } = useAuth();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignInFormData>();
 
-  useEffect(() => {
-    if (isAuthenticated()) {
-      return routes.push("/dashboard");
-    }
-  }, [isAuthenticated]);
-
   const onSubmit: SubmitHandler<SignInFormData> = async (data) => {
     try {
-      const response = await login(data);
-      if (response) {
+      const result = await signIn('credentials', {
+        redirect: false,
+        email: data.email,
+        password: data.password
+      });
+  
+      if (result?.error) {
+        return toast.error("Credenciais invalidas", {
+              description: "E-mail ou senha inválidos",
+              duration: 3000,
+              position: "top-right",
+              richColors: true,
+            });         
+      }
+
         toast.success("Login realizado com sucesso!", {
           description: "Você está sendo redirecionado para a página inicial",
           duration: 3000,
@@ -42,23 +45,15 @@ export default function SignInPage() {
         });
 
         routes.push("/dashboard");
-      } else {
-        toast.error("Erro ao realizar login!", {
-          description: "Credenciais inválidas. Por favor, tente novamente.",
-          duration: 3000,
-          position: "top-right",
-          richColors: true,
-        });
-      }
-    } catch (error: any) {
+  
+    } catch (error) {
       toast.error("Erro ao realizar login!", {
-        description: "Por favor, tente novamente.",
+        description: (error as Error)?.message || "Por favor, tente novamente.",
         duration: 3000,
         position: "top-right",
         richColors: true,
       });
 
-      console.log(error);
     }
   };
 

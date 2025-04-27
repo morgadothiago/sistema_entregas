@@ -1,24 +1,22 @@
-"use client";
-import React, { ReactNode, useEffect } from "react";
+"use server";
+import React, { ReactNode } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SideBar } from "../components/MenuSheet";
-import { useAuth } from "../context";
-import { useRouter } from "next/navigation";
+import { auth } from "../api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
-  const { isAuthenticated } = useAuth();
-  const routes = useRouter();
+export default async function Layout({ children }: LayoutProps) {
+  const session = await auth()
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      return routes.push("/signin");
-    }
-  }, [isAuthenticated]);
+  if(!session){
+    redirect('/signin')
+  }
+  
 
   return (
     <div>
