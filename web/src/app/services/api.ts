@@ -15,23 +15,22 @@ interface IErrorResponse {
 class ApiService {
   private api: AxiosInstance;
   static instance: ApiService;
-  private token: string;
+  private token: string = '';
 
   constructor() {
     this.api = Axios.create({
-      baseURL: "http://localhost:3001",
+      baseURL: process.env.API_HOST,
     });
-    this.token = "";
+
     this.setupIntercepters();
   }
 
   setupIntercepters() {
     this.api.interceptors.request.use(
       (config) => {
-        if (this.token) {
-          const bearerToken = `Baerer ${this.token}`;
-          config.headers.Authorization = bearerToken;
-        }
+        
+        config.headers.Authorization ??= this.token;
+        
         return config;
       },
 
@@ -41,7 +40,7 @@ class ApiService {
   }
 
   setToken(token: string) {
-    this.token = token;
+    this.token = `Bearer ${token}`;
   }
 
   cleanToken() {
@@ -51,23 +50,20 @@ class ApiService {
   async getInfo() {
     this.api.get("");
   }
-
+  
   async login(email: string, password: string) {
-    const response = await this.api
+    return this.api
       .post("/auth/login", { email, password })
       .then(this.getResponse<ILoginResponse>)
       .catch(this.getError);
-    return response;
   }
+
   async newUser(data: ICreateUser) {
-    console.log("Estou enviando para o backend =>", data);
 
     const response = await this.api
       .post("/auth/signup/company", data)
       .then(this.getResponse)
       .catch(this.getError);
-
-    console.log("Gravou no banco ", response);
 
     return response;
   }
@@ -76,9 +72,6 @@ class ApiService {
     return response.data;
   }
   private getError(error: AxiosError<any>): IErrorResponse {
-    if (error.status === 401) {
-      console.error(error.status);
-    }
     if (error.status === 422) {
       return {
         message: error.response?.data?.message,
@@ -87,8 +80,8 @@ class ApiService {
     }
 
     return {
-      message: "Credenciais inválidas",
-      status: error.response?.status ?? 401, // Default to 500 if status is undefined
+      message: error.response?.data?.message,
+      status: error.status || 500, // Default to 500 if status is undefined
     };
   }
 

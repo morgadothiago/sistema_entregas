@@ -21,6 +21,7 @@ import LogoMenuLateral from "@/app/assets/img2.png";
 import { itemAdm, items, itemSupport } from "@/app/utils/menu";
 import { useState } from "react"; // Import useState
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 export function SideBar() {
   const { user, logout } = useAuth();
@@ -29,13 +30,13 @@ export function SideBar() {
 
   const handleLogOut = async () => {
     await logout(); // Await the logout function
+    await signOut({redirect: true, redirectTo:  '/signin'})
     router.push("/");
   };
 
   function handleNextPage(itemTitle: string) {
     setSelectedItem(itemTitle); // Set the selected item
     router.push(`/dashboard/${itemTitle}`); // Navigate to the corresponding page
-    console.log(itemTitle);
   }
 
   return (

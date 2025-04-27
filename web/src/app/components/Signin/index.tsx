@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 "use client";
 
 import { Plus } from "lucide-react";
@@ -25,6 +23,7 @@ export default function SignIn() {
   const onSubmit: SubmitHandler<SignInFormData> = async (data) => {
     try {
       const response = await login(data);
+
       if (response) {
         toast.success("Login realizado com sucesso!", {
           description: "Você está sendo redirecionado para a página inicial",
@@ -41,7 +40,7 @@ export default function SignIn() {
           richColors: true,
         });
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Login realizado com sucesso!", {
         description: "Você está sendo redirecionado para a página inicial",
         duration: 3000,
@@ -49,7 +48,6 @@ export default function SignIn() {
         richColors: true,
       });
 
-      console.log(error);
     }
   };
 

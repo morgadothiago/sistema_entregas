@@ -63,7 +63,6 @@ export default function SignUpPage() {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (step === 3) {
-      console.log(data);
 
       const addUser = await api.newUser(data as ICreateUser);
 
