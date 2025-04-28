@@ -5,6 +5,7 @@ import { AuthModule } from "./auth/auth.module";
 import { GpsModule } from "./gps/gps.module";
 import { AuthMiddleware } from "./auth/auth.middleware";
 import { JwtModule } from "@nestjs/jwt";
+import { VehicleTypeModule } from "./vehicle-type/vehicle-type.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { JwtModule } from "@nestjs/jwt";
         signOptions: { expiresIn: process.env.JWT_EXPIRATION },
       }),
     }),
+    VehicleTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
