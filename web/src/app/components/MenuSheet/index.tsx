@@ -19,18 +19,19 @@ import Image from "next/image";
 import LogoMenuLateral from "@/app/assets/img2.png";
 
 import { itemAdm, items, itemSupport } from "@/app/utils/menu";
-import { useState } from "react"; // Import useState
+import { useEffect, useState } from "react"; // Import useState
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
+import { User } from "@/app/types/User";
 
 export function SideBar() {
-  const { user, logout } = useAuth();
+  const [user, setUser] = useState<User>({} as User)
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   const router = useRouter();
 
   const handleLogOut = async () => {
-    await logout();
+    
     await signOut({redirect: true, redirectTo:  '/signin'})
     router.push("/");
   };
@@ -40,6 +41,12 @@ export function SideBar() {
    
     router.push(`/dashboard/${itemTitle}`);
   }
+
+  useEffect(() => {
+    getSession().then((data) =>{
+      if(data) setUser(data.user as unknown as User)
+    });
+  }, []); 
 
   
 
