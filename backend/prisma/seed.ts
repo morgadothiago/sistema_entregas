@@ -39,19 +39,22 @@ async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
 
 async function seedProfit(prisma: PrismaClient, logger: Logger) {
   logger.log(`Seeding Profit`);
+
   try {
+    const percentage = 0.1;
+
     await prisma.profitMargin?.upsert({
       where: { id: 1 },
       update: {},
       create: {
         id: 1,
-        percentage: 10.0,
+        percentage,
       },
     });
 
-    logger.log(`Seeded Profit: ${10.0}`);
-  } catch {
-    logger.error(`Profit`);
+    logger.log(`Seeded Profit: ${percentage * 100}%`);
+  } catch (err) {
+    logger.error(`Profit ${err}`);
   }
 }
 

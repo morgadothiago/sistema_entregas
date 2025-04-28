@@ -84,5 +84,8 @@
     "roots": [
       "<rootDir>/apps/"
     ]
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }
