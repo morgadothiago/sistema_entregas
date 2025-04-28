@@ -153,6 +153,21 @@ exports.Prisma.CompanyScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.VehicleTypeScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  pricePerKm: 'pricePerKm',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProfitMarginScalarFieldEnum = {
+  id: 'id',
+  percentage: 'percentage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.BalanceScalarFieldEnum = {
   id: 'id',
   amount: 'amount',
@@ -268,6 +283,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   Adress: 'Adress',
   Company: 'Company',
+  VehicleType: 'VehicleType',
+  ProfitMargin: 'ProfitMargin',
   Balance: 'Balance',
   Extract: 'Extract',
   DeliveryMan: 'DeliveryMan',

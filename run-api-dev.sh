@@ -5,6 +5,8 @@ docker compose up -d
 
 cd ..
 
-yarn 
+yarn
+
+yarn seed
 
 yarn start:dev api

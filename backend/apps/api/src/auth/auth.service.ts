@@ -18,7 +18,9 @@ export class AuthService {
   ) {}
 
   async signupCompany(company: CompanyDto) {
-    const hashedPassword = await bcrypt.hash(company.password, 10);
+    const salt = await bcrypt.genSalt(12);
+
+    const hashedPassword = await bcrypt.hash(company.password, salt);
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email: company.email },

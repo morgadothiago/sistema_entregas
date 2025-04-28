@@ -69,6 +69,25 @@ enum UserStatus {
   BLOCKED
 }
 
+model VehicleType {
+  id         Int      @id @default(autoincrement())
+  type       String   @unique
+  pricePerKm Float    @default(1)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("vehicle_types")
+}
+
+model ProfitMargin {
+  id         Int      @id @default(autoincrement())
+  percentage Decimal  @default(0.00) @db.Decimal(3, 2) // 3 dígitos no total, 2 decimais
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("profit_margins")
+}
+
 model Balance {
   id        Int      @id @default(autoincrement())
   amount    Float    @default(0)
