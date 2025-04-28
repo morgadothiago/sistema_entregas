@@ -40,6 +40,8 @@ export class AuthMiddleware implements NestMiddleware {
 
       if (!user) throw new UnauthorizedException("token invalid");
 
+      (req as Request & { user: User }).user = user as User;
+
       if (user.role === Role.ADMIN) return next();
 
       if (user.status === "BLOCKED")
@@ -47,8 +49,6 @@ export class AuthMiddleware implements NestMiddleware {
 
       if (user.status === "INACTIVE")
         throw new UnauthorizedException("User is inactive");
-
-      (req as Request & { user: User }).user = user as User;
 
       next();
     } catch (error) {
