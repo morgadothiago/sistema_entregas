@@ -11,12 +11,18 @@ export async function consult_cnpj(cnpj: string): Promise<IConsultCNPJ | false> 
 
     } catch (error) {
         if (axios.isAxiosError(error)) {
-
+            
             console.log("Erro na requisição: =>", error.message);
             console.log("Erro na requisição:", error.response?.data);
+
+    
         } else {
             console.log("Erro inesperado:", error);
+
+        
         }
         return false;
     }
+
+
 }

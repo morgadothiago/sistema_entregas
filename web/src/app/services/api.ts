@@ -85,6 +85,13 @@ class ApiService {
       };
     }
 
+    if (error.status === 409) {
+      return {
+        message: error.response?.data?.message,
+        status: error.status,
+      };
+    }
+
     return {
       message: error.response?.data?.message,
       status: error.status || 500, // Default to 500 if status is undefined

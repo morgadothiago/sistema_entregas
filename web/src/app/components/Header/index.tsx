@@ -7,7 +7,7 @@ import { User } from "@/app/types/User";
 import Image from "next/image";
 
 export default function Header() {
-  const [, setIsNotification] = useState(false);
+  const [setIsNotification] = useState(false);
   const [user, setUser] = useState<User>({} as User)
   
   const notifications = [
@@ -29,33 +29,25 @@ export default function Header() {
   ];
 
   React.useEffect(() => {
-    // Simulate fetching notifications from an API or other source
-    const fetchNotifications = async () => {
-      // Here you can set the notifications array
-      // For now, we will use the hardcoded notifications
-      setIsNotification(notifications.length > 0);
-      
-    };
+ 
 
     getSession().then((data) =>{
       if(data) setUser(data.user as unknown as User)
     });
 
-      
-    fetchNotifications();
+   
   }, []); // Empty dependency array to run only on mount
 
   return (
-    <div className="flex flex-row md:flex-row justify-between items-center p-1 bg-white ">
-      <div className="text-lg font-semibold">Olá: {user?.Company?.name}</div>
-      <div className="text-lg font-bold mt-2 md:mt-0 bg-gray-200 rounded-full px-4 py-1 w-full text-center sm:w-auto sm:text-left">
+    <div className="md:px-20 md:p-2 flex flex-row md:flex-row justify-between items-center p-1 bg-white ">
+      <div className="text-base md:text-lg font-semibold md:w-[85%]">Olá: {user?.Company?.name}</div>
+      <div className="flex gap-4">
+      <div className="text-lg font-bold mt-2 md:mt-0 bg-gray-200 rounded-full px-4 py-1">
         R$ {user?.Balance?.amount || 0}
       </div>
       <div className="flex items-center space-x-4 mt-2 md:mt-0">
         <SideBarSheet isNotification={true} />
-        <button className="p-2 rounded-full hover:bg-gray-100 transition">
-          
-        </button>
+      </div>
       </div>
     </div>
   );
