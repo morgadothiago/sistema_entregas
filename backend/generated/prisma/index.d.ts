@@ -6713,24 +6713,24 @@ export namespace Prisma {
 
   export type ProfitMarginAvgAggregateOutputType = {
     id: number | null
-    percentage: number | null
+    percentage: Decimal | null
   }
 
   export type ProfitMarginSumAggregateOutputType = {
     id: number | null
-    percentage: number | null
+    percentage: Decimal | null
   }
 
   export type ProfitMarginMinAggregateOutputType = {
     id: number | null
-    percentage: number | null
+    percentage: Decimal | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type ProfitMarginMaxAggregateOutputType = {
     id: number | null
-    percentage: number | null
+    percentage: Decimal | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -6864,7 +6864,7 @@ export namespace Prisma {
 
   export type ProfitMarginGroupByOutputType = {
     id: number
-    percentage: number
+    percentage: Decimal
     createdAt: Date
     updatedAt: Date
     _count: ProfitMarginCountAggregateOutputType | null
@@ -6923,7 +6923,7 @@ export namespace Prisma {
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      percentage: number
+      percentage: Prisma.Decimal
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["profitMargin"]>
@@ -7350,7 +7350,7 @@ export namespace Prisma {
    */
   interface ProfitMarginFieldRefs {
     readonly id: FieldRef<"ProfitMargin", 'Int'>
-    readonly percentage: FieldRef<"ProfitMargin", 'Float'>
+    readonly percentage: FieldRef<"ProfitMargin", 'Decimal'>
     readonly createdAt: FieldRef<"ProfitMargin", 'DateTime'>
     readonly updatedAt: FieldRef<"ProfitMargin", 'DateTime'>
   }
@@ -16065,6 +16065,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Decimal'
+   */
+  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal[]'
+   */
+  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+  /**
    * Reference to a field of type 'ExtractType'
    */
   export type EnumExtractTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExtractType'>
@@ -16397,7 +16411,7 @@ export namespace Prisma {
     OR?: ProfitMarginWhereInput[]
     NOT?: ProfitMarginWhereInput | ProfitMarginWhereInput[]
     id?: IntFilter<"ProfitMargin"> | number
-    percentage?: FloatFilter<"ProfitMargin"> | number
+    percentage?: DecimalFilter<"ProfitMargin"> | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFilter<"ProfitMargin"> | Date | string
     updatedAt?: DateTimeFilter<"ProfitMargin"> | Date | string
   }
@@ -16414,7 +16428,7 @@ export namespace Prisma {
     AND?: ProfitMarginWhereInput | ProfitMarginWhereInput[]
     OR?: ProfitMarginWhereInput[]
     NOT?: ProfitMarginWhereInput | ProfitMarginWhereInput[]
-    percentage?: FloatFilter<"ProfitMargin"> | number
+    percentage?: DecimalFilter<"ProfitMargin"> | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFilter<"ProfitMargin"> | Date | string
     updatedAt?: DateTimeFilter<"ProfitMargin"> | Date | string
   }, "id">
@@ -16436,7 +16450,7 @@ export namespace Prisma {
     OR?: ProfitMarginScalarWhereWithAggregatesInput[]
     NOT?: ProfitMarginScalarWhereWithAggregatesInput | ProfitMarginScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"ProfitMargin"> | number
-    percentage?: FloatWithAggregatesFilter<"ProfitMargin"> | number
+    percentage?: DecimalWithAggregatesFilter<"ProfitMargin"> | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeWithAggregatesFilter<"ProfitMargin"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ProfitMargin"> | Date | string
   }
@@ -17241,47 +17255,47 @@ export namespace Prisma {
   }
 
   export type ProfitMarginCreateInput = {
-    percentage?: number
+    percentage?: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type ProfitMarginUncheckedCreateInput = {
     id?: number
-    percentage?: number
+    percentage?: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type ProfitMarginUpdateInput = {
-    percentage?: FloatFieldUpdateOperationsInput | number
+    percentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProfitMarginUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    percentage?: FloatFieldUpdateOperationsInput | number
+    percentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProfitMarginCreateManyInput = {
     id?: number
-    percentage?: number
+    percentage?: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type ProfitMarginUpdateManyMutationInput = {
-    percentage?: FloatFieldUpdateOperationsInput | number
+    percentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ProfitMarginUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    percentage?: FloatFieldUpdateOperationsInput | number
+    percentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18188,6 +18202,17 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type DecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
   export type ProfitMarginCountOrderByAggregateInput = {
     id?: SortOrder
     percentage?: SortOrder
@@ -18217,6 +18242,22 @@ export namespace Prisma {
   export type ProfitMarginSumOrderByAggregateInput = {
     id?: SortOrder
     percentage?: SortOrder
+  }
+
+  export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
   }
 
   export type UserListRelationFilter = {
@@ -18870,6 +18911,14 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type DecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
   export type UserCreateNestedManyWithoutBalanceInput = {
     create?: XOR<UserCreateWithoutBalanceInput, UserUncheckedCreateWithoutBalanceInput> | UserCreateWithoutBalanceInput[] | UserUncheckedCreateWithoutBalanceInput[]
     connectOrCreate?: UserCreateOrConnectWithoutBalanceInput | UserCreateOrConnectWithoutBalanceInput[]
@@ -19323,6 +19372,33 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
   }
 
   export type NestedEnumExtractTypeFilter<$PrismaModel = never> = {

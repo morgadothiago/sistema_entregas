@@ -81,7 +81,7 @@ model VehicleType {
 
 model ProfitMargin {
   id         Int      @id @default(autoincrement())
-  percentage Float    @default(0)
+  percentage Decimal  @default(0.00) @db.Decimal(3, 2) // 3 dígitos no total, 2 decimais
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
