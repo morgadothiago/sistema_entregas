@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { TextInput } from "../components/TextInput";
+import { TextInput } from "../components/Input";
 import { Button } from "@/components/ui/button";
 import { ufs } from "../utils/citys";
 import { Select } from "@/app/components/Select";
@@ -119,11 +119,9 @@ export default function SignUpPage() {
                 labelName="Nome da Empresa"
                 className="w-full"
                 placeholder="Digite o nome da empresa"
+                error
                 {...register("name", { required: true })}
               />
-              {errors.name && (
-                <span className="text-red-500 text-xs">Nome da empresa é obrigatório</span>
-              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <TextInput
