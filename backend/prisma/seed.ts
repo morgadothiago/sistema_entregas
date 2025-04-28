@@ -11,11 +11,11 @@ const prisma = new PrismaClient();
 
 async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
   const vehicleTypes = [
-    { type: "Car", pricePerKm: 1.5 },
-    { type: "Motorcycle", pricePerKm: 1.0 },
-    { type: "Truck", pricePerKm: 2.5 },
-    { type: "Bus", pricePerKm: 2.0 },
-    { type: "Bicycle", pricePerKm: 0.5 },
+    { type: "Carro", pricePerKm: 1.5 },
+    { type: "Motocicleta", pricePerKm: 1.0 },
+    { type: "Caminhão", pricePerKm: 2.5 },
+    { type: "Ônibus", pricePerKm: 2.0 },
+    { type: "Bicicleta", pricePerKm: 0.5 },
   ];
 
   logger.log(`Seeding vehicle types`);
