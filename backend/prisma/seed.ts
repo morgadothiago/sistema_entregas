@@ -63,7 +63,7 @@ async function createAdminUser(prisma: PrismaClient, logger: Logger) {
   logger.log(`Creating admin user`);
   const salt = await bcrypt.genSalt(12);
 
-  const hashedPassword = await bcrypt.hash("admin", salt);
+  const hashedPassword = await bcrypt.hash("secret_admin", salt);
 
   const user: Partial<User> = {
     email: "admin@admin.com",
