@@ -6,6 +6,7 @@ import {
   User,
   UserStatus,
 } from "./../generated/prisma";
+import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -60,10 +61,13 @@ async function seedProfit(prisma: PrismaClient, logger: Logger) {
 
 async function createAdminUser(prisma: PrismaClient, logger: Logger) {
   logger.log(`Creating admin user`);
+  const salt = await bcrypt.genSalt(12);
+
+  const hashedPassword = await bcrypt.hash("admin", salt);
 
   const user: Partial<User> = {
     email: "admin@admin.com",
-    password: "admin",
+    password: hashedPassword,
     role: Role.ADMIN,
     status: UserStatus.ACTIVE,
     information: "admin criado com seed",
