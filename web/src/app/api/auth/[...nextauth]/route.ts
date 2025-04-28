@@ -12,6 +12,8 @@ export const authOptions: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: Partial<Record<"email" | "password", unknown>>) {
+        
+        
         if (!credentials || typeof credentials.email !== "string" || typeof credentials.password !== "string") {
           return null;
         }
@@ -21,7 +23,7 @@ export const authOptions: NextAuthConfig = {
           }
 
           const res = await api.login(credentials.email, credentials.password);
-          
+          console.log(res)
           if('status' in res)
             return null
           

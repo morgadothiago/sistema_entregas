@@ -84,6 +84,7 @@ export default function SignInPage() {
           <TextInput
             className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
             labelName="Email"
+            type="email"
             placeholder="Digite seu email"
             {...register("email", { required: true })}
           />
