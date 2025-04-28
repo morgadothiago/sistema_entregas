@@ -1,5 +1,11 @@
 import { Logger } from "@nestjs/common";
-import { PrismaClient } from "./../generated/prisma";
+import {
+  Balance,
+  PrismaClient,
+  Role,
+  User,
+  UserStatus,
+} from "./../generated/prisma";
 
 const prisma = new PrismaClient();
 
@@ -49,6 +55,48 @@ async function seedProfit(prisma: PrismaClient, logger: Logger) {
   }
 }
 
+async function createAdminUser(prisma: PrismaClient, logger: Logger) {
+  logger.log(`Creating admin user`);
+
+  const user: Partial<User> = {
+    email: "admin@admin.com",
+    password: "admin",
+    role: Role.ADMIN,
+    status: UserStatus.ACTIVE,
+    information: "admin criado com seed",
+    id: 1,
+  };
+
+  const balance: Partial<Balance> = {
+    id: 1,
+    amount: 0,
+  };
+
+  try {
+    await prisma.user?.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        email: user.email as string,
+        password: user.password as string,
+        role: user.role,
+        status: user.status,
+        information: user.information,
+        Balance: {
+          create: {
+            amount: balance.amount,
+          },
+        },
+      },
+    });
+
+    logger.log(`Admin user created successfully`);
+  } catch (error) {
+    logger.error(
+      `Failed to create admin user: ${(error as Record<string, any>).message}`,
+    );
+  }
+}
 async function main() {
   await prisma.$connect();
 
@@ -56,6 +104,7 @@ async function main() {
 
   await seedProfit(prisma, logger);
   await seedvehicleTypes(prisma, logger);
+  await createAdminUser(prisma, logger);
 }
 
 main()
