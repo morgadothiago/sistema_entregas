@@ -29,6 +29,16 @@ export type Adress = $Result.DefaultSelection<Prisma.$AdressPayload>
  */
 export type Company = $Result.DefaultSelection<Prisma.$CompanyPayload>
 /**
+ * Model VehicleType
+ * 
+ */
+export type VehicleType = $Result.DefaultSelection<Prisma.$VehicleTypePayload>
+/**
+ * Model ProfitMargin
+ * 
+ */
+export type ProfitMargin = $Result.DefaultSelection<Prisma.$ProfitMarginPayload>
+/**
  * Model Balance
  * 
  */
@@ -289,6 +299,26 @@ export class PrismaClient<
     * ```
     */
   get company(): Prisma.CompanyDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.vehicleType`: Exposes CRUD operations for the **VehicleType** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more VehicleTypes
+    * const vehicleTypes = await prisma.vehicleType.findMany()
+    * ```
+    */
+  get vehicleType(): Prisma.VehicleTypeDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.profitMargin`: Exposes CRUD operations for the **ProfitMargin** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ProfitMargins
+    * const profitMargins = await prisma.profitMargin.findMany()
+    * ```
+    */
+  get profitMargin(): Prisma.ProfitMarginDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.balance`: Exposes CRUD operations for the **Balance** model.
@@ -802,6 +832,8 @@ export namespace Prisma {
     User: 'User',
     Adress: 'Adress',
     Company: 'Company',
+    VehicleType: 'VehicleType',
+    ProfitMargin: 'ProfitMargin',
     Balance: 'Balance',
     Extract: 'Extract',
     DeliveryMan: 'DeliveryMan',
@@ -827,7 +859,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "adress" | "company" | "balance" | "extract" | "deliveryMan" | "localization" | "delivery" | "address" | "client"
+      modelProps: "user" | "adress" | "company" | "vehicleType" | "profitMargin" | "balance" | "extract" | "deliveryMan" | "localization" | "delivery" | "address" | "client"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1050,6 +1082,154 @@ export namespace Prisma {
           count: {
             args: Prisma.CompanyCountArgs<ExtArgs>
             result: $Utils.Optional<CompanyCountAggregateOutputType> | number
+          }
+        }
+      }
+      VehicleType: {
+        payload: Prisma.$VehicleTypePayload<ExtArgs>
+        fields: Prisma.VehicleTypeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.VehicleTypeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.VehicleTypeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>
+          }
+          findFirst: {
+            args: Prisma.VehicleTypeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.VehicleTypeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>
+          }
+          findMany: {
+            args: Prisma.VehicleTypeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>[]
+          }
+          create: {
+            args: Prisma.VehicleTypeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>
+          }
+          createMany: {
+            args: Prisma.VehicleTypeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.VehicleTypeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>[]
+          }
+          delete: {
+            args: Prisma.VehicleTypeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>
+          }
+          update: {
+            args: Prisma.VehicleTypeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>
+          }
+          deleteMany: {
+            args: Prisma.VehicleTypeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.VehicleTypeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.VehicleTypeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>[]
+          }
+          upsert: {
+            args: Prisma.VehicleTypeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$VehicleTypePayload>
+          }
+          aggregate: {
+            args: Prisma.VehicleTypeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateVehicleType>
+          }
+          groupBy: {
+            args: Prisma.VehicleTypeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<VehicleTypeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.VehicleTypeCountArgs<ExtArgs>
+            result: $Utils.Optional<VehicleTypeCountAggregateOutputType> | number
+          }
+        }
+      }
+      ProfitMargin: {
+        payload: Prisma.$ProfitMarginPayload<ExtArgs>
+        fields: Prisma.ProfitMarginFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ProfitMarginFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ProfitMarginFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>
+          }
+          findFirst: {
+            args: Prisma.ProfitMarginFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ProfitMarginFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>
+          }
+          findMany: {
+            args: Prisma.ProfitMarginFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>[]
+          }
+          create: {
+            args: Prisma.ProfitMarginCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>
+          }
+          createMany: {
+            args: Prisma.ProfitMarginCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ProfitMarginCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>[]
+          }
+          delete: {
+            args: Prisma.ProfitMarginDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>
+          }
+          update: {
+            args: Prisma.ProfitMarginUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>
+          }
+          deleteMany: {
+            args: Prisma.ProfitMarginDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ProfitMarginUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ProfitMarginUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>[]
+          }
+          upsert: {
+            args: Prisma.ProfitMarginUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ProfitMarginPayload>
+          }
+          aggregate: {
+            args: Prisma.ProfitMarginAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateProfitMargin>
+          }
+          groupBy: {
+            args: Prisma.ProfitMarginGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ProfitMarginGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ProfitMarginCountArgs<ExtArgs>
+            result: $Utils.Optional<ProfitMarginCountAggregateOutputType> | number
           }
         }
       }
@@ -1658,6 +1838,8 @@ export namespace Prisma {
     user?: UserOmit
     adress?: AdressOmit
     company?: CompanyOmit
+    vehicleType?: VehicleTypeOmit
+    profitMargin?: ProfitMarginOmit
     balance?: BalanceOmit
     extract?: ExtractOmit
     deliveryMan?: DeliveryManOmit
@@ -5481,6 +5663,2059 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: CompanyInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model VehicleType
+   */
+
+  export type AggregateVehicleType = {
+    _count: VehicleTypeCountAggregateOutputType | null
+    _avg: VehicleTypeAvgAggregateOutputType | null
+    _sum: VehicleTypeSumAggregateOutputType | null
+    _min: VehicleTypeMinAggregateOutputType | null
+    _max: VehicleTypeMaxAggregateOutputType | null
+  }
+
+  export type VehicleTypeAvgAggregateOutputType = {
+    id: number | null
+    pricePerKm: number | null
+  }
+
+  export type VehicleTypeSumAggregateOutputType = {
+    id: number | null
+    pricePerKm: number | null
+  }
+
+  export type VehicleTypeMinAggregateOutputType = {
+    id: number | null
+    type: string | null
+    pricePerKm: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleTypeMaxAggregateOutputType = {
+    id: number | null
+    type: string | null
+    pricePerKm: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type VehicleTypeCountAggregateOutputType = {
+    id: number
+    type: number
+    pricePerKm: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type VehicleTypeAvgAggregateInputType = {
+    id?: true
+    pricePerKm?: true
+  }
+
+  export type VehicleTypeSumAggregateInputType = {
+    id?: true
+    pricePerKm?: true
+  }
+
+  export type VehicleTypeMinAggregateInputType = {
+    id?: true
+    type?: true
+    pricePerKm?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleTypeMaxAggregateInputType = {
+    id?: true
+    type?: true
+    pricePerKm?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type VehicleTypeCountAggregateInputType = {
+    id?: true
+    type?: true
+    pricePerKm?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type VehicleTypeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VehicleType to aggregate.
+     */
+    where?: VehicleTypeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleTypes to fetch.
+     */
+    orderBy?: VehicleTypeOrderByWithRelationInput | VehicleTypeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: VehicleTypeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleTypes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleTypes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned VehicleTypes
+    **/
+    _count?: true | VehicleTypeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: VehicleTypeAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: VehicleTypeSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: VehicleTypeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: VehicleTypeMaxAggregateInputType
+  }
+
+  export type GetVehicleTypeAggregateType<T extends VehicleTypeAggregateArgs> = {
+        [P in keyof T & keyof AggregateVehicleType]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateVehicleType[P]>
+      : GetScalarType<T[P], AggregateVehicleType[P]>
+  }
+
+
+
+
+  export type VehicleTypeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VehicleTypeWhereInput
+    orderBy?: VehicleTypeOrderByWithAggregationInput | VehicleTypeOrderByWithAggregationInput[]
+    by: VehicleTypeScalarFieldEnum[] | VehicleTypeScalarFieldEnum
+    having?: VehicleTypeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: VehicleTypeCountAggregateInputType | true
+    _avg?: VehicleTypeAvgAggregateInputType
+    _sum?: VehicleTypeSumAggregateInputType
+    _min?: VehicleTypeMinAggregateInputType
+    _max?: VehicleTypeMaxAggregateInputType
+  }
+
+  export type VehicleTypeGroupByOutputType = {
+    id: number
+    type: string
+    pricePerKm: number
+    createdAt: Date
+    updatedAt: Date
+    _count: VehicleTypeCountAggregateOutputType | null
+    _avg: VehicleTypeAvgAggregateOutputType | null
+    _sum: VehicleTypeSumAggregateOutputType | null
+    _min: VehicleTypeMinAggregateOutputType | null
+    _max: VehicleTypeMaxAggregateOutputType | null
+  }
+
+  type GetVehicleTypeGroupByPayload<T extends VehicleTypeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<VehicleTypeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof VehicleTypeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], VehicleTypeGroupByOutputType[P]>
+            : GetScalarType<T[P], VehicleTypeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type VehicleTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    pricePerKm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["vehicleType"]>
+
+  export type VehicleTypeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    pricePerKm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["vehicleType"]>
+
+  export type VehicleTypeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    pricePerKm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["vehicleType"]>
+
+  export type VehicleTypeSelectScalar = {
+    id?: boolean
+    type?: boolean
+    pricePerKm?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type VehicleTypeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "pricePerKm" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicleType"]>
+
+  export type $VehicleTypePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "VehicleType"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      type: string
+      pricePerKm: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["vehicleType"]>
+    composites: {}
+  }
+
+  type VehicleTypeGetPayload<S extends boolean | null | undefined | VehicleTypeDefaultArgs> = $Result.GetResult<Prisma.$VehicleTypePayload, S>
+
+  type VehicleTypeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<VehicleTypeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: VehicleTypeCountAggregateInputType | true
+    }
+
+  export interface VehicleTypeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['VehicleType'], meta: { name: 'VehicleType' } }
+    /**
+     * Find zero or one VehicleType that matches the filter.
+     * @param {VehicleTypeFindUniqueArgs} args - Arguments to find a VehicleType
+     * @example
+     * // Get one VehicleType
+     * const vehicleType = await prisma.vehicleType.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends VehicleTypeFindUniqueArgs>(args: SelectSubset<T, VehicleTypeFindUniqueArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one VehicleType that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {VehicleTypeFindUniqueOrThrowArgs} args - Arguments to find a VehicleType
+     * @example
+     * // Get one VehicleType
+     * const vehicleType = await prisma.vehicleType.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends VehicleTypeFindUniqueOrThrowArgs>(args: SelectSubset<T, VehicleTypeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VehicleType that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleTypeFindFirstArgs} args - Arguments to find a VehicleType
+     * @example
+     * // Get one VehicleType
+     * const vehicleType = await prisma.vehicleType.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends VehicleTypeFindFirstArgs>(args?: SelectSubset<T, VehicleTypeFindFirstArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first VehicleType that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleTypeFindFirstOrThrowArgs} args - Arguments to find a VehicleType
+     * @example
+     * // Get one VehicleType
+     * const vehicleType = await prisma.vehicleType.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends VehicleTypeFindFirstOrThrowArgs>(args?: SelectSubset<T, VehicleTypeFindFirstOrThrowArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more VehicleTypes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleTypeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all VehicleTypes
+     * const vehicleTypes = await prisma.vehicleType.findMany()
+     * 
+     * // Get first 10 VehicleTypes
+     * const vehicleTypes = await prisma.vehicleType.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const vehicleTypeWithIdOnly = await prisma.vehicleType.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends VehicleTypeFindManyArgs>(args?: SelectSubset<T, VehicleTypeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a VehicleType.
+     * @param {VehicleTypeCreateArgs} args - Arguments to create a VehicleType.
+     * @example
+     * // Create one VehicleType
+     * const VehicleType = await prisma.vehicleType.create({
+     *   data: {
+     *     // ... data to create a VehicleType
+     *   }
+     * })
+     * 
+     */
+    create<T extends VehicleTypeCreateArgs>(args: SelectSubset<T, VehicleTypeCreateArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many VehicleTypes.
+     * @param {VehicleTypeCreateManyArgs} args - Arguments to create many VehicleTypes.
+     * @example
+     * // Create many VehicleTypes
+     * const vehicleType = await prisma.vehicleType.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends VehicleTypeCreateManyArgs>(args?: SelectSubset<T, VehicleTypeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many VehicleTypes and returns the data saved in the database.
+     * @param {VehicleTypeCreateManyAndReturnArgs} args - Arguments to create many VehicleTypes.
+     * @example
+     * // Create many VehicleTypes
+     * const vehicleType = await prisma.vehicleType.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many VehicleTypes and only return the `id`
+     * const vehicleTypeWithIdOnly = await prisma.vehicleType.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends VehicleTypeCreateManyAndReturnArgs>(args?: SelectSubset<T, VehicleTypeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a VehicleType.
+     * @param {VehicleTypeDeleteArgs} args - Arguments to delete one VehicleType.
+     * @example
+     * // Delete one VehicleType
+     * const VehicleType = await prisma.vehicleType.delete({
+     *   where: {
+     *     // ... filter to delete one VehicleType
+     *   }
+     * })
+     * 
+     */
+    delete<T extends VehicleTypeDeleteArgs>(args: SelectSubset<T, VehicleTypeDeleteArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one VehicleType.
+     * @param {VehicleTypeUpdateArgs} args - Arguments to update one VehicleType.
+     * @example
+     * // Update one VehicleType
+     * const vehicleType = await prisma.vehicleType.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends VehicleTypeUpdateArgs>(args: SelectSubset<T, VehicleTypeUpdateArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more VehicleTypes.
+     * @param {VehicleTypeDeleteManyArgs} args - Arguments to filter VehicleTypes to delete.
+     * @example
+     * // Delete a few VehicleTypes
+     * const { count } = await prisma.vehicleType.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends VehicleTypeDeleteManyArgs>(args?: SelectSubset<T, VehicleTypeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VehicleTypes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleTypeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many VehicleTypes
+     * const vehicleType = await prisma.vehicleType.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends VehicleTypeUpdateManyArgs>(args: SelectSubset<T, VehicleTypeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more VehicleTypes and returns the data updated in the database.
+     * @param {VehicleTypeUpdateManyAndReturnArgs} args - Arguments to update many VehicleTypes.
+     * @example
+     * // Update many VehicleTypes
+     * const vehicleType = await prisma.vehicleType.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more VehicleTypes and only return the `id`
+     * const vehicleTypeWithIdOnly = await prisma.vehicleType.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends VehicleTypeUpdateManyAndReturnArgs>(args: SelectSubset<T, VehicleTypeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one VehicleType.
+     * @param {VehicleTypeUpsertArgs} args - Arguments to update or create a VehicleType.
+     * @example
+     * // Update or create a VehicleType
+     * const vehicleType = await prisma.vehicleType.upsert({
+     *   create: {
+     *     // ... data to create a VehicleType
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the VehicleType we want to update
+     *   }
+     * })
+     */
+    upsert<T extends VehicleTypeUpsertArgs>(args: SelectSubset<T, VehicleTypeUpsertArgs<ExtArgs>>): Prisma__VehicleTypeClient<$Result.GetResult<Prisma.$VehicleTypePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of VehicleTypes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleTypeCountArgs} args - Arguments to filter VehicleTypes to count.
+     * @example
+     * // Count the number of VehicleTypes
+     * const count = await prisma.vehicleType.count({
+     *   where: {
+     *     // ... the filter for the VehicleTypes we want to count
+     *   }
+     * })
+    **/
+    count<T extends VehicleTypeCountArgs>(
+      args?: Subset<T, VehicleTypeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], VehicleTypeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a VehicleType.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleTypeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends VehicleTypeAggregateArgs>(args: Subset<T, VehicleTypeAggregateArgs>): Prisma.PrismaPromise<GetVehicleTypeAggregateType<T>>
+
+    /**
+     * Group by VehicleType.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {VehicleTypeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends VehicleTypeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: VehicleTypeGroupByArgs['orderBy'] }
+        : { orderBy?: VehicleTypeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, VehicleTypeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetVehicleTypeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the VehicleType model
+   */
+  readonly fields: VehicleTypeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for VehicleType.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__VehicleTypeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the VehicleType model
+   */
+  interface VehicleTypeFieldRefs {
+    readonly id: FieldRef<"VehicleType", 'Int'>
+    readonly type: FieldRef<"VehicleType", 'String'>
+    readonly pricePerKm: FieldRef<"VehicleType", 'Float'>
+    readonly createdAt: FieldRef<"VehicleType", 'DateTime'>
+    readonly updatedAt: FieldRef<"VehicleType", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * VehicleType findUnique
+   */
+  export type VehicleTypeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * Filter, which VehicleType to fetch.
+     */
+    where: VehicleTypeWhereUniqueInput
+  }
+
+  /**
+   * VehicleType findUniqueOrThrow
+   */
+  export type VehicleTypeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * Filter, which VehicleType to fetch.
+     */
+    where: VehicleTypeWhereUniqueInput
+  }
+
+  /**
+   * VehicleType findFirst
+   */
+  export type VehicleTypeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * Filter, which VehicleType to fetch.
+     */
+    where?: VehicleTypeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleTypes to fetch.
+     */
+    orderBy?: VehicleTypeOrderByWithRelationInput | VehicleTypeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VehicleTypes.
+     */
+    cursor?: VehicleTypeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleTypes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleTypes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleTypes.
+     */
+    distinct?: VehicleTypeScalarFieldEnum | VehicleTypeScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleType findFirstOrThrow
+   */
+  export type VehicleTypeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * Filter, which VehicleType to fetch.
+     */
+    where?: VehicleTypeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleTypes to fetch.
+     */
+    orderBy?: VehicleTypeOrderByWithRelationInput | VehicleTypeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for VehicleTypes.
+     */
+    cursor?: VehicleTypeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleTypes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleTypes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of VehicleTypes.
+     */
+    distinct?: VehicleTypeScalarFieldEnum | VehicleTypeScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleType findMany
+   */
+  export type VehicleTypeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * Filter, which VehicleTypes to fetch.
+     */
+    where?: VehicleTypeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of VehicleTypes to fetch.
+     */
+    orderBy?: VehicleTypeOrderByWithRelationInput | VehicleTypeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing VehicleTypes.
+     */
+    cursor?: VehicleTypeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` VehicleTypes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` VehicleTypes.
+     */
+    skip?: number
+    distinct?: VehicleTypeScalarFieldEnum | VehicleTypeScalarFieldEnum[]
+  }
+
+  /**
+   * VehicleType create
+   */
+  export type VehicleTypeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * The data needed to create a VehicleType.
+     */
+    data: XOR<VehicleTypeCreateInput, VehicleTypeUncheckedCreateInput>
+  }
+
+  /**
+   * VehicleType createMany
+   */
+  export type VehicleTypeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many VehicleTypes.
+     */
+    data: VehicleTypeCreateManyInput | VehicleTypeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VehicleType createManyAndReturn
+   */
+  export type VehicleTypeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * The data used to create many VehicleTypes.
+     */
+    data: VehicleTypeCreateManyInput | VehicleTypeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * VehicleType update
+   */
+  export type VehicleTypeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * The data needed to update a VehicleType.
+     */
+    data: XOR<VehicleTypeUpdateInput, VehicleTypeUncheckedUpdateInput>
+    /**
+     * Choose, which VehicleType to update.
+     */
+    where: VehicleTypeWhereUniqueInput
+  }
+
+  /**
+   * VehicleType updateMany
+   */
+  export type VehicleTypeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update VehicleTypes.
+     */
+    data: XOR<VehicleTypeUpdateManyMutationInput, VehicleTypeUncheckedUpdateManyInput>
+    /**
+     * Filter which VehicleTypes to update
+     */
+    where?: VehicleTypeWhereInput
+    /**
+     * Limit how many VehicleTypes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleType updateManyAndReturn
+   */
+  export type VehicleTypeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * The data used to update VehicleTypes.
+     */
+    data: XOR<VehicleTypeUpdateManyMutationInput, VehicleTypeUncheckedUpdateManyInput>
+    /**
+     * Filter which VehicleTypes to update
+     */
+    where?: VehicleTypeWhereInput
+    /**
+     * Limit how many VehicleTypes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleType upsert
+   */
+  export type VehicleTypeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * The filter to search for the VehicleType to update in case it exists.
+     */
+    where: VehicleTypeWhereUniqueInput
+    /**
+     * In case the VehicleType found by the `where` argument doesn't exist, create a new VehicleType with this data.
+     */
+    create: XOR<VehicleTypeCreateInput, VehicleTypeUncheckedCreateInput>
+    /**
+     * In case the VehicleType was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<VehicleTypeUpdateInput, VehicleTypeUncheckedUpdateInput>
+  }
+
+  /**
+   * VehicleType delete
+   */
+  export type VehicleTypeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+    /**
+     * Filter which VehicleType to delete.
+     */
+    where: VehicleTypeWhereUniqueInput
+  }
+
+  /**
+   * VehicleType deleteMany
+   */
+  export type VehicleTypeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which VehicleTypes to delete
+     */
+    where?: VehicleTypeWhereInput
+    /**
+     * Limit how many VehicleTypes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * VehicleType without action
+   */
+  export type VehicleTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the VehicleType
+     */
+    select?: VehicleTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the VehicleType
+     */
+    omit?: VehicleTypeOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ProfitMargin
+   */
+
+  export type AggregateProfitMargin = {
+    _count: ProfitMarginCountAggregateOutputType | null
+    _avg: ProfitMarginAvgAggregateOutputType | null
+    _sum: ProfitMarginSumAggregateOutputType | null
+    _min: ProfitMarginMinAggregateOutputType | null
+    _max: ProfitMarginMaxAggregateOutputType | null
+  }
+
+  export type ProfitMarginAvgAggregateOutputType = {
+    id: number | null
+    percentage: number | null
+  }
+
+  export type ProfitMarginSumAggregateOutputType = {
+    id: number | null
+    percentage: number | null
+  }
+
+  export type ProfitMarginMinAggregateOutputType = {
+    id: number | null
+    percentage: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProfitMarginMaxAggregateOutputType = {
+    id: number | null
+    percentage: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ProfitMarginCountAggregateOutputType = {
+    id: number
+    percentage: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ProfitMarginAvgAggregateInputType = {
+    id?: true
+    percentage?: true
+  }
+
+  export type ProfitMarginSumAggregateInputType = {
+    id?: true
+    percentage?: true
+  }
+
+  export type ProfitMarginMinAggregateInputType = {
+    id?: true
+    percentage?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProfitMarginMaxAggregateInputType = {
+    id?: true
+    percentage?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ProfitMarginCountAggregateInputType = {
+    id?: true
+    percentage?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ProfitMarginAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProfitMargin to aggregate.
+     */
+    where?: ProfitMarginWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfitMargins to fetch.
+     */
+    orderBy?: ProfitMarginOrderByWithRelationInput | ProfitMarginOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ProfitMarginWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfitMargins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfitMargins.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ProfitMargins
+    **/
+    _count?: true | ProfitMarginCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ProfitMarginAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ProfitMarginSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ProfitMarginMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ProfitMarginMaxAggregateInputType
+  }
+
+  export type GetProfitMarginAggregateType<T extends ProfitMarginAggregateArgs> = {
+        [P in keyof T & keyof AggregateProfitMargin]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateProfitMargin[P]>
+      : GetScalarType<T[P], AggregateProfitMargin[P]>
+  }
+
+
+
+
+  export type ProfitMarginGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ProfitMarginWhereInput
+    orderBy?: ProfitMarginOrderByWithAggregationInput | ProfitMarginOrderByWithAggregationInput[]
+    by: ProfitMarginScalarFieldEnum[] | ProfitMarginScalarFieldEnum
+    having?: ProfitMarginScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ProfitMarginCountAggregateInputType | true
+    _avg?: ProfitMarginAvgAggregateInputType
+    _sum?: ProfitMarginSumAggregateInputType
+    _min?: ProfitMarginMinAggregateInputType
+    _max?: ProfitMarginMaxAggregateInputType
+  }
+
+  export type ProfitMarginGroupByOutputType = {
+    id: number
+    percentage: number
+    createdAt: Date
+    updatedAt: Date
+    _count: ProfitMarginCountAggregateOutputType | null
+    _avg: ProfitMarginAvgAggregateOutputType | null
+    _sum: ProfitMarginSumAggregateOutputType | null
+    _min: ProfitMarginMinAggregateOutputType | null
+    _max: ProfitMarginMaxAggregateOutputType | null
+  }
+
+  type GetProfitMarginGroupByPayload<T extends ProfitMarginGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ProfitMarginGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ProfitMarginGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ProfitMarginGroupByOutputType[P]>
+            : GetScalarType<T[P], ProfitMarginGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ProfitMarginSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    percentage?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["profitMargin"]>
+
+  export type ProfitMarginSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    percentage?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["profitMargin"]>
+
+  export type ProfitMarginSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    percentage?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["profitMargin"]>
+
+  export type ProfitMarginSelectScalar = {
+    id?: boolean
+    percentage?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ProfitMarginOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "percentage" | "createdAt" | "updatedAt", ExtArgs["result"]["profitMargin"]>
+
+  export type $ProfitMarginPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ProfitMargin"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      percentage: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["profitMargin"]>
+    composites: {}
+  }
+
+  type ProfitMarginGetPayload<S extends boolean | null | undefined | ProfitMarginDefaultArgs> = $Result.GetResult<Prisma.$ProfitMarginPayload, S>
+
+  type ProfitMarginCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ProfitMarginFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ProfitMarginCountAggregateInputType | true
+    }
+
+  export interface ProfitMarginDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ProfitMargin'], meta: { name: 'ProfitMargin' } }
+    /**
+     * Find zero or one ProfitMargin that matches the filter.
+     * @param {ProfitMarginFindUniqueArgs} args - Arguments to find a ProfitMargin
+     * @example
+     * // Get one ProfitMargin
+     * const profitMargin = await prisma.profitMargin.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ProfitMarginFindUniqueArgs>(args: SelectSubset<T, ProfitMarginFindUniqueArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ProfitMargin that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ProfitMarginFindUniqueOrThrowArgs} args - Arguments to find a ProfitMargin
+     * @example
+     * // Get one ProfitMargin
+     * const profitMargin = await prisma.profitMargin.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ProfitMarginFindUniqueOrThrowArgs>(args: SelectSubset<T, ProfitMarginFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProfitMargin that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfitMarginFindFirstArgs} args - Arguments to find a ProfitMargin
+     * @example
+     * // Get one ProfitMargin
+     * const profitMargin = await prisma.profitMargin.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ProfitMarginFindFirstArgs>(args?: SelectSubset<T, ProfitMarginFindFirstArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ProfitMargin that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfitMarginFindFirstOrThrowArgs} args - Arguments to find a ProfitMargin
+     * @example
+     * // Get one ProfitMargin
+     * const profitMargin = await prisma.profitMargin.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ProfitMarginFindFirstOrThrowArgs>(args?: SelectSubset<T, ProfitMarginFindFirstOrThrowArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProfitMargins that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfitMarginFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ProfitMargins
+     * const profitMargins = await prisma.profitMargin.findMany()
+     * 
+     * // Get first 10 ProfitMargins
+     * const profitMargins = await prisma.profitMargin.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const profitMarginWithIdOnly = await prisma.profitMargin.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ProfitMarginFindManyArgs>(args?: SelectSubset<T, ProfitMarginFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ProfitMargin.
+     * @param {ProfitMarginCreateArgs} args - Arguments to create a ProfitMargin.
+     * @example
+     * // Create one ProfitMargin
+     * const ProfitMargin = await prisma.profitMargin.create({
+     *   data: {
+     *     // ... data to create a ProfitMargin
+     *   }
+     * })
+     * 
+     */
+    create<T extends ProfitMarginCreateArgs>(args: SelectSubset<T, ProfitMarginCreateArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ProfitMargins.
+     * @param {ProfitMarginCreateManyArgs} args - Arguments to create many ProfitMargins.
+     * @example
+     * // Create many ProfitMargins
+     * const profitMargin = await prisma.profitMargin.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ProfitMarginCreateManyArgs>(args?: SelectSubset<T, ProfitMarginCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ProfitMargins and returns the data saved in the database.
+     * @param {ProfitMarginCreateManyAndReturnArgs} args - Arguments to create many ProfitMargins.
+     * @example
+     * // Create many ProfitMargins
+     * const profitMargin = await prisma.profitMargin.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ProfitMargins and only return the `id`
+     * const profitMarginWithIdOnly = await prisma.profitMargin.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ProfitMarginCreateManyAndReturnArgs>(args?: SelectSubset<T, ProfitMarginCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ProfitMargin.
+     * @param {ProfitMarginDeleteArgs} args - Arguments to delete one ProfitMargin.
+     * @example
+     * // Delete one ProfitMargin
+     * const ProfitMargin = await prisma.profitMargin.delete({
+     *   where: {
+     *     // ... filter to delete one ProfitMargin
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ProfitMarginDeleteArgs>(args: SelectSubset<T, ProfitMarginDeleteArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ProfitMargin.
+     * @param {ProfitMarginUpdateArgs} args - Arguments to update one ProfitMargin.
+     * @example
+     * // Update one ProfitMargin
+     * const profitMargin = await prisma.profitMargin.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ProfitMarginUpdateArgs>(args: SelectSubset<T, ProfitMarginUpdateArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ProfitMargins.
+     * @param {ProfitMarginDeleteManyArgs} args - Arguments to filter ProfitMargins to delete.
+     * @example
+     * // Delete a few ProfitMargins
+     * const { count } = await prisma.profitMargin.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ProfitMarginDeleteManyArgs>(args?: SelectSubset<T, ProfitMarginDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProfitMargins.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfitMarginUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ProfitMargins
+     * const profitMargin = await prisma.profitMargin.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ProfitMarginUpdateManyArgs>(args: SelectSubset<T, ProfitMarginUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ProfitMargins and returns the data updated in the database.
+     * @param {ProfitMarginUpdateManyAndReturnArgs} args - Arguments to update many ProfitMargins.
+     * @example
+     * // Update many ProfitMargins
+     * const profitMargin = await prisma.profitMargin.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ProfitMargins and only return the `id`
+     * const profitMarginWithIdOnly = await prisma.profitMargin.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ProfitMarginUpdateManyAndReturnArgs>(args: SelectSubset<T, ProfitMarginUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ProfitMargin.
+     * @param {ProfitMarginUpsertArgs} args - Arguments to update or create a ProfitMargin.
+     * @example
+     * // Update or create a ProfitMargin
+     * const profitMargin = await prisma.profitMargin.upsert({
+     *   create: {
+     *     // ... data to create a ProfitMargin
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ProfitMargin we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ProfitMarginUpsertArgs>(args: SelectSubset<T, ProfitMarginUpsertArgs<ExtArgs>>): Prisma__ProfitMarginClient<$Result.GetResult<Prisma.$ProfitMarginPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ProfitMargins.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfitMarginCountArgs} args - Arguments to filter ProfitMargins to count.
+     * @example
+     * // Count the number of ProfitMargins
+     * const count = await prisma.profitMargin.count({
+     *   where: {
+     *     // ... the filter for the ProfitMargins we want to count
+     *   }
+     * })
+    **/
+    count<T extends ProfitMarginCountArgs>(
+      args?: Subset<T, ProfitMarginCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ProfitMarginCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ProfitMargin.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfitMarginAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ProfitMarginAggregateArgs>(args: Subset<T, ProfitMarginAggregateArgs>): Prisma.PrismaPromise<GetProfitMarginAggregateType<T>>
+
+    /**
+     * Group by ProfitMargin.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ProfitMarginGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ProfitMarginGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ProfitMarginGroupByArgs['orderBy'] }
+        : { orderBy?: ProfitMarginGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ProfitMarginGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetProfitMarginGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ProfitMargin model
+   */
+  readonly fields: ProfitMarginFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ProfitMargin.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ProfitMarginClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ProfitMargin model
+   */
+  interface ProfitMarginFieldRefs {
+    readonly id: FieldRef<"ProfitMargin", 'Int'>
+    readonly percentage: FieldRef<"ProfitMargin", 'Float'>
+    readonly createdAt: FieldRef<"ProfitMargin", 'DateTime'>
+    readonly updatedAt: FieldRef<"ProfitMargin", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ProfitMargin findUnique
+   */
+  export type ProfitMarginFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * Filter, which ProfitMargin to fetch.
+     */
+    where: ProfitMarginWhereUniqueInput
+  }
+
+  /**
+   * ProfitMargin findUniqueOrThrow
+   */
+  export type ProfitMarginFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * Filter, which ProfitMargin to fetch.
+     */
+    where: ProfitMarginWhereUniqueInput
+  }
+
+  /**
+   * ProfitMargin findFirst
+   */
+  export type ProfitMarginFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * Filter, which ProfitMargin to fetch.
+     */
+    where?: ProfitMarginWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfitMargins to fetch.
+     */
+    orderBy?: ProfitMarginOrderByWithRelationInput | ProfitMarginOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProfitMargins.
+     */
+    cursor?: ProfitMarginWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfitMargins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfitMargins.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProfitMargins.
+     */
+    distinct?: ProfitMarginScalarFieldEnum | ProfitMarginScalarFieldEnum[]
+  }
+
+  /**
+   * ProfitMargin findFirstOrThrow
+   */
+  export type ProfitMarginFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * Filter, which ProfitMargin to fetch.
+     */
+    where?: ProfitMarginWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfitMargins to fetch.
+     */
+    orderBy?: ProfitMarginOrderByWithRelationInput | ProfitMarginOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ProfitMargins.
+     */
+    cursor?: ProfitMarginWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfitMargins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfitMargins.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ProfitMargins.
+     */
+    distinct?: ProfitMarginScalarFieldEnum | ProfitMarginScalarFieldEnum[]
+  }
+
+  /**
+   * ProfitMargin findMany
+   */
+  export type ProfitMarginFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * Filter, which ProfitMargins to fetch.
+     */
+    where?: ProfitMarginWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ProfitMargins to fetch.
+     */
+    orderBy?: ProfitMarginOrderByWithRelationInput | ProfitMarginOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ProfitMargins.
+     */
+    cursor?: ProfitMarginWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ProfitMargins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ProfitMargins.
+     */
+    skip?: number
+    distinct?: ProfitMarginScalarFieldEnum | ProfitMarginScalarFieldEnum[]
+  }
+
+  /**
+   * ProfitMargin create
+   */
+  export type ProfitMarginCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ProfitMargin.
+     */
+    data: XOR<ProfitMarginCreateInput, ProfitMarginUncheckedCreateInput>
+  }
+
+  /**
+   * ProfitMargin createMany
+   */
+  export type ProfitMarginCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ProfitMargins.
+     */
+    data: ProfitMarginCreateManyInput | ProfitMarginCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProfitMargin createManyAndReturn
+   */
+  export type ProfitMarginCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * The data used to create many ProfitMargins.
+     */
+    data: ProfitMarginCreateManyInput | ProfitMarginCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ProfitMargin update
+   */
+  export type ProfitMarginUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ProfitMargin.
+     */
+    data: XOR<ProfitMarginUpdateInput, ProfitMarginUncheckedUpdateInput>
+    /**
+     * Choose, which ProfitMargin to update.
+     */
+    where: ProfitMarginWhereUniqueInput
+  }
+
+  /**
+   * ProfitMargin updateMany
+   */
+  export type ProfitMarginUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ProfitMargins.
+     */
+    data: XOR<ProfitMarginUpdateManyMutationInput, ProfitMarginUncheckedUpdateManyInput>
+    /**
+     * Filter which ProfitMargins to update
+     */
+    where?: ProfitMarginWhereInput
+    /**
+     * Limit how many ProfitMargins to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProfitMargin updateManyAndReturn
+   */
+  export type ProfitMarginUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * The data used to update ProfitMargins.
+     */
+    data: XOR<ProfitMarginUpdateManyMutationInput, ProfitMarginUncheckedUpdateManyInput>
+    /**
+     * Filter which ProfitMargins to update
+     */
+    where?: ProfitMarginWhereInput
+    /**
+     * Limit how many ProfitMargins to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProfitMargin upsert
+   */
+  export type ProfitMarginUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ProfitMargin to update in case it exists.
+     */
+    where: ProfitMarginWhereUniqueInput
+    /**
+     * In case the ProfitMargin found by the `where` argument doesn't exist, create a new ProfitMargin with this data.
+     */
+    create: XOR<ProfitMarginCreateInput, ProfitMarginUncheckedCreateInput>
+    /**
+     * In case the ProfitMargin was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ProfitMarginUpdateInput, ProfitMarginUncheckedUpdateInput>
+  }
+
+  /**
+   * ProfitMargin delete
+   */
+  export type ProfitMarginDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
+    /**
+     * Filter which ProfitMargin to delete.
+     */
+    where: ProfitMarginWhereUniqueInput
+  }
+
+  /**
+   * ProfitMargin deleteMany
+   */
+  export type ProfitMarginDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ProfitMargins to delete
+     */
+    where?: ProfitMarginWhereInput
+    /**
+     * Limit how many ProfitMargins to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ProfitMargin without action
+   */
+  export type ProfitMarginDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfitMargin
+     */
+    select?: ProfitMarginSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ProfitMargin
+     */
+    omit?: ProfitMarginOmit<ExtArgs> | null
   }
 
 
@@ -13601,6 +15836,27 @@ export namespace Prisma {
   export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
 
 
+  export const VehicleTypeScalarFieldEnum: {
+    id: 'id',
+    type: 'type',
+    pricePerKm: 'pricePerKm',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type VehicleTypeScalarFieldEnum = (typeof VehicleTypeScalarFieldEnum)[keyof typeof VehicleTypeScalarFieldEnum]
+
+
+  export const ProfitMarginScalarFieldEnum: {
+    id: 'id',
+    percentage: 'percentage',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ProfitMarginScalarFieldEnum = (typeof ProfitMarginScalarFieldEnum)[keyof typeof ProfitMarginScalarFieldEnum]
+
+
   export const BalanceScalarFieldEnum: {
     id: 'id',
     amount: 'amount',
@@ -14080,6 +16336,109 @@ export namespace Prisma {
     idUser?: IntWithAggregatesFilter<"Company"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
+  }
+
+  export type VehicleTypeWhereInput = {
+    AND?: VehicleTypeWhereInput | VehicleTypeWhereInput[]
+    OR?: VehicleTypeWhereInput[]
+    NOT?: VehicleTypeWhereInput | VehicleTypeWhereInput[]
+    id?: IntFilter<"VehicleType"> | number
+    type?: StringFilter<"VehicleType"> | string
+    pricePerKm?: FloatFilter<"VehicleType"> | number
+    createdAt?: DateTimeFilter<"VehicleType"> | Date | string
+    updatedAt?: DateTimeFilter<"VehicleType"> | Date | string
+  }
+
+  export type VehicleTypeOrderByWithRelationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    pricePerKm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleTypeWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    type?: string
+    AND?: VehicleTypeWhereInput | VehicleTypeWhereInput[]
+    OR?: VehicleTypeWhereInput[]
+    NOT?: VehicleTypeWhereInput | VehicleTypeWhereInput[]
+    pricePerKm?: FloatFilter<"VehicleType"> | number
+    createdAt?: DateTimeFilter<"VehicleType"> | Date | string
+    updatedAt?: DateTimeFilter<"VehicleType"> | Date | string
+  }, "id" | "type">
+
+  export type VehicleTypeOrderByWithAggregationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    pricePerKm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: VehicleTypeCountOrderByAggregateInput
+    _avg?: VehicleTypeAvgOrderByAggregateInput
+    _max?: VehicleTypeMaxOrderByAggregateInput
+    _min?: VehicleTypeMinOrderByAggregateInput
+    _sum?: VehicleTypeSumOrderByAggregateInput
+  }
+
+  export type VehicleTypeScalarWhereWithAggregatesInput = {
+    AND?: VehicleTypeScalarWhereWithAggregatesInput | VehicleTypeScalarWhereWithAggregatesInput[]
+    OR?: VehicleTypeScalarWhereWithAggregatesInput[]
+    NOT?: VehicleTypeScalarWhereWithAggregatesInput | VehicleTypeScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"VehicleType"> | number
+    type?: StringWithAggregatesFilter<"VehicleType"> | string
+    pricePerKm?: FloatWithAggregatesFilter<"VehicleType"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"VehicleType"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"VehicleType"> | Date | string
+  }
+
+  export type ProfitMarginWhereInput = {
+    AND?: ProfitMarginWhereInput | ProfitMarginWhereInput[]
+    OR?: ProfitMarginWhereInput[]
+    NOT?: ProfitMarginWhereInput | ProfitMarginWhereInput[]
+    id?: IntFilter<"ProfitMargin"> | number
+    percentage?: FloatFilter<"ProfitMargin"> | number
+    createdAt?: DateTimeFilter<"ProfitMargin"> | Date | string
+    updatedAt?: DateTimeFilter<"ProfitMargin"> | Date | string
+  }
+
+  export type ProfitMarginOrderByWithRelationInput = {
+    id?: SortOrder
+    percentage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfitMarginWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: ProfitMarginWhereInput | ProfitMarginWhereInput[]
+    OR?: ProfitMarginWhereInput[]
+    NOT?: ProfitMarginWhereInput | ProfitMarginWhereInput[]
+    percentage?: FloatFilter<"ProfitMargin"> | number
+    createdAt?: DateTimeFilter<"ProfitMargin"> | Date | string
+    updatedAt?: DateTimeFilter<"ProfitMargin"> | Date | string
+  }, "id">
+
+  export type ProfitMarginOrderByWithAggregationInput = {
+    id?: SortOrder
+    percentage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ProfitMarginCountOrderByAggregateInput
+    _avg?: ProfitMarginAvgOrderByAggregateInput
+    _max?: ProfitMarginMaxOrderByAggregateInput
+    _min?: ProfitMarginMinOrderByAggregateInput
+    _sum?: ProfitMarginSumOrderByAggregateInput
+  }
+
+  export type ProfitMarginScalarWhereWithAggregatesInput = {
+    AND?: ProfitMarginScalarWhereWithAggregatesInput | ProfitMarginScalarWhereWithAggregatesInput[]
+    OR?: ProfitMarginScalarWhereWithAggregatesInput[]
+    NOT?: ProfitMarginScalarWhereWithAggregatesInput | ProfitMarginScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ProfitMargin"> | number
+    percentage?: FloatWithAggregatesFilter<"ProfitMargin"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"ProfitMargin"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ProfitMargin"> | Date | string
   }
 
   export type BalanceWhereInput = {
@@ -14824,6 +17183,105 @@ export namespace Prisma {
     cnpj?: StringFieldUpdateOperationsInput | string
     idAddress?: IntFieldUpdateOperationsInput | number
     idUser?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleTypeCreateInput = {
+    type: string
+    pricePerKm?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleTypeUncheckedCreateInput = {
+    id?: number
+    type: string
+    pricePerKm?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleTypeUpdateInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    pricePerKm?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleTypeUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    pricePerKm?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleTypeCreateManyInput = {
+    id?: number
+    type: string
+    pricePerKm?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VehicleTypeUpdateManyMutationInput = {
+    type?: StringFieldUpdateOperationsInput | string
+    pricePerKm?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VehicleTypeUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    type?: StringFieldUpdateOperationsInput | string
+    pricePerKm?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfitMarginCreateInput = {
+    percentage?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfitMarginUncheckedCreateInput = {
+    id?: number
+    percentage?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfitMarginUpdateInput = {
+    percentage?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfitMarginUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    percentage?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfitMarginCreateManyInput = {
+    id?: number
+    percentage?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ProfitMarginUpdateManyMutationInput = {
+    percentage?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ProfitMarginUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    percentage?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15680,6 +18138,87 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type VehicleTypeCountOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    pricePerKm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleTypeAvgOrderByAggregateInput = {
+    id?: SortOrder
+    pricePerKm?: SortOrder
+  }
+
+  export type VehicleTypeMaxOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    pricePerKm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleTypeMinOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    pricePerKm?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type VehicleTypeSumOrderByAggregateInput = {
+    id?: SortOrder
+    pricePerKm?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type ProfitMarginCountOrderByAggregateInput = {
+    id?: SortOrder
+    percentage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfitMarginAvgOrderByAggregateInput = {
+    id?: SortOrder
+    percentage?: SortOrder
+  }
+
+  export type ProfitMarginMaxOrderByAggregateInput = {
+    id?: SortOrder
+    percentage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfitMarginMinOrderByAggregateInput = {
+    id?: SortOrder
+    percentage?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ProfitMarginSumOrderByAggregateInput = {
+    id?: SortOrder
+    percentage?: SortOrder
+  }
+
   export type UserListRelationFilter = {
     every?: UserWhereInput
     some?: UserWhereInput
@@ -15719,22 +18258,6 @@ export namespace Prisma {
   export type BalanceSumOrderByAggregateInput = {
     id?: SortOrder
     amount?: SortOrder
-  }
-
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type EnumExtractTypeFilter<$PrismaModel = never> = {
@@ -16339,6 +18862,14 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCompanyInput, UserUpdateWithoutCompanyInput>, UserUncheckedUpdateWithoutCompanyInput>
   }
 
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type UserCreateNestedManyWithoutBalanceInput = {
     create?: XOR<UserCreateWithoutBalanceInput, UserUncheckedCreateWithoutBalanceInput> | UserCreateWithoutBalanceInput[] | UserUncheckedCreateWithoutBalanceInput[]
     connectOrCreate?: UserCreateOrConnectWithoutBalanceInput | UserCreateOrConnectWithoutBalanceInput[]
@@ -16351,14 +18882,6 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutBalanceInput | UserCreateOrConnectWithoutBalanceInput[]
     createMany?: UserCreateManyBalanceInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
-  }
-
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type UserUpdateManyWithoutBalanceNestedInput = {
