@@ -6,6 +6,7 @@ import { GpsModule } from "./gps/gps.module";
 import { AuthMiddleware } from "./auth/auth.middleware";
 import { JwtModule } from "@nestjs/jwt";
 import { VehicleTypeModule } from "./vehicle-type/vehicle-type.module";
+import { ProfitModule } from "./profit/profit.module";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { VehicleTypeModule } from "./vehicle-type/vehicle-type.module";
       }),
     }),
     VehicleTypeModule,
+    ProfitModule,
   ],
   controllers: [AppController],
   providers: [AppService],
