@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   Injectable,
   Logger,
   NestMiddleware,
@@ -39,22 +38,22 @@ export class AuthMiddleware implements NestMiddleware {
         },
       });
 
-      if (!user) throw new ForbiddenException("token invalid");
+      if (!user) throw new UnauthorizedException("token invalid");
 
-      if (user.role !== Role.ADMIN) return next();
+      if (user.role === Role.ADMIN) return next();
 
       if (user.status === "BLOCKED")
-        throw new ForbiddenException("User is blocked");
+        throw new UnauthorizedException("User is blocked");
 
       if (user.status === "INACTIVE")
-        throw new ForbiddenException("User is inactive");
+        throw new UnauthorizedException("User is inactive");
 
       (req as Request & { user: User }).user = user as User;
 
       next();
     } catch (error) {
       this.logger.error(error);
-      throw new UnauthorizedException("Invalid token");
+      throw error;
     }
   }
 }
