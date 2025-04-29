@@ -1,41 +1,32 @@
 "use client";
-"use client";
 import React, { useState } from "react";
 import SideBarSheet from "../sidebarsheet";
 import { getSession } from "next-auth/react";
 import { User } from "@/app/types/User";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-
 export default function Header() {
- 
-  const [user, setUser] = useState<User>({} as User)
-  
+  const [user, setUser] = useState<User>({} as User);
 
   React.useEffect(() => {
- 
-
-    getSession().then((data) =>{
-      if(data) setUser(data.user as unknown as User)
+    getSession().then((data) => {
+      if (data) setUser(data.user as unknown as User);
     });
-
-   
   }, []); // Empty dependency array to run only on mount
 
   return (
-    <div className="md:px-20 md:p-2 flex flex-row md:flex-row justify-between items-center p-1 bg-white ">
-      <div className="text-base md:text-lg font-semibold md:w-[85%]">
-        <SidebarTrigger />
-        Olá: {user?.Company?.name}
-        
+    <div className="flex items-center justify-between h-16 px-5 shadow-md rounded-lg">
+      <div className="flex items-center  flex-1">
+        <SidebarTrigger className="mr-3" />
+        <span className="text-black text-sm font-semibold">Olá: {user?.Company?.name}</span>
       </div>
-      <div className="flex gap-4">
-      <div className="text-lg font-bold mt-2 md:mt-0 bg-gray-200 rounded-full px-4 py-1">
-        R$ {user?.Balance?.amount || 0}
-      </div>
-      <div className="flex items-center space-x-4 mt-2 md:mt-0">
-        <SideBarSheet isNotification={true} />
-      </div>
+      <div className="flex gap-5 ">
+        <div className="bg-zinc-400 sm:w-full text-black font-bold rounded-full px-4 py-1 shadow-sm text-sm sm:text-base">
+          R$ {user?.Balance?.amount || 0}
+        </div>
+        <div className="flex items-center">
+          <SideBarSheet isNotification={true} />
+        </div>
       </div>
     </div>
   );

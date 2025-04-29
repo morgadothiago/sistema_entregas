@@ -39,6 +39,7 @@ export default function SignUpPage() {
           position: "top-right",
           richColors: true,
         });
+        routes.push('/signin')
        } else {
         toast.error("Erro ao cadastrar usuário!", {
           description: "Verifique os dados e tente novamente.",
