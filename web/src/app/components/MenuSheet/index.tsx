@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/app/context";
+
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,

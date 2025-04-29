@@ -33,13 +33,14 @@ export default function SignUpPage() {
         city: data.municipio
       } as ICreateUser);
 
-      if(addUser) {
+      if(!addUser) {
         toast.success("Usuário cadastrado com sucesso!", {
           description: "Você será redirecionado para a página de login.",
           duration: 3000,
           position: "top-right",
           richColors: true,
         });
+        routes.push("/signin");
        } else {
         toast.error("Erro ao cadastrar usuário!", {
           description: "Verifique os dados e tente novamente.",
@@ -48,12 +49,10 @@ export default function SignUpPage() {
           richColors: true,
         });
        }
-
-
-      setStep(step + 1);
      
       return; // Impede o envio do formulário se houver algum campo em branco
     }
+    setStep(step + 1);
   };
 
   const handleConsultCNPJ = async (cnpj: string) => {
@@ -76,13 +75,12 @@ export default function SignUpPage() {
       setValue('zipCode', data.cep);
       setValue('complement', data.complemento || '');
       setValue('number', data.ddd_telefone_1 || '');
-      toast.success("CNPJ encontrado com sucesso!", {
-        description: "Dados preenchidos automaticamente!",
-        duration: 3000,
-        position: "top-right",
-        richColors: true,
-      });      
+    
+      console.log(data.municipio);
+      console.log(data.uf);
+      
     }
+    
   };
 
   return (
@@ -119,7 +117,7 @@ export default function SignUpPage() {
                 labelName="Nome da Empresa"
                 className="w-full"
                 placeholder="Digite o nome da empresa"
-                error
+                
                 {...register("name", { required: true })}
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -183,15 +181,14 @@ export default function SignUpPage() {
                 {...register("complement", { required: true })}
               />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <Select
+                <TextInput
                   labelName="Cidade"
-                  options={ufs.map((uf) => ({ value: uf.label, label: uf.label }))}
                   {...register("municipio", { required: true })}
                   className="w-full"
                 />
-                <Select
+                <TextInput
                   labelName="UF"
-                  options={ufs.map((uf) => ({ value: uf.value, label: uf.value }))}
+                 
                   {...register("state", { required: true })}
                   className="w-full"
                 />
