@@ -8,8 +8,19 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import type { SignInFormData } from "../types/SingInType";
-import { TextInput } from "../components/TextInput";
+
 import { signIn } from "next-auth/react";
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
+import { TextInput } from "../components/Input";
+
+
+
+const schema = yup.object({
+  email: yup.string().email("E-mail inválido"),
+  password: yup.string().required("Senha é obrigatória"),
+});
+
 
 export default function SignInPage() {
   const routes = useRouter();
@@ -18,7 +29,9 @@ export default function SignInPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormData>();
+  } = useForm<SignInFormData>({
+    resolver: yupResolver(schema)
+  });
 
   const onSubmit: SubmitHandler<SignInFormData> = async (data) => {
     try {
@@ -84,27 +97,22 @@ export default function SignInPage() {
           <TextInput
             className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
             labelName="Email"
-            type="email"
+            errors={errors.email}
             placeholder="Digite seu email"
-            {...register("email", { required: true })}
+            type="email"
+            {...register("email",  { required: true })}
+           
           />
-          {errors.email && (
-            <span className="text-red-500 text-sm text-left w-full">
-              Este campo é obrigatório
-            </span>
-          )}
+          
           <TextInput
             className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
             labelName="Senha"
             placeholder="Digite sua senha"
             type="password"
-            {...register("password", { required: true })}
+            errors={errors.password}
+            {...register("password",  { required: true, })}
           />
-          {errors.password && (
-            <span className="text-red-500 text-sm text-left w-full">
-              Este campo é obrigatório
-            </span>
-          )}
+           
           <div className="flex flex-col items-start w-full">
             <Link
               href="/reset-password"

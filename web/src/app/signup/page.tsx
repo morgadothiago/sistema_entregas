@@ -24,7 +24,6 @@ export default function SignUpPage() {
   } = useForm<FormData>({});
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-   
     if (step === 3) {
       const cnpjSemMascara = data.cnpj.replace(/\D/g, '');
       const addUser = await api.newUser({
@@ -33,14 +32,13 @@ export default function SignUpPage() {
         city: data.municipio
       } as ICreateUser);
 
-      if(!addUser) {
+      if(addUser) {
         toast.success("Usuário cadastrado com sucesso!", {
           description: "Você será redirecionado para a página de login.",
           duration: 3000,
           position: "top-right",
           richColors: true,
         });
-        routes.push("/signin");
        } else {
         toast.error("Erro ao cadastrar usuário!", {
           description: "Verifique os dados e tente novamente.",
@@ -49,6 +47,9 @@ export default function SignUpPage() {
           richColors: true,
         });
        }
+
+
+      setStep(step + 1);
      
       return; // Impede o envio do formulário se houver algum campo em branco
     }

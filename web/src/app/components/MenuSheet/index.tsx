@@ -52,7 +52,7 @@ export function SideBar() {
 
   return (
  
-      <Sidebar className="flex-1 flex h-screen shadow-lg ">
+      <Sidebar className="flex-1 flex h-screen shadow-lg "  >
         <div className="bg-gradient-to-b from-[#003B73] to-[#5DADE2] flex-1 flex flex-col p-4">
           <SidebarHeader className="bg-none">
             <div className="flex items-center mb-4">

@@ -1,8 +1,9 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FieldError } from "react-hook-form";
 
-interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface TextInputProps  {
   labelName: string;
   className?: string; // Made optional to allow for default styling
   placeholder?: string;
@@ -10,6 +11,9 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   classNameInput?: string;
   labelColor?: string; // New prop for dynamic label color
   inputBorderColor?: string; // New prop for dynamic input border color
+  errors?: FieldError;
+  type?: string;
+
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
@@ -18,8 +22,9 @@ export const TextInput: React.FC<TextInputProps> = ({
   classNameInput = "", // Default to an empty string if not provided
   labelColor = "#003B73", // Default label color
   inputBorderColor = "border-blue-500", // Default input border color
+  errors,
   ...rest
-}) => {
+}: TextInputProps) => {
   return (
     <div className={`flex flex-col ${className}`}>
       <Label
@@ -31,6 +36,12 @@ export const TextInput: React.FC<TextInputProps> = ({
         className={`w-full ${inputBorderColor} rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out ${classNameInput}`}
         {...rest}
       />
+
+       
+            <span className="text-red-500 text-sm text-left w-full h-[10px]">
+              {errors?.message}
+            </span>
+        
     </div>
   );
 };
