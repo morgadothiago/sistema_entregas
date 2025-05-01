@@ -32,29 +32,13 @@ model User {
   @@map("users")
 }
 
-model Adress {
-  id         Int       @id @default(autoincrement())
-  street     String
-  number     String
-  city       String
-  state      String
-  zipCode    String
-  country    String
-  complement String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  Company    Company[]
-
-  @@map("adresses")
-}
-
 model Company {
   id        Int      @id @default(autoincrement())
   name      String
   phone     String
   cnpj      String   @unique
   idAddress Int
-  Adress    Adress   @relation(fields: [idAddress], references: [id])
+  Address   Address  @relation(fields: [idAddress], references: [id])
   idUser    Int      @unique
   User      User     @relation(fields: [idUser], references: [id])
   createdAt DateTime @default(now())
@@ -153,20 +137,22 @@ model Localization {
   updatedAt  DateTime  @updatedAt
   Delivery   Delivery? @relation(fields: [deliveryId], references: [id])
   deliveryId Int?
+  Address    Address[]
 
   @@map("localizations")
 }
 
 model Delivery {
-  id     Int            @id @default(autoincrement())
-  code   String         @unique
-  higth  Float
-  width  Float
-  length Float
-  weight Float
-  price  Float
-  info   String[]
-  status DeliveryStatus
+  id            Int            @id @default(autoincrement())
+  code          String         @unique
+  higth         Float
+  width         Float
+  length        Float
+  weight        Float
+  price         Float
+  info          String[]
+  clientAddress Address        @relation(fields: [addressId], references: [id])
+  status        DeliveryStatus
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -174,21 +160,27 @@ model Delivery {
   DeliveryMan   DeliveryMan?   @relation(fields: [deliveryManId], references: [id])
   deliveryManId Int?
   Localization  Localization[]
+  addressId     Int
 
   @@map("deliveries")
 }
 
 model Address {
-  id        Int      @id @default(autoincrement())
-  street    String
-  number    String
-  city      String
-  state     String
-  zipCode   String
-  country   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Client    Client[]
+  id             Int          @id @default(autoincrement())
+  street         String
+  number         String
+  city           String
+  state          String
+  zipCode        String
+  country        String
+  complement     String?
+  Localization   Localization @relation(fields: [localizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  Client         Client[]
+  Delivery       Delivery[]
+  localizationId Int
+  Company        Company[]
 
   @@map("addresses")
 }
@@ -196,9 +188,10 @@ model Address {
 model Client {
   id        Int      @id @default(autoincrement())
   name      String
-  email     String   @unique
+  code      String   @default(uuid())
+  email     String
   phone     String
-  Adress    Address  @relation(fields: [addressId], references: [id])
+  Address   Address  @relation(fields: [addressId], references: [id])
   addressId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

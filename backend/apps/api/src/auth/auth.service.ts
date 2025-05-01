@@ -8,13 +8,15 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
 import { CompanyDto } from "./dto/company.dto";
-import { Company, Role, UserStatus } from "generated/prisma";
+import { Role, UserStatus } from "generated/prisma";
+import { LocationService } from "../location/location.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private locationService: LocationService,
   ) {}
 
   async signupCompany(company: CompanyDto) {
@@ -34,6 +36,14 @@ export class AuthService {
 
     if (existingCnpj) throw new ConflictException("CNPj já cadastrado");
 
+    const localization = await this.locationService.reverse(
+      company.city,
+      company.state,
+      company.address,
+      company.number,
+      company.zipCode,
+    );
+
     await this.prisma.user.create({
       data: {
         email: company.email,
@@ -46,7 +56,7 @@ export class AuthService {
             name: company.name,
             cnpj: company.cnpj,
             phone: company.phone,
-            Adress: {
+            Address: {
               create: {
                 city: company.city,
                 state: company.state,
@@ -55,6 +65,12 @@ export class AuthService {
                 zipCode: company.zipCode,
                 complement: company.complement,
                 country: "Brasil",
+                Localization: {
+                  create: {
+                    latitude: localization.latitude,
+                    longitude: localization.longitude,
+                  },
+                },
               },
             },
           },
@@ -73,9 +89,13 @@ export class AuthService {
       where: { email: loginDto.email },
       include: {
         Balance: true,
-        Extract: true,
+        Extract: {
+          skip: 0,
+          take: 5,
+          orderBy: { createdAt: "desc" },
+        },
         Company: {
-          include: { Adress: true },
+          include: { Address: true },
         },
       },
     });
@@ -102,8 +122,8 @@ export class AuthService {
         email: user.email,
         role: user.role,
         Balance: user.Balance,
-        Extract: user.Extract ?? [],
-        Company: user.Company as Company,
+        Extract: user.Extract,
+        Company: user.Company,
       },
     };
   }

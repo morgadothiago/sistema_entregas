@@ -1,11 +1,11 @@
 
-cd backend/DOCKER
+cd backend
 
 docker compose up -d
 
-cd ..
-
 yarn
+
+yarn prisma db push
 
 yarn seed
 

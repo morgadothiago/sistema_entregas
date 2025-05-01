@@ -14,6 +14,10 @@ export class VehicleTypeService {
 
   constructor(private prisma: PrismaService) {}
 
+  findOne(type: string): Partial<VehicleType> | undefined {
+    return VehicleTypeService.data.find((data) => data.type === type);
+  }
+
   async delete(type: string) {
     const vehicleType = await this.prisma.vehicleType.findUnique({
       where: { type },
