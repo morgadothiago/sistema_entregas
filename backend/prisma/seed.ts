@@ -1,11 +1,5 @@
 import { Logger } from "@nestjs/common";
-import {
-  Balance,
-  PrismaClient,
-  Role,
-  User,
-  UserStatus,
-} from "./../generated/prisma";
+import { Balance, PrismaClient, Role, User, UserStatus } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();

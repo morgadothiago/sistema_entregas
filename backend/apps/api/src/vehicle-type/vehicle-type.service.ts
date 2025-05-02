@@ -4,18 +4,42 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { VehicleType } from "generated/prisma";
+import { VehicleType } from "@prisma/client";
 import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto";
 import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto";
+import { CacheService } from "cache/cache.service";
 
 @Injectable()
 export class VehicleTypeService {
-  static data: Partial<VehicleType>[] = [];
+  constructor(
+    private prisma: PrismaService,
+    private cache: CacheService,
+  ) {}
 
-  constructor(private prisma: PrismaService) {}
+  async findOne(type: string): Promise<Partial<VehicleType> | undefined> {
+    const data = await this.cache.getValue(
+      `${VehicleTypeService.name}:${type}`,
+    );
 
-  findOne(type: string): Partial<VehicleType> | undefined {
-    return VehicleTypeService.data.find((data) => data.type === type);
+    if (data) return JSON.parse(data) as VehicleType;
+
+    const vehicleType = await this.prisma.vehicleType.findUnique({
+      where: { type },
+      select: { id: true, pricePerKm: true, type: true },
+    });
+
+    if (!vehicleType)
+      throw new NotFoundException(
+        `Tipo de veiculo '${type}' nao foi encontrado`,
+      );
+
+    await this.cache.setCache(
+      `${VehicleTypeService.name}:type`,
+      JSON.stringify(vehicleType),
+      60 * 60 * 24, // 24h
+    );
+
+    return vehicleType;
   }
 
   async delete(type: string) {
@@ -34,8 +58,6 @@ export class VehicleTypeService {
         type: type,
       },
     });
-
-    VehicleTypeService.data.filter((data) => data.type !== type);
   }
 
   async update(
@@ -73,11 +95,11 @@ export class VehicleTypeService {
 
     await this.prisma.vehicleType.update({
       where: { id: vehicleType.id },
-      data: vehicleType,
+      data: vehicleTypeDto,
     });
 
-    const i = VehicleTypeService.data.findIndex((data) => data.type === type);
-    VehicleTypeService.data[i] = vehicleTypeDto;
+    await this.cache.delete(`${VehicleTypeService.name}:type`);
+    await this.cache.delete(VehicleTypeService.name);
   }
 
   async create(body: CreateVehicleTypeDto): Promise<void> {
@@ -99,21 +121,34 @@ export class VehicleTypeService {
       data: vehicleTypeDto,
     });
 
-    VehicleTypeService.data.push(vehicleTypeDto);
+    await this.cache.setCache(
+      `${VehicleTypeService.name}:type`,
+      JSON.stringify(vehicleTypeDto),
+    );
+
+    await this.cache.delete(VehicleTypeService.name);
   }
 
   async findAll(): Promise<Partial<VehicleType>[]> {
-    if (!VehicleTypeService.data.length) {
-      VehicleTypeService.data = await this.prisma.vehicleType.findMany({
-        where: {},
-        select: {
-          id: true,
-          type: true,
-          pricePerKm: true,
-        },
-      });
-    }
+    const data = await this.cache.getValue(VehicleTypeService.name);
 
-    return VehicleTypeService.data;
+    if (data) return JSON.parse(data) as VehicleType[];
+
+    const vehicleTypes = await this.prisma.vehicleType.findMany({
+      where: {},
+      select: {
+        id: true,
+        type: true,
+        pricePerKm: true,
+      },
+    });
+
+    await this.cache.setCache(
+      VehicleTypeService.name,
+      JSON.stringify(vehicleTypes),
+      60 * 60 * 24, // 24h
+    );
+
+    return vehicleTypes;
   }
 }

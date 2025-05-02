@@ -1,25 +1,25 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import axios, { AxiosInstance } from "axios";
-import { Localization } from "generated/prisma";
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from "@nestjs/common";
+import axios, { AxiosError, AxiosInstance } from "axios";
+import { Localization } from "@prisma/client";
 import { ILocation, ReverseResponse } from "../typing/location";
+import { CacheService } from "cache/cache.service";
 
 @Injectable()
 export class LocationService implements OnModuleInit {
   private http: AxiosInstance;
   private logger = new Logger(LocationService.name);
 
-  constructor() {
+  constructor(private cache: CacheService) {
     this.http = axios.create({
       baseURL: process.env.LOCATION_HOST,
 
       params: {
         key: process.env.LOCATION_KEY,
-        format: "json",
-        overview: false, // Desativa a geometria detalhada da rota (mais rápido)
-        steps: false, // Remove passos detalhados (instruções de viagem)
-        annotations: false, // Desativa dados extras como velocidade por trecho
-        geometries: "none", // Ignora a codificação da rota (polyline)
-        alternatives: false, // Evita calcular rotas alternativas
       },
     });
   }
@@ -38,22 +38,33 @@ export class LocationService implements OnModuleInit {
     address: string,
     number: string,
     zipCode: string,
-  ) {
+  ): Promise<{ latitude: number; longitude: number }> {
+    const query = `${number} ${address}, ${city}, ${state}, ${zipCode}`;
+    const data = await this.cache.getValue(query);
+
+    if (data)
+      return JSON.parse(data) as { latitude: number; longitude: number };
+
     const response = await this.http
       .get<Array<ReverseResponse>>("/search", {
         params: {
-          q: `${number}, ${address}, ${city}, ${state}, ${zipCode}, Brasil`,
+          q: query,
+          format: "json",
         },
       })
       .then((res) => res.data)
-      .catch((e) => {
+      .catch((e: AxiosError) => {
         this.logger.error(e?.response?.data || e.message);
+        throw new NotFoundException("Erro ao buscar localização");
       });
 
-    return {
-      latitude: +(response?.[0]?.lat || 0),
-      longitude: +(response?.[0]?.lon || 0),
+    const geoCode = {
+      latitude: +response[0].lat,
+      longitude: +response[0].lon,
     };
+
+    await this.cache.setCache(query, JSON.stringify(geoCode));
+    return geoCode;
   }
 
   async findDistance(
@@ -65,23 +76,17 @@ export class LocationService implements OnModuleInit {
       duration: number;
     }>
   > {
-    const location = await this.http
-      .get<ILocation>(
-        `/directions/driving/${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
-        {
-          params: {
-            steps: true,
-            alternatives: true,
-          },
-        },
-      )
-      .then((res) => {
-        console.log(res.data);
+    const coordenates = encodeURIComponent(
+      `${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
+    );
 
-        return res.data;
-      })
-      .catch(() => {
-        throw new Error("Erro ao calcular a rota");
+    const location = await this.http
+      .get<ILocation>(`/directions/driving/` + coordenates)
+      .then((res) => res.data)
+      .catch((e: AxiosError) => {
+        this.logger.error(e);
+
+        throw new NotFoundException("Erro ao calcular a rota");
       });
 
     return location.routes.map((route) => {
