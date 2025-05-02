@@ -11,7 +11,7 @@ import {
 import { Server, Socket } from "socket.io";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "generated/prisma";
+import { User } from "@prisma/client";
 import { Logger } from "@nestjs/common";
 
 @WebSocketGateway(2000, {

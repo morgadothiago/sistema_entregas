@@ -16,7 +16,7 @@ export class DeliverySimulateDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  higth: number;
+  height: number;
 
   @ApiProperty({
     description: "largura do pacote em metros",

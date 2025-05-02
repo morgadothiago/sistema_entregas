@@ -10,7 +10,7 @@ export class DeliveryCreateDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  higth: number;
+  height: number;
 
   @ApiProperty({
     description: "Width of the delivery package in centimeters",

@@ -2,19 +2,28 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from "@nestjs/common";
 import { CurrencyLocationDto } from "./dto/currency-location.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { GpsGateway } from "./gps.gateway";
-import { DeliveryStatus } from "generated/prisma";
+import { DeliveryStatus } from "@prisma/client";
 import { SocketDto } from "../websocket/dto/socket.dto";
 
 @Injectable()
-export class GpsService {
+export class GpsService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private gpsWebsocket: GpsGateway,
   ) {}
+
+  onModuleInit() {
+    ["JWT_SECRET", "JWT_EXPIRATION"].forEach((env) => {
+      if (!process.env[env]) {
+        throw new Error(`Variável de ambiente ${env} não definida`);
+      }
+    });
+  }
 
   async getLocation(code: string, socket: SocketDto) {
     const client = this.gpsWebsocket.getClient(socket.socketId);

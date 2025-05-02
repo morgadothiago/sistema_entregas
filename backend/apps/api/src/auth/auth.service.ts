@@ -8,7 +8,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
 import { CompanyDto } from "./dto/company.dto";
-import { Role, UserStatus } from "generated/prisma";
+import { Role, UserStatus } from "@prisma/client";
 import { LocationService } from "../location/location.service";
 
 @Injectable()

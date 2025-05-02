@@ -6,7 +6,7 @@ import { ProfitService } from "../profit/profit.service";
 import { VehicleTypeService } from "../vehicle-type/vehicle-type.service";
 import { DeliveryUpdateDto } from "./dto/delivery-update.dto";
 import { LocationService } from "../location/location.service";
-import { Localization, VehicleType } from "generated/prisma";
+import { Localization, VehicleType } from "@prisma/client";
 
 @Injectable()
 export class DeliveryService {
@@ -26,7 +26,7 @@ export class DeliveryService {
     let vehicleTypes: Partial<VehicleType>[];
 
     if (body.vehicleType) {
-      const data = this.vehicleType.findOne(body.vehicleType);
+      const data = await this.vehicleType.findOne(body.vehicleType);
       vehicleTypes = data ? [data] : await this.vehicleType.findAll();
     } else {
       vehicleTypes = await this.vehicleType.findAll();
@@ -83,13 +83,14 @@ export class DeliveryService {
       (acc, vehicleType, index) => {
         const prices = distances.map(({ distance, duration }) => {
           return {
-            price:
-              distance *
+            price: +(
+              (distance / 1000) *
               (vehicleType.pricePerKm || 0) *
-              (1 + (profit.percentage?.toNumber() || 0)),
+              (1 + (profit.percentage?.toNumber() || 0))
+            ).toFixed(2),
 
-            duration,
-            distance,
+            duration: duration / 3600,
+            distance: distance / 1000,
           };
         });
         const key: string = vehicleType.type || `vehicleType${index}`;

@@ -13,7 +13,7 @@ import { DeliveryCreateDto } from "./dto/delivery-create.dto";
 import { DeliveryUpdateDto } from "./dto/delivery-update.dto";
 import { DeliverySimulateDto } from "./dto/delivery-simulate.dto";
 import { Request } from "express";
-import { User } from "generated/prisma";
+import { User } from "@prisma/client";
 
 @Controller("delivery")
 export class DeliveryController {
