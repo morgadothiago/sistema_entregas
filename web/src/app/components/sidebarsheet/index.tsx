@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Sheet,
   SheetContent,
@@ -9,7 +11,15 @@ import {
 import { Bell, BellDot } from "lucide-react";
 import React from "react";
 
-export default function SideBarSheet({ isNotification }: any) {
+type Notification = {
+  id: number;
+  message: string;
+  timestamp: string;
+  isNotification: boolean;
+  data: Notification[];
+};
+
+export default function SideBarSheet({ isNotification, data }: Notification) {
   return (
     <Sheet>
       <SheetTrigger>{isNotification ? <BellDot /> : <Bell />}</SheetTrigger>
@@ -17,8 +27,9 @@ export default function SideBarSheet({ isNotification }: any) {
         <SheetHeader>
           <SheetTitle>Are you absolutely sure?</SheetTitle>
           <SheetDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            {data.map((notification: { message: string }, index: number) => (
+              <div key={index}>{notification.message}</div>
+            ))}
           </SheetDescription>
         </SheetHeader>
       </SheetContent>
