@@ -22,7 +22,7 @@ model User {
   status      UserStatus   @default(ACTIVE)
   information String       @default("")
   createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  updatedAt   DateTime     @default(now()) @updatedAt
   Balance     Balance      @relation(fields: [balanceId], references: [id])
   Extract     Extract[]
   balanceId   Int
@@ -42,7 +42,7 @@ model Company {
   idUser    Int      @unique
   User      User     @relation(fields: [idUser], references: [id])
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("companies")
 }
@@ -58,7 +58,7 @@ model VehicleType {
   type       String   @unique
   pricePerKm Float    @default(1)
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("vehicle_types")
 }
@@ -67,7 +67,7 @@ model ProfitMargin {
   id         Int      @id @default(autoincrement())
   percentage Decimal  @default(0.00) @db.Decimal(3, 2) // 3 dígitos no total, 2 decimais
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("profit_margins")
 }
@@ -76,7 +76,7 @@ model Balance {
   id        Int      @id @default(autoincrement())
   amount    Float    @default(0)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   User User[]
 
@@ -88,7 +88,7 @@ model Extract {
   amount    Float       @default(0)
   type      ExtractType
   createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  updatedAt DateTime    @default(now()) @updatedAt
 
   User   User? @relation(fields: [userId], references: [id])
   userId Int?
@@ -114,7 +114,7 @@ model DeliveryMan {
   phone     String
   address   String
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt DateTime   @default(now()) @updatedAt
   User      User       @relation(fields: [userId], references: [id])
   userId    Int        @unique
   Delivery  Delivery[]
@@ -134,7 +134,7 @@ model Localization {
   latitude   Float
   longitude  Float
   createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  updatedAt  DateTime  @default(now()) @updatedAt
   Delivery   Delivery? @relation(fields: [deliveryId], references: [id])
   deliveryId Int?
   Address    Address[]
@@ -145,7 +145,7 @@ model Localization {
 model Delivery {
   id            Int            @id @default(autoincrement())
   code          String         @unique
-  higth         Float
+  height        Float
   width         Float
   length        Float
   weight        Float
@@ -155,7 +155,7 @@ model Delivery {
   status        DeliveryStatus
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   DeliveryMan   DeliveryMan?   @relation(fields: [deliveryManId], references: [id])
   deliveryManId Int?
@@ -176,7 +176,7 @@ model Address {
   complement     String?
   Localization   Localization @relation(fields: [localizationId], references: [id])
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  updatedAt      DateTime     @default(now()) @updatedAt
   Client         Client[]
   Delivery       Delivery[]
   localizationId Int
@@ -194,7 +194,7 @@ model Client {
   Address   Address  @relation(fields: [addressId], references: [id])
   addressId Int
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("clients")
 }

@@ -28,6 +28,16 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: redis-server --maxmemory 25mb --maxmemory-policy allkeys-lru
+    environment:
+      - REDIS_PASSWORD=suasenhaaqui
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
   pgweb:
     image: sosedoff/pgweb
     ports:
