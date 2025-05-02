@@ -13,7 +13,7 @@ export interface User {
   email: string;
   role: ERole;
   Balance: IBalance;
-  Company: string;
+  Company: Record<string, any>;
   Extract: IExtract[];
 }
 export interface ICreateUser {

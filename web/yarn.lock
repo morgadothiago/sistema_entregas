@@ -7,17 +7,6 @@
   resolved "https://registry.yarnpkg.com/@alloc/quick-lru/-/quick-lru-5.2.0.tgz#7bf68b20c0a350f936915fcae06f58e32007ce30"
   integrity sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==
 
-"@auth/core@0.39.0":
-  version "0.39.0"
-  resolved "https://registry.yarnpkg.com/@auth/core/-/core-0.39.0.tgz#39468332bdd6d710f859dcfb6597618f6d99efff"
-  integrity sha512-jusviw/sUSfAh6S/wjY5tRmJOq0Itd3ImF+c/b4HB9DfmfChtcfVJTNJeqCeExeCG8oh4PBKRsMQJsn2W6NhFQ==
-  dependencies:
-    "@panva/hkdf" "^1.2.1"
-    jose "^6.0.6"
-    oauth4webapi "^3.3.0"
-    preact "10.24.3"
-    preact-render-to-string "6.5.11"
-
 "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.7":
   version "7.27.0"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.27.0.tgz#fbee7cf97c709518ecc1f590984481d5460d4762"
@@ -386,11 +375,6 @@
   version "1.0.39"
   resolved "https://registry.yarnpkg.com/@nolyfill/is-core-module/-/is-core-module-1.0.39.tgz#3dc35ba0f1e66b403c00b39344f870298ebb1c8e"
   integrity sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==
-
-"@panva/hkdf@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@panva/hkdf/-/hkdf-1.2.1.tgz#cb0d111ef700136f4580349ff0226bf25c853f23"
-  integrity sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==
 
 "@radix-ui/number@1.1.1":
   version "1.1.1"
@@ -2760,11 +2744,6 @@ jiti@^2.4.2:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-2.4.2.tgz#d19b7732ebb6116b06e2038da74a55366faef560"
   integrity sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==
 
-jose@^6.0.6:
-  version "6.0.10"
-  resolved "https://registry.yarnpkg.com/jose/-/jose-6.0.10.tgz#52d96e1a671b4c02e13b71e0d35abea2e774712b"
-  integrity sha512-skIAxZqcMkOrSwjJvplIPYrlXGpxTPnro2/QWTDCxAdWQrSTV5/KqspMWmi5WAx5+ULswASJiZ0a+1B/Lxt9cw==
-
 "js-tokens@^3.0.0 || ^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -2997,13 +2976,6 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-next-auth@^5.0.0-beta.27:
-  version "5.0.0-beta.27"
-  resolved "https://registry.yarnpkg.com/next-auth/-/next-auth-5.0.0-beta.27.tgz#dff4cbedc07dc3e6a88148ffd8bdd41c1e87ff13"
-  integrity sha512-/QtP9C0C99YpEuBEJqMaDXH3ISWMgObQalwVZEoC7sskaIPhv5fQl6fXS/rXJQKqLY6MNJ42rqjqmRdoXZH2EQ==
-  dependencies:
-    "@auth/core" "0.39.0"
-
 next-themes@^0.4.6:
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/next-themes/-/next-themes-0.4.6.tgz#8d7e92d03b8fea6582892a50a928c9b23502e8b6"
@@ -3031,11 +3003,6 @@ next@15.3.0:
     "@next/swc-win32-arm64-msvc" "15.3.0"
     "@next/swc-win32-x64-msvc" "15.3.0"
     sharp "^0.34.1"
-
-oauth4webapi@^3.3.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/oauth4webapi/-/oauth4webapi-3.5.0.tgz#9be1227e2a6af7761dd0d1a811ce33050077974b"
-  integrity sha512-DF3mLWNuxPkxJkHmWxbSFz4aE5CjWOsm465VBfBdWzmzX4Mg3vF8icxK+iKqfdWrIumBJ2TaoNQWx+SQc2bsPQ==
 
 object-assign@^4.1.1:
   version "4.1.1"
@@ -3198,16 +3165,6 @@ postcss@^8.4.41:
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
 
-preact-render-to-string@6.5.11:
-  version "6.5.11"
-  resolved "https://registry.yarnpkg.com/preact-render-to-string/-/preact-render-to-string-6.5.11.tgz#467e69908a453497bb93d4d1fc35fb749a78e027"
-  integrity sha512-ubnauqoGczeGISiOh6RjX0/cdaF8v/oDXIjO85XALCQjwQP+SB4RDXXtvZ6yTYSjG+PC1QRP2AhPgCEsM2EvUw==
-
-preact@10.24.3:
-  version "10.24.3"
-  resolved "https://registry.yarnpkg.com/preact/-/preact-10.24.3.tgz#086386bd47071e3b45410ef20844c21e23828f64"
-  integrity sha512-Z2dPnBnMUfyQfSQ+GBdsGa16hz35YmLmtTLhM169uW944hYL6xzTYkJjC07j+Wosz733pMWx0fgON3JNw1jJQA==
-
 prelude-ls@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
@@ -3258,11 +3215,6 @@ react-hook-form@^7.55.0:
   version "7.55.0"
   resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.55.0.tgz#df3c80a20a68f6811f49bec3406defaefb6dce80"
   integrity sha512-XRnjsH3GVMQz1moZTW53MxfoWN7aDpUg/GpVNc4A3eXRVNdGXfbzJ4vM4aLQ8g6XCUh1nIbx70aaNCl7kxnjog==
-
-react-icons@^5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-5.5.0.tgz#8aa25d3543ff84231685d3331164c00299cdfaf2"
-  integrity sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==
 
 react-is@^16.13.1:
   version "16.13.1"

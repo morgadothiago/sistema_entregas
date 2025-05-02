@@ -7,7 +7,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="w-full h-full  ">
+    <div className=" w-full ">
       <Header />
 
       {children}

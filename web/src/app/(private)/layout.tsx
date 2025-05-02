@@ -23,7 +23,11 @@ export default async function Layout({ children }: LayoutProps) {
       <SidebarProvider>
         <SideBar />
 
-       
+        <SidebarTrigger
+          className=" w-15  h-15 lg:hidden "
+          size="lg"
+          variant="outline"
+        />
         {children}
       </SidebarProvider>
     </div>

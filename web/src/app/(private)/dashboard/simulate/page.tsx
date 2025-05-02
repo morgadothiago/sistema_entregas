@@ -3,7 +3,7 @@ import React from "react";
 export default function page() {
   return (
     <div>
-      <div className="w-full h-full bg-amber-400">
+      <div className="">
         <h1>Simulação de entrega</h1>
       </div>
     </div>
