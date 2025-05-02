@@ -1,5 +1,5 @@
 "use client";
-"use client";
+
 import React, { useState } from "react";
 import SideBarSheet from "../sidebarsheet";
 import { getSession } from "next-auth/react";

@@ -7,7 +7,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className=" w-full ">
+    <div className="flex flex-1 flex-col">
       <Header />
 
       {children}

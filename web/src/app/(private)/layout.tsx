@@ -18,7 +18,7 @@ export default async function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div>
+    <div className="flex flex-1 ">
       <SidebarProvider>
         <SideBar />
         {children}
