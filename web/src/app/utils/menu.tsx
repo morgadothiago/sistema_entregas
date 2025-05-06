@@ -32,7 +32,7 @@ export const items = [
   },
   {
     title: "Notificações",
-    url: "/dashboard/notifications",
+    url: "/notifications",
     icon: Bell,
   },
 ];
@@ -42,6 +42,11 @@ export const itemAdm = [
     title: "Cadastro de Entregador",
     url: "/admin/delivery",
     icon: Car,
+  },
+  {
+    title: "Usuario",
+    url: "/admin/user",
+    icon: User,
   },
   {
     title: "Repasse de valores",

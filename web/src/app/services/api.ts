@@ -15,11 +15,11 @@ interface IErrorResponse {
 class ApiService {
   private api: AxiosInstance;
   static instance: ApiService;
-  private token: string = '';
+  private token: string = "";
 
   constructor() {
     this.api = Axios.create({
-      baseURL: process.env.API_HOST,
+      baseURL: "http://localhost:3001",
     });
 
     this.setupIntercepters();
@@ -28,9 +28,8 @@ class ApiService {
   setupIntercepters() {
     this.api.interceptors.request.use(
       (config) => {
-        
         config.headers.Authorization ??= this.token;
-        
+
         return config;
       },
 
@@ -50,7 +49,7 @@ class ApiService {
   async getInfo() {
     this.api.get("");
   }
-  
+
   async login(email: string, password: string) {
     return this.api
       .post("/auth/login", { email, password })
@@ -59,7 +58,6 @@ class ApiService {
   }
 
   async newUser(data: ICreateUser) {
-
     const response = await this.api
       .post("/auth/signup/company", data)
       .then(this.getResponse)
