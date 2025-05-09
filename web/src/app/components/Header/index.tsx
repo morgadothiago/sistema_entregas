@@ -20,7 +20,7 @@ export default function Header() {
     <div className="flex flex-row md:flex-row justify-between items-center p-4 ">
       <div className="flex items-center text-lg font-semibold text-black space-x-2">
         <SidebarTrigger className="w-10 h-10 lg:hidden" />
-        <span>Olá: {user?.Company?.name}</span>
+        <span>Olá: {user?.email}</span>
       </div>
       <div className="flex items-center space-x-4  md:mt-0">
         <div className="text-lg font-bold bg-[#5DADE2] text-[#ffff] rounded-full px-4 py-1 shadow-inner">
