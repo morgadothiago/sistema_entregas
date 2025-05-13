@@ -1,10 +1,29 @@
 import React from "react";
 import { TextInput } from "../components/TextInput";
 import { Select } from "@/app/components/Select";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, UseFormRegister } from "react-hook-form";
 import { cities } from "../utils/citys";
 import { ufs } from "../utils/citys";
 import { useHookFormMask } from "use-mask-input";
+
+type MaskOptions = {
+  mask: string[];
+  required?: boolean;
+};
+
+type RegisterWithMask = (
+  name: string,
+  options: MaskOptions
+) => ReturnType<
+  UseFormRegister<{
+    address: string;
+    number: string;
+    complement: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  }>
+>;
 
 export function AddressStep() {
   const {
@@ -12,7 +31,9 @@ export function AddressStep() {
     formState: { errors },
   } = useFormContext();
 
-  const registerWithMask = useHookFormMask<String>(register);
+  const registerWithMask = useHookFormMask(
+    register
+  ) as unknown as RegisterWithMask;
 
   return (
     <div className="space-y-4">
@@ -65,7 +86,7 @@ export function AddressStep() {
 
         <TextInput
           {...registerWithMask("zipCode", {
-            mask: ["99999-999"] as string[],
+            mask: ["99999-999"],
             required: true,
           })}
           labelName="CEP"

@@ -1,15 +1,51 @@
 import React from "react";
 import { TextInput } from "../components/TextInput";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, UseFormRegister } from "react-hook-form";
 import { useHookFormMask } from "use-mask-input";
+
+type MaskOptions = {
+  mask: string[];
+  required?: boolean;
+};
+
+type RegisterWithMask = (
+  name: string,
+  options: MaskOptions
+) => ReturnType<
+  UseFormRegister<{
+    address: string;
+    number: string;
+    complement: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    name: string;
+    cnpj: string;
+    phone: string;
+    businessType: string;
+  }>
+>;
+
+type FormData = {
+  address: string;
+  number: string;
+  complement: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  name: string;
+  cnpj: string;
+  phone: string;
+  businessType: string;
+};
 
 export function BusinessDataStep() {
   const {
     register,
     formState: { errors },
-  } = useFormContext();
+  } = useFormContext<FormData>();
 
-  const registerWithMask = useHookFormMask<String>(register);
+  const registerWithMask = useHookFormMask(register) as unknown as RegisterWithMask;
   return (
     <div className="space-y-4">
       <TextInput

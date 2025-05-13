@@ -1,51 +1,61 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
 import api from "../services/api";
-import type { ICreateUser } from "../types/User";
 import { useRouter } from "next/navigation";
 import { BusinessDataStep } from "./BusinessDataStep";
 import { AddressStep } from "./AddressStep";
 import { AccessDataStep } from "./AccessDataStep";
-import { FormProvider } from "react-hook-form";
 import { unmaskInput } from "../util/unmaskInput";
+import type { ICreateUser } from "../types/User";
+
+// ✅ Tipagem completa do formulário
+type FormData = {
+  companyName: string;
+  cnpj: string;
+  email: string;
+  password: string;
+  address: string;
+  number: string;
+  complement: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phone: string;
+};
 
 export default function SignUpPage() {
   const [step, setStep] = useState(1);
   const methods = useForm<FormData>();
-  const routes = useRouter();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (step === 3) {
-      const unmaskedData = {
+      const unmaskedData: ICreateUser = {
+        name: data.companyName,
         ...data,
-        zipCode: unmaskInput((data as any).zipCode),
-        phone: unmaskInput((data as any).phone),
-        cnpj: unmaskInput((data as any).cnpj),
+        zipCode: unmaskInput(data.zipCode),
+        phone: unmaskInput(data.phone),
+        cnpj: unmaskInput(data.cnpj),
       };
+
       try {
         setIsLoading(true);
-        const addUser = await api.newUser(
-          unmaskedData as unknown as ICreateUser
-        );
+        const response = await api.newUser(unmaskedData);
 
-        if (!addUser) {
-          toast.success("Login realizado com sucesso!", {
-            description: "Você está sendo redirecionado para a página inicial",
+        if (response) {
+          toast.success("Cadastro realizado com sucesso!", {
+            description: "Você será redirecionado para a página de login.",
             duration: 3000,
             position: "top-right",
             richColors: true,
           });
-          routes.push("/signin");
+          router.push("/signin");
         } else {
-          // Exibe mensagem de erro caso a criação do usuário falhe
           toast.error("Erro ao criar usuário", {
             description:
               "Ocorreu um erro ao criar o usuário. Tente novamente mais tarde.",
@@ -54,73 +64,69 @@ export default function SignUpPage() {
             richColors: true,
           });
         }
-        setIsLoading(false);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Erro ao criar usuário:", error);
-        const errorMessage =
-          (error as any).response?.data?.message || "Erro desconhecido";
-        const statusCode =
-          (error as any).response?.status || "Código de status desconhecido";
+
+        let errorMessage = "Erro desconhecido";
+        let statusCode = "Erro";
+
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof (error as { response?: unknown }).response === "object"
+        ) {
+          const response = (
+            error as {
+              response?: { data?: { message?: string }; status?: number };
+            }
+          ).response;
+          errorMessage = response?.data?.message || errorMessage;
+          statusCode = String(response?.status || statusCode);
+        }
+
         toast.error(`Erro ${statusCode}: ${errorMessage}`, {
-          description:
-            "Ocorreu um erro ao criar o usuário. Tente novamente mais tarde.",
+          description: "Tente novamente mais tarde.",
           duration: 3000,
           position: "top-right",
           richColors: true,
         });
+      } finally {
         setIsLoading(false);
       }
     } else {
-      setStep(step + 1);
+      setStep((prev) => prev + 1);
     }
   };
 
   const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
+    if (step > 1) setStep((prev) => prev - 1);
   };
 
   return (
     <div className="max-w-md mx-auto w-full">
       <div className="relative mb-6">
         <div className="flex justify-between p-4 bg-[#5DADE2] rounded-lg shadow-lg gap-4 border border-gray-200">
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ${
-                step === 1 ? "bg-[#00E676] scale-110" : "bg-gray-300"
-              }`}
-            >
-              <span className="text-white text-xl font-bold">1</span>
-            </div>
-            <span className="text-gray-800 font-semibold mt-2 text-sm">
-              Dados Empresariais
-            </span>
-          </div>
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ${
-                step === 2 ? "bg-[#00E676] scale-110" : "bg-gray-300"
-              }`}
-            >
-              <span className="text-white text-xl font-bold">2</span>
-            </div>
-            <span className="text-gray-800 font-semibold mt-2 text-sm">
-              Endereço
-            </span>
-          </div>
-          <div className="flex flex-col items-center">
-            <div
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ${
-                step === 3 ? "bg-[#2196F3] scale-110" : "bg-gray-300"
-              }`}
-            >
-              <span className="text-white text-xl font-bold">3</span>
-            </div>
-            <span className="text-gray-800 font-semibold mt-2 text-sm">
-              Dados de Acesso
-            </span>
-          </div>
+          {["Dados Empresariais", "Endereço", "Dados de Acesso"].map(
+            (label, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ${
+                    step === index + 1
+                      ? "bg-[#00E676] scale-110"
+                      : "bg-gray-300"
+                  }`}
+                >
+                  <span className="text-white text-xl font-bold">
+                    {index + 1}
+                  </span>
+                </div>
+                <span className="text-gray-800 font-semibold mt-2 text-sm">
+                  {label}
+                </span>
+              </div>
+            )
+          )}
         </div>
         <div
           className="absolute bottom-0 left-0 right-0 h-1 bg-[#00E676] transition-all duration-300"
@@ -133,6 +139,7 @@ export default function SignUpPage() {
           {step === 1 && <BusinessDataStep />}
           {step === 2 && <AddressStep />}
           {step === 3 && <AccessDataStep />}
+
           <div className="flex justify-between mt-4">
             {step > 1 && (
               <Button
