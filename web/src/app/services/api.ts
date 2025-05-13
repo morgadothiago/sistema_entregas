@@ -15,22 +15,21 @@ interface IErrorResponse {
 class ApiService {
   private api: AxiosInstance;
   static instance: ApiService;
-  private token: string = '';
+  private token: string = "";
 
   constructor() {
     this.api = Axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_HOST,
     });
-    console.log(process.env.NEXT_PUBLIC_API_HOST)
+    console.log(process.env.NEXT_PUBLIC_API_HOST);
     this.setupIntercepters();
   }
 
   setupIntercepters() {
     this.api.interceptors.request.use(
       (config) => {
-        
         config.headers.Authorization ??= this.token;
-        
+
         return config;
       },
 
@@ -50,7 +49,7 @@ class ApiService {
   async getInfo() {
     this.api.get("");
   }
-  
+
   async login(email: string, password: string) {
     return this.api
       .post("/auth/login", { email, password })
@@ -59,7 +58,6 @@ class ApiService {
   }
 
   async newUser(data: ICreateUser) {
-
     const response = await this.api
       .post("/auth/signup/company", data)
       .then(this.getResponse)
@@ -73,6 +71,12 @@ class ApiService {
   }
   private getError(error: AxiosError<any>): IErrorResponse {
     if (error.status === 422) {
+      return {
+        message: error.response?.data?.message,
+        status: error.status,
+      };
+    }
+    if (error.status === 409) {
       return {
         message: error.response?.data?.message,
         status: error.status,
