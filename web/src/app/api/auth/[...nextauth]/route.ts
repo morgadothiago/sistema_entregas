@@ -11,8 +11,14 @@ export const authOptions: NextAuthConfig = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: Partial<Record<"email" | "password", unknown>>) {
-        if (!credentials || typeof credentials.email !== "string" || typeof credentials.password !== "string") {
+      async authorize(
+        credentials: Partial<Record<"email" | "password", unknown>>
+      ) {
+        if (
+          !credentials ||
+          typeof credentials.email !== "string" ||
+          typeof credentials.password !== "string"
+        ) {
           return null;
         }
         try {
@@ -21,20 +27,17 @@ export const authOptions: NextAuthConfig = {
           }
 
           const res = await api.login(credentials.email, credentials.password);
-          
-          if('status' in res)
-            return null
-          
+
+          if ("status" in res) return null;
 
           const { token, user } = res;
 
-          api.setToken(token)
-        
+          api.setToken(token);
+
           return {
             ...user,
             id: user.id.toString(), // Ensure the 'id' is a string as required by next-auth
           };
-          
         } catch (error) {
           console.error("Authorization error:", error);
           return null;
@@ -50,7 +53,7 @@ export const authOptions: NextAuthConfig = {
 
       return token;
     },
-    
+
     async session({ session, token }) {
       (session as unknown as { user: User }).user = token.user as User;
 
@@ -62,7 +65,7 @@ export const authOptions: NextAuthConfig = {
   },
   pages: {
     signIn: "/signin", // Página de login personalizada
-    error: '/signin',  // Redireciona erros de volta para o login
+    error: "/signin", // Redireciona erros de volta para o login
   },
 };
 
@@ -70,5 +73,5 @@ export const {
   handlers: { GET, POST }, // Exportação CORRETA para NextAuth v5
   auth,
   signIn,
-  signOut
+  signOut,
 } = NextAuth(authOptions);

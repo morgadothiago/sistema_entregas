@@ -19,9 +19,9 @@ class ApiService {
 
   constructor() {
     this.api = Axios.create({
-      baseURL: "http://localhost:3001",
+      baseURL: process.env.NEXT_PUBLIC_API_HOST,
     });
-
+    console.log(process.env.NEXT_PUBLIC_API_HOST);
     this.setupIntercepters();
   }
 
@@ -71,6 +71,12 @@ class ApiService {
   }
   private getError(error: AxiosError<any>): IErrorResponse {
     if (error.status === 422) {
+      return {
+        message: error.response?.data?.message,
+        status: error.status,
+      };
+    }
+    if (error.status === 409) {
       return {
         message: error.response?.data?.message,
         status: error.status,

@@ -1,4 +1,5 @@
 import type { IBalance } from "./Belance";
+import { ICompany } from "./Compny";
 import type { IExtract } from "./Extract";
 
 export enum ERole {
@@ -13,8 +14,9 @@ export interface User {
   email: string;
   role: ERole;
   Balance: IBalance;
-  Company: Record<string, any>;
+  Company: ICompany;
   Extract: IExtract[];
+  emailVerified?: Date | null; // ← necessário para NextAuth
 }
 export interface ICreateUser {
   name: string;
