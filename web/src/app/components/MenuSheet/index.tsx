@@ -19,24 +19,25 @@ import Image from "next/image";
 import LogoMenuLateral from "@/app/assets/img2.png";
 
 import { itemAdm, items, itemSupport } from "@/app/utils/menu";
-import { useState } from "react"; // Import useState
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import api from "@/app/services/api";
 
 export function SideBar() {
-  const { user, logout } = useAuth();
-  const [selectedItem, setSelectedItem] = useState<string | null>(null); // State to track selected item
-  const router = useRouter(); // Initialize the router
+  const { user } = useAuth();
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleLogOut = async () => {
-    await logout(); // Await the logout function
-    await signOut({redirect: true, redirectTo:  '/signin'})
-    router.push("/");
+    await signOut({redirect: false});
+    api.cleanToken();
+    router.push("/signin");
   };
 
   function handleNextPage(itemTitle: string) {
-    setSelectedItem(itemTitle); // Set the selected item
-    router.push(`/dashboard/${itemTitle}`); // Navigate to the corresponding page
+    setSelectedItem(itemTitle);
+    router.push(`/dashboard/${itemTitle}`);
   }
 
   return (
@@ -70,11 +71,11 @@ export function SideBar() {
                       selectedItem === item.title
                         ? "bg-[#fff] text-black"
                         : "text-white"
-                    }`} // Change background color and text color if selected
+                    }`}
                   >
                     <SidebarMenuButton asChild>
                       <a
-                        onClick={() => handleNextPage(item.url)} // Pass item.title to handleNextPage
+                        onClick={() => handleNextPage(item.url)}
                         className="flex items-center p-2"
                       >
                         <item.icon className="mr-2" />
@@ -102,11 +103,11 @@ export function SideBar() {
                         selectedItem === item.title
                           ? "bg-[#fff] text-black"
                           : "text-white"
-                      }`} // Change background color and text color if selected
+                      }`}
                     >
                       <SidebarMenuButton asChild>
                         <a
-                          onClick={() => handleNextPage(item.title)} // Pass item.title to handleNextPage
+                          onClick={() => handleNextPage(item.title)}
                           className="flex items-center p-2"
                         >
                           <item.icon className="mr-2" />
@@ -134,7 +135,7 @@ export function SideBar() {
                       selectedItem === item.title
                         ? "bg-[#fff] text-black"
                         : "text-white"
-                    }`} // Change background color and text color if selected
+                    }`}
                   >
                     <SidebarMenuButton asChild>
                       <button
