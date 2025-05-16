@@ -3,8 +3,8 @@ import React, { ReactNode } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SideBar } from "../components/MenuSheet";
-import { auth } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+import { auth } from "../util/auth";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,7 +12,7 @@ interface LayoutProps {
 
 export default async function Layout({ children }: LayoutProps) {
   const session = await auth()
-
+  
   if(!session){
     redirect('/signin')
   }

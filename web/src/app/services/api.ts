@@ -21,7 +21,7 @@ class ApiService {
     this.api = Axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_HOST,
     });
-    console.log(process.env.NEXT_PUBLIC_API_HOST);
+
     this.setupIntercepters();
   }
 
