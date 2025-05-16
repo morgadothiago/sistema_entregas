@@ -42,62 +42,12 @@ export default function SignUpPage() {
         phone: unmaskInput(data.phone),
         cnpj: unmaskInput(data.cnpj),
       };
+      setIsLoading(true);
+      const response = await api.newUser(unmaskedData);
 
-      try {
-        setIsLoading(true);
-        const response = await api.newUser(unmaskedData);
-
-        if (response) {
-          toast.success("Cadastro realizado com sucesso!", {
-            description: "Você será redirecionado para a página de login.",
-            duration: 3000,
-            position: "top-right",
-            richColors: true,
-          });
-          router.push("/signin");
-        } else {
-          toast.error("Erro ao criar usuário", {
-            description:
-              "Ocorreu um erro ao criar o usuário. Tente novamente mais tarde.",
-            duration: 3000,
-            position: "top-right",
-            richColors: true,
-          });
-        }
-      } catch (error: unknown) {
-        console.error("Erro ao criar usuário:", error);
-
-        let errorMessage = "Erro desconhecido";
-        let statusCode = "Erro";
-
-        if (
-          typeof error === "object" &&
-          error !== null &&
-          "response" in error &&
-          typeof (error as { response?: unknown }).response === "object"
-        ) {
-          const response = (
-            error as {
-              response?: { data?: { message?: string }; status?: number };
-            }
-          ).response;
-          errorMessage = response?.data?.message || errorMessage;
-          statusCode = String(response?.status || statusCode);
-        }
-
-        toast.error(`Erro ${statusCode}: ${errorMessage}`, {
-          description: "Tente novamente mais tarde.",
-          duration: 3000,
-          position: "top-right",
-          richColors: true,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      setStep((prev) => prev + 1);
-    }
-  };
+      setIsLoading(false);
+    
+    
 
   const handleBack = () => {
     if (step > 1) setStep((prev) => prev - 1);

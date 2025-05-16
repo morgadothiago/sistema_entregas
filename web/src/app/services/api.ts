@@ -60,7 +60,7 @@ class ApiService {
   async newUser(data: ICreateUser) {
     const response = await this.api
       .post("/auth/signup/company", data)
-      .then(this.getResponse)
+      .then(this.getResponse<void>)
       .catch(this.getError);
 
     return response;
