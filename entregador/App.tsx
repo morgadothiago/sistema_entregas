@@ -8,6 +8,8 @@ import {
 } from "@expo-google-fonts/roboto";
 import { Loading } from "./src/components/Loading";
 import { useEffect, useState } from "react";
+import AppRoutes from "./src/routes";
+import { AuthProvider } from "./src/context/AuthContext";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -28,9 +30,8 @@ export default function App() {
   }
 
   return (
-    <View>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar barStyle={"light-content"} />
-    </View>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
