@@ -7,11 +7,20 @@ import type { StackNavigationProp } from "@react-navigation/stack";
 export default function SignInScreen() {
   const { login, isAuthenticated } = useAuth();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
   // Simulate a login function
   const handleLogin = async () => {
-    await login();
-    navigation.navigate("Home");
+    try {
+      // Simulate an API call
+
+      await login();
+
+      // Check authentication status after login
+      if (isAuthenticated) {
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      console.error("Login failed", error);
+    }
   };
 
   return (

@@ -7,8 +7,10 @@ import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "../../types/RootParamsList";
 
 export default function Home() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, checkAuthStatus } = useAuth();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  console.log("isAuthenticated", checkAuthStatus());
 
   // Simulate a logout function
   const handleLogout = async () => {
@@ -16,10 +18,10 @@ export default function Home() {
       // Simulate an API call
 
       logout();
-      console.log("Logout successful", isAuthenticated);
+      console.log("Logout successful", checkAuthStatus());
       // Navigate to the login screen after successful logout
 
-      if (isAuthenticated === false) {
+      if (!isAuthenticated) {
         navigation.navigate("SignIn");
       }
     } catch (error) {
