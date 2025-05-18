@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "entregador",
-    "slug": "entregador",
+    "name": "Entregador",
+    "slug": "Entregador",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
