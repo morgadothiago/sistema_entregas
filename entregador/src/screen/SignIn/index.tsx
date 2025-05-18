@@ -1,8 +1,13 @@
-import { Button, View } from "react-native";
+import { Button } from "react-native";
+
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
+
 import type { RootStackParamList } from "../../types/RootParamsList";
 import type { StackNavigationProp } from "@react-navigation/stack";
+
+import { Input } from "../../components/Input";
+import { GradientBackground } from "./styles";
 
 export default function SignInScreen() {
   const { login, isAuthenticated } = useAuth();
@@ -24,8 +29,9 @@ export default function SignInScreen() {
   };
 
   return (
-    <View>
+    <GradientBackground>
       <Button title="Entrar" onPress={handleLogin} />
-    </View>
+      <Input />
+    </GradientBackground>
   );
 }
