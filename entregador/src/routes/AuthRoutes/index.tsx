@@ -13,7 +13,7 @@ export default function AuthRoutes() {
   const { isAuthenticated } = useAuth();
   return (
     <Stack.Navigator
-      screenOptions={{ headerShown: true }}
+      screenOptions={{ headerShown: false }}
       initialRouteName={isAuthenticated ? "Home" : "SignIn"}
     >
       <Stack.Screen name="SignIn" component={SignInScreen} />

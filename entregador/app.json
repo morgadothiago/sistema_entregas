@@ -32,7 +32,19 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "most-recent"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ca0f3a90-7d85-46b1-8d9f-13ffa3c2ae04"
+      }
+    },
+    "owner": "thiago_morgado",
   }
 }
