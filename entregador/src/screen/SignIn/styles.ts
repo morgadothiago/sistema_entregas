@@ -15,7 +15,7 @@ export const GradientBackground = styled(LinearGradient).attrs({
   end: { x: 0.5, y: 1.5 },
 })`
   flex: 1;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   padding: ${height * 0.01}px;
 `;
@@ -53,4 +53,35 @@ export const Footer = styled.View`
   width: 100%;
   align-items: center;
   padding: ${height * 0.025}px;
+`;
+
+export const SocialLoginArea = styled.View`
+  margin-top: ${height * 0.03}px;
+  align-items: center;
+`;
+
+export const SocialText = styled.Text`
+  color: #fff;
+  margin-bottom: ${height * 0.015}px;
+  font-size: ${width * 0.045}px;
+`;
+
+export const SocialButtons = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  gap: ${width * 0.04}px;
+`;
+
+export const SocialButton = styled.TouchableOpacity`
+  background-color: #fff;
+  border-radius: 10px;
+  padding: ${width * 0.02}px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const SocialIcon = styled.Image`
+  width: ${width * 0.08}px;
+  height: ${width * 0.08}px;
+  resize-mode: contain;
 `;

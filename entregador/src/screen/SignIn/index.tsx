@@ -2,6 +2,7 @@ import { Button, Keyboard, TouchableWithoutFeedback } from "react-native";
 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
+import { AntDesign } from "@expo/vector-icons";
 
 import type { RootStackParamList } from "../../types/RootParamsList";
 import type { StackNavigationProp } from "@react-navigation/stack";
@@ -14,6 +15,10 @@ import {
   Title,
   FormArea,
   Footer,
+  SocialLoginArea,
+  SocialButton,
+  SocialButtons,
+  SocialText,
 } from "./styles";
 
 import Logo from "../../../assets/ios-light.png";
@@ -74,8 +79,22 @@ export default function SignInScreen() {
                 }}
                 icon="lock"
               />
+
+              <Button title="Login" onPress={() => {}} />
             </FormArea>
           </KeyboardAvoidingView>
+
+          <SocialLoginArea>
+            <SocialText>Or continue with</SocialText>
+            <SocialButtons>
+              <SocialButton>
+                <AntDesign name="apple1" size={24} color="#000" />
+              </SocialButton>
+              <SocialButton>
+                <AntDesign name="google" size={24} color="black" />
+              </SocialButton>
+            </SocialButtons>
+          </SocialLoginArea>
 
           <Footer>
             <Button title="Login" onPress={handleLogin} />
