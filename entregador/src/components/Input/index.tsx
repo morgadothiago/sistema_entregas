@@ -17,7 +17,7 @@ export function TextInput({ icon, formProps, inputProps }: Props) {
         <Container>
           <FormArea>
             <IconBox>
-              <Feather name={icon} size={24} />
+              <Feather name={icon} size={24} color={"#fff"} />
             </IconBox>
 
             <Input {...inputProps} />

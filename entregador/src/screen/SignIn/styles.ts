@@ -15,14 +15,15 @@ export const GradientBackground = styled(LinearGradient).attrs({
   end: { x: 0.5, y: 1.5 },
 })`
   flex: 1;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
-  padding: ${height * 0.03}px;
+  padding: ${height * 0.01}px;
 `;
 
 export const ImageContainer = styled.View`
   width: 100%;
   height: ${height * 0.2}px;
+
   align-items: center;
 `;
 
@@ -42,7 +43,7 @@ export const Title = styled.Text`
 
 export const FormArea = styled.View`
   width: 100%;
-
+  margin-top: ${height * 0.01}px;
   margin-bottom: ${height * 0.03}px;
 `;
 
