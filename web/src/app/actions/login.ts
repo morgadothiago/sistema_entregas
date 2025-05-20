@@ -23,8 +23,9 @@ export const loginRequester = async (_actionState: ActionState, formdata: FormDa
         password: formdata.get("password") as string,
       };
 
-      await loginValidation.validate(data,{strict: true});
-      
+     
+      await loginValidation.validate(data);
+
       const result = await signIn('credentials', {
         redirect: false,
         email: data.email,
@@ -44,14 +45,12 @@ export const loginRequester = async (_actionState: ActionState, formdata: FormDa
           errors: error.errors,
         } as ValidationError;
 
-        return _actionState
       }
       else {
         _actionState.error = (error as Error).message
       }
     }
     
-      
     _actionState.payload = formdata;
 
     return {
