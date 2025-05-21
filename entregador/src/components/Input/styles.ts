@@ -6,7 +6,7 @@ const { width, height } = Dimensions.get("window");
 
 export const Container = styled.View`
   width: 100%;
-  padding: ${height * 0.015}px ${width * 0.04}px;
+  padding: ${height * 0.02}px ${width * 0.03}px;
 `;
 
 export const FormArea = styled.View`
@@ -29,17 +29,24 @@ export const Icon = styled.View`
 export const IconBox = styled.View`
   width: 56px;
   height: 56px;
-  background-color: ${theme.colors.background};
+  background-color: ${theme.colors.buttonText};
   align-items: center;
   justify-content: center;
 `;
 
 export const Inputs = styled.TextInput`
   flex: 1;
-  padding-left: 16px;
+  padding-left: 10px;
   height: 56px;
-  padding: 0 ${width * 0.04}px;
   color: ${theme.colors.text};
-  font-size: ${width * 0.045}px;
-  background-color: ${theme.colors.background};
+  font-size: ${width * 0.035}px;
+  background-color: ${theme.colors.buttonText};
+`;
+
+export const Label = styled.Text`
+  color: ${theme.colors.button};
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  margin-top: -20px;
 `;

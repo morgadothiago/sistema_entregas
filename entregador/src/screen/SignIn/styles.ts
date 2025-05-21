@@ -79,7 +79,7 @@ export const SocialText = styled.Text`
 export const SocialButtons = styled.View`
   flex-direction: row;
   justify-content: center;
-  gap: ${width * 0.02}px;
+  gap: ${width * 0.09}px;
 `;
 
 export const SocialButton = styled.TouchableOpacity`
