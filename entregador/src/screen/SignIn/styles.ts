@@ -2,6 +2,7 @@ import styled from "styled-components/native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Dimensions } from "react-native";
+import { theme } from "../../global/theme";
 
 const { width, height } = Dimensions.get("window");
 
@@ -82,7 +83,7 @@ export const SocialButtons = styled.View`
 `;
 
 export const SocialButton = styled.TouchableOpacity`
-  background-color: #fff;
+  background-color: ${theme.colors.button};
   border-radius: 10px;
   padding: ${width * 0.02}px;
   align-items: center;

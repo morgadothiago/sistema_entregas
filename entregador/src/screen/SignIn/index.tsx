@@ -31,6 +31,7 @@ import { KeyboardAvoidingView } from "react-native";
 import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { LinkButton } from "../../components/Link";
+import { theme } from "../../global/theme";
 
 export default function SignInScreen() {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -98,7 +99,6 @@ export default function SignInScreen() {
           {!keyboardVisible && (
             <ImageContainer>
               <Image source={Logo} resizeMode="cover" />
-              <Title>Sign In</Title>
             </ImageContainer>
           )}
 
@@ -143,17 +143,28 @@ export default function SignInScreen() {
           <SocialLoginArea>
             <SocialButtons>
               <SocialButton>
-                <AntDesign name="apple1" size={24} color="#000" />
+                <AntDesign
+                  name="apple1"
+                  size={24}
+                  color={theme.colors.buttonText}
+                />
               </SocialButton>
               <SocialButton>
-                <AntDesign name="google" size={24} color="black" />
+                <AntDesign
+                  name="google"
+                  size={24}
+                  color={theme.colors.buttonText}
+                />
               </SocialButton>
             </SocialButtons>
           </SocialLoginArea>
 
           <Footer>
             <LinkButton linkTitle="Esqueceu sua senha" onPress={() => {}} />
-            <LinkButton linkTitle="Criar conta" onPress={() => {}} />
+            <LinkButton
+              linkTitle="Criar conta"
+              onPress={() => navigation.navigate("SignUp")}
+            />
           </Footer>
         </>
       </GradientBackground>
