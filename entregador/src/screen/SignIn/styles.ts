@@ -48,7 +48,8 @@ export const Title = styled.Text`
 
 export const FormArea = styled.View`
   width: 100%;
-  margin-top: ${height * 0.02}px;
+  margin-top: ${height * 0.01}px;
+
   margin-bottom: ${({ keyboardOpen }: ImageProps) =>
     keyboardOpen
       ? `${height * 0.2}px`
@@ -66,14 +67,9 @@ export const Footer = styled.View`
 `;
 
 export const SocialLoginArea = styled.View`
-  margin-top: ${height * 0.03}px;
+  margin-top: ${height * 0.001}px;
   align-items: center;
-`;
-
-export const SocialText = styled.Text`
-  color: #fff;
-  margin-bottom: ${height * 0.015}px;
-  font-size: ${width * 0.045}px;
+  background-color: red;
 `;
 
 export const SocialButtons = styled.View`

@@ -4,6 +4,10 @@ import { theme } from "../../global/theme";
 
 const { width, height } = Dimensions.get("window");
 
+type InputProps = {
+  $hasError?: boolean;
+};
+
 export const Container = styled.View`
   width: 100%;
   padding: ${height * 0.02}px ${width * 0.03}px;
@@ -12,7 +16,8 @@ export const Container = styled.View`
 export const FormArea = styled.View`
   width: 100%;
   height: 56px;
-  background-color: ${theme.colors.secondary};
+  background-color: red;
+
   flex-direction: row;
   align-items: center;
   border-radius: 12px;
@@ -22,7 +27,7 @@ export const FormArea = styled.View`
 export const Icon = styled.View`
   width: ${width * 0.14}px;
   height: 100%;
-  background-color: ${theme.colors.secondary};
+
   align-items: center;
   justify-content: center;
 `;
@@ -49,4 +54,12 @@ export const Label = styled.Text`
   font-weight: bold;
   margin-bottom: 16px;
   margin-top: -20px;
+`;
+
+export const ErrorTitle = styled.Text`
+  font-size: 14px;
+  color: #dc1637;
+  margin-top: 7px;
+  font-weight: bold;
+  margin-left: 5px;
 `;
