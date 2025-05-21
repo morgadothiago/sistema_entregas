@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateProfitDto } from "./dto/update-profit.dto";
-import { ProfitMargin } from "generated/prisma";
+import { ProfitMargin } from "@prisma/client";
 
 @Injectable()
 export class ProfitService {

@@ -11,8 +11,8 @@ import {
 import { Server, Socket } from "socket.io";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "generated/prisma";
 import { Logger } from "@nestjs/common";
+import { User } from "@prisma/client";
 
 @WebSocketGateway(2000, {
   namespace: "gps",
