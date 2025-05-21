@@ -17,14 +17,18 @@ export const GradientBackground = styled(LinearGradient).attrs({
   flex: 1;
   justify-content: center;
   align-items: center;
-  padding: ${height * 0.01}px;
+  padding: ${height * 0.02}px;
 `;
 
-export const ImageContainer = styled.View`
+export const ImageContainer = styled.View<ImageProps>`
   width: 100%;
-  height: ${height * 0.2}px;
-
+  height: ${({ keyboardOpen }: ImageProps) =>
+    keyboardOpen ? "0px" : `${height * 0.2}px`};
   align-items: center;
+  justify-content: center;
+  margin-bottom: ${({ keyboardOpen }: ImageProps) =>
+    keyboardOpen ? "0px" : `${height * 0.0}px`};
+  overflow: hidden;
 `;
 
 export const Image = styled.Image<ImageProps>`
@@ -43,8 +47,11 @@ export const Title = styled.Text`
 
 export const FormArea = styled.View`
   width: 100%;
-  margin-top: ${height * 0.01}px;
-  margin-bottom: ${height * 0.03}px;
+  margin-top: ${height * 0.02}px;
+  margin-bottom: ${({ keyboardOpen }: ImageProps) =>
+    keyboardOpen
+      ? `${height * 0.2}px`
+      : `${height * 0.08}px`}; /* Ajustável conforme necessidade */
 `;
 
 export const Footer = styled.View`
@@ -53,6 +60,8 @@ export const Footer = styled.View`
   width: 100%;
   align-items: center;
   padding: ${height * 0.025}px;
+  flex-direction: row;
+  justify-content: space-between;
 `;
 
 export const SocialLoginArea = styled.View`
@@ -69,7 +78,7 @@ export const SocialText = styled.Text`
 export const SocialButtons = styled.View`
   flex-direction: row;
   justify-content: center;
-  gap: ${width * 0.04}px;
+  gap: ${width * 0.02}px;
 `;
 
 export const SocialButton = styled.TouchableOpacity`
@@ -83,5 +92,5 @@ export const SocialButton = styled.TouchableOpacity`
 export const SocialIcon = styled.Image`
   width: ${width * 0.08}px;
   height: ${width * 0.08}px;
-  resize-mode: contain;
+  background-size: contain;
 `;

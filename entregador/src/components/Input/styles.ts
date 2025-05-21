@@ -17,18 +17,6 @@ export const FormArea = styled.View`
   align-items: center;
   border-radius: 12px;
   overflow: hidden;
-
-  ${Platform.select({
-    ios: `
-      shadow-color: #000;
-      shadow-offset: 0px 2px;
-      shadow-opacity: 0.2;
-      shadow-radius: 4px;
-    `,
-    android: `
-      elevation: 4;
-    `,
-  })}
 `;
 
 export const Icon = styled.View`
@@ -46,7 +34,7 @@ export const IconBox = styled.View`
   justify-content: center;
 `;
 
-export const Input = styled.TextInput`
+export const Inputs = styled.TextInput`
   flex: 1;
   padding-left: 16px;
   height: 56px;

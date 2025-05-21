@@ -1,4 +1,9 @@
-import { Button, Keyboard, TouchableWithoutFeedback } from "react-native";
+import {
+  Keyboard,
+  Platform,
+  TextInput,
+  TouchableWithoutFeedback,
+} from "react-native";
 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -7,7 +12,8 @@ import { AntDesign } from "@expo/vector-icons";
 import type { RootStackParamList } from "../../types/RootParamsList";
 import type { StackNavigationProp } from "@react-navigation/stack";
 
-import { TextInput } from "../../components/Input";
+import { Input } from "../../components/Input";
+import { Button } from "../../components/Button";
 import {
   GradientBackground,
   ImageContainer,
@@ -18,28 +24,68 @@ import {
   SocialLoginArea,
   SocialButton,
   SocialButtons,
-  SocialText,
 } from "./styles";
 
 import Logo from "../../../assets/ios-light.png";
 import { KeyboardAvoidingView } from "react-native";
 import { useForm } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { LinkButton } from "../../components/Link";
 
 export default function SignInScreen() {
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+
   const { control } = useForm();
   const { login, isAuthenticated } = useAuth();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      console.log("Keyboard shown");
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      console.log("Keyboard hidden");
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardOpen(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardOpen(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const emailRef = useRef<TextInput>(null);
+
   // Simulate a login function
   const handleLogin = async () => {
     try {
-      // Simulate an API call
+      setLoading(true);
 
-      await login();
+      // Simula requisição
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Check authentication status after login
-      if (isAuthenticated) {
-        navigation.navigate("Home");
-      }
+      setLoading(false);
+      setButtonDisabled(true);
+      console.log("Login");
     } catch (error) {
       console.error("Login failed", error);
     }
@@ -49,14 +95,19 @@ export default function SignInScreen() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <GradientBackground>
         <>
-          <ImageContainer>
-            <Image source={Logo} resizeMode="cover" />
-            <Title>Sign In</Title>
-          </ImageContainer>
+          {!keyboardVisible && (
+            <ImageContainer>
+              <Image source={Logo} resizeMode="cover" />
+              <Title>Sign In</Title>
+            </ImageContainer>
+          )}
 
-          <KeyboardAvoidingView behavior="padding">
-            <FormArea>
-              <TextInput
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+          >
+            <FormArea keyboardOpen={keyboardOpen}>
+              <Input
+                ref={emailRef}
                 formProps={{
                   name: "email",
                   control,
@@ -68,7 +119,7 @@ export default function SignInScreen() {
                 icon="user"
               />
 
-              <TextInput
+              <Input
                 formProps={{
                   name: "email",
                   control,
@@ -80,12 +131,16 @@ export default function SignInScreen() {
                 icon="lock"
               />
 
-              <Button title="Login" onPress={() => {}} />
+              <Button
+                onPress={handleLogin}
+                disabled={loading}
+                loading={loading}
+                label="Entrar"
+              />
             </FormArea>
           </KeyboardAvoidingView>
 
           <SocialLoginArea>
-            <SocialText>Or continue with</SocialText>
             <SocialButtons>
               <SocialButton>
                 <AntDesign name="apple1" size={24} color="#000" />
@@ -97,7 +152,8 @@ export default function SignInScreen() {
           </SocialLoginArea>
 
           <Footer>
-            <Button title="Login" onPress={handleLogin} />
+            <LinkButton linkTitle="Esqueceu sua senha" onPress={() => {}} />
+            <LinkButton linkTitle="Criar conta" onPress={() => {}} />
           </Footer>
         </>
       </GradientBackground>
