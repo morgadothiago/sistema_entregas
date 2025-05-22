@@ -11,12 +11,13 @@ type InputProps = {
 export const Container = styled.View`
   width: 100%;
   padding: ${height * 0.02}px ${width * 0.03}px;
+  margin-bottom: -20px;
 `;
 
-export const FormArea = styled.View`
+export const FormArea = styled.View<InputProps>`
   width: 100%;
   height: 56px;
-  background-color: red;
+  background-color: ${theme.colors.buttonText};
 
   flex-direction: row;
   align-items: center;
@@ -34,7 +35,7 @@ export const Icon = styled.View`
 export const IconBox = styled.View`
   width: 56px;
   height: 56px;
-  background-color: ${theme.colors.buttonText};
+
   align-items: center;
   justify-content: center;
 `;
@@ -45,15 +46,15 @@ export const Inputs = styled.TextInput`
   height: 56px;
   color: ${theme.colors.text};
   font-size: ${width * 0.035}px;
-  background-color: ${theme.colors.buttonText};
 `;
 
 export const Label = styled.Text`
   color: ${theme.colors.button};
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 16px;
-  margin-top: -20px;
+  margin-bottom: 5px;
+
+  margin-left: 5px;
 `;
 
 export const ErrorTitle = styled.Text`
@@ -62,4 +63,5 @@ export const ErrorTitle = styled.Text`
   margin-top: 7px;
   font-weight: bold;
   margin-left: 5px;
+  margin-top: 2px;
 `;

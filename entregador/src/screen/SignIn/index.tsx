@@ -37,6 +37,13 @@ import Logo from "../../../assets/ios-light.png";
 import { LinkButton } from "../../components/Link";
 import { theme } from "../../global/theme";
 import { SigninSchema } from "../../util/schemasValidations";
+import { api } from "../../services/api";
+import type { AxiosError } from "axios";
+import type { ApiResponse } from "../../types/Axios";
+import type { LoginResponse } from "../../types/SignIn";
+import Toast from "react-native-toast-message";
+import { ToastService } from "react-native-toastier";
+import { showAppToast, showErrorToast } from "../../util/Toast";
 
 export default function SignInScreen() {
   const {
@@ -85,12 +92,32 @@ export default function SignInScreen() {
 
   // Simulate a login function
   const handleLogin = async (data: any) => {
-    if (!data) {
-      setLoading(false);
-      setButtonDisabled(false);
-      return;
+    try {
+      const response = await api.post<ApiResponse<LoginResponse>>("/signin", {
+        email: data.email,
+        password: data.password,
+      });
+      console.log("aqui");
+      if (response.status === 200) {
+        showAppToast({
+          title: "Seja bem-vindo!",
+          message: response.data.message,
+          type: "success",
+        });
+      }
+    } catch (error: any) {
+      if (!data) {
+        setLoading(false);
+        setButtonDisabled(false);
+        return;
+      }
+      const statusCode = error?.response?.status;
+      const message = error?.response?.data?.message;
+
+      if (statusCode === 401) {
+        showErrorToast(message);
+      }
     }
-    console.log("Dados enviado do input: ", data);
   };
 
   return (
