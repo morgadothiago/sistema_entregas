@@ -13,15 +13,15 @@ import type { LoginResponse } from "../types/SignIn";
 import type { SignInFormData } from "../types/SignInForm";
 import { showAppToast, showErrorToast } from "../util/Toast";
 
-// Tipagem do usuário (ajuste conforme necessário)
 interface User {
   name: string;
   email: string;
-  // Adicione outras propriedades conforme o LoginResponse
+  // Outras propriedades se necessário
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isLoading: boolean;
   user: User | null;
   login: (data: SignInFormData) => Promise<void>;
   logout: () => Promise<void>;
@@ -33,6 +33,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // 👈 novo estado de carregamento
+
+  // ✅ Checa o token salvo no AsyncStorage ao iniciar o app
+  useEffect(() => {
+    const loadStoredData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("@auth:token");
+        const userData = await AsyncStorage.getItem("@auth:user");
+
+        if (token && userData) {
+          setIsAuthenticated(true);
+          setUser(JSON.parse(userData));
+          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do usuário:", error);
+      } finally {
+        setIsLoading(false); // ✅ Finaliza carregamento
+      }
+    };
+
+    loadStoredData();
+  }, []);
 
   const login = async (data: SignInFormData): Promise<void> => {
     try {
@@ -47,22 +70,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const token = loginData.token;
         const userData = loginData.user;
 
-        // Salvar no AsyncStorage
         await AsyncStorage.setItem("@auth:token", token);
         await AsyncStorage.setItem("@auth:user", JSON.stringify(userData));
 
-        // Atualizar estado global
         setIsAuthenticated(true);
         setUser(userData);
-
-        console.log(userData);
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         showAppToast({
           message: response.data.message || "Login realizado com sucesso!",
           type: "success",
         });
-
-        console.log("✅ Login efetuado com sucesso.");
       } else {
         showErrorToast(response.data?.message || "Erro ao fazer login.");
         setIsAuthenticated(false);
@@ -72,8 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const message =
         error?.response?.data?.message || "Erro de conexão ou login inválido.";
 
-      console.error("🔥 Erro de exceção:", message);
-
+      console.error("Erro ao logar:", message);
       showErrorToast(message);
       setIsAuthenticated(false);
       setUser(null);
@@ -85,14 +102,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem("@auth:user");
     setIsAuthenticated(false);
     setUser(null);
-    console.log("👋 Usuário deslogado.");
+    delete api.defaults.headers.common["Authorization"];
   };
 
   const checkAuthStatus = () => isAuthenticated;
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, login, logout, checkAuthStatus }}
+      value={{
+        isAuthenticated,
+        isLoading,
+        user,
+        login,
+        logout,
+        checkAuthStatus,
+      }}
     >
       {children}
     </AuthContext.Provider>

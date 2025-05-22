@@ -18,7 +18,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "icon": "./assets/ios-light.png"
+      "icon": "./assets/ios-light.png",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Permita que o Entregador acesse sua localização para mostrar sua posição no mapa."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +29,16 @@
         "backgroundColor": "#00439A"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.entregador"
+      "package": "com.anonymous.entregador",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "SUA_CHAVE_GOOGLE_MAPS_AQUI"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,9 +46,13 @@
     "plugins": [
       "expo-font",
       [
-        "expo-dev-client",
+        "expo-dev-client"
+      ],
+      [
+        "expo-maps",
         {
-          "launchMode": "most-recent"
+          "requestLocationPermission": true,
+          "locationPermission": "Permita que o Entregador use sua localização para exibir o mapa"
         }
       ]
     ],

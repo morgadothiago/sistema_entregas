@@ -6,7 +6,11 @@ import AuthRoutes from "./AuthRoutes";
 import { ToastProvider } from "react-native-toastier";
 
 export default function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null; // ou <ActivityIndicator /> se quiser
+  }
 
   return (
     <ToastProvider>
