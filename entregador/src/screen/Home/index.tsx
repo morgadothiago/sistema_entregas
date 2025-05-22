@@ -1,37 +1,31 @@
-import { Text, View } from "react-native";
+import React, { useEffect } from "react";
+import { Text, SafeAreaView, Button } from "react-native";
 import { useAuth } from "../../context/AuthContext";
-import { Button } from "react-native";
-import { SafeAreaView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "../../types/RootParamsList";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home() {
-  const { isAuthenticated, logout, checkAuthStatus } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  console.log("isAuthenticated", checkAuthStatus());
-
-  // Simulate a logout function
-  const handleLogout = async () => {
-    try {
-      // Simulate an API call
-
-      logout();
-      console.log("Logout successful", checkAuthStatus());
-      // Navigate to the login screen after successful logout
-
-      if (!isAuthenticated) {
-        navigation.navigate("SignIn");
-      }
-    } catch (error) {
-      console.error("Logout failed", error);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigation.navigate("SignIn");
     }
+  }, [isAuthenticated, navigation]);
+
+  const handleLogout = async () => {
+    await logout();
+    // Após logout, isAuthenticated vai mudar e o useEffect vai redirecionar
   };
 
   return (
-    <SafeAreaView>
-      <Text>Bem-vindo à página inicial!</Text>
+    <SafeAreaView
+      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+    >
+      <Text>Bem-vindo à página inicial, {user?.name}!</Text>
       <Button title="Sair" onPress={handleLogout} />
     </SafeAreaView>
   );

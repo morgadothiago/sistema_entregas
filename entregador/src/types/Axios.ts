@@ -4,7 +4,7 @@ export type ApiResponse<T> = {
   token: string;
   status: number;
   success: boolean;
-  data: AxiosResponse;
+  data: T;
   message: string;
 };
 export type ApiErrorResponse = {
