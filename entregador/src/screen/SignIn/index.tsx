@@ -10,7 +10,6 @@ import {
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -36,21 +35,21 @@ import Logo from "../../../assets/ios-light.png";
 
 import { LinkButton } from "../../components/Link";
 import { theme } from "../../global/theme";
-import { SigninSchema } from "../../util/schemasValidations";
 import { api } from "../../services/api";
-import type { AxiosError } from "axios";
+
 import type { ApiResponse } from "../../types/Axios";
 import type { LoginResponse } from "../../types/SignIn";
-import Toast from "react-native-toast-message";
-import { ToastService } from "react-native-toastier";
+
 import { showAppToast, showErrorToast } from "../../util/Toast";
+import type { SignInFormData } from "../../types/SignInForm";
+import { SigninSchema } from "../../util/schemasValidations";
 
 export default function SignInScreen() {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({});
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { login, isAuthenticated } = useAuth();
 
@@ -90,34 +89,23 @@ export default function SignInScreen() {
 
   const emailRef = useRef<TextInput>(null);
 
-  // Simulate a login function
   const handleLogin = async (data: any) => {
-    try {
-      const response = await api.post<ApiResponse<LoginResponse>>("/signin", {
-        email: data.email,
-        password: data.password,
-      });
-      console.log("aqui");
-      if (response.status === 200) {
-        showAppToast({
-          title: "Seja bem-vindo!",
-          message: response.data.message,
-          type: "success",
-        });
-      }
-    } catch (error: any) {
-      if (!data) {
-        setLoading(false);
-        setButtonDisabled(false);
-        return;
-      }
-      const statusCode = error?.response?.status;
-      const message = error?.response?.data?.message;
+    if (!data.email || !data.password) {
+      setLoading(false);
+      setButtonDisabled(false);
 
-      if (statusCode === 401) {
-        showErrorToast(message);
-      }
+      console.warn("Preencha o email e a senha.");
+      showErrorToast("Preencha o email e a senha.");
+      return;
     }
+
+    setLoading(true);
+    setButtonDisabled(true);
+
+    await login(data);
+
+    setLoading(false);
+    setButtonDisabled(false);
   };
 
   return (

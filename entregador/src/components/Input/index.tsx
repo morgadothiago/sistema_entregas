@@ -20,8 +20,8 @@ import { forwardRef } from "react";
 type Props<T extends FieldValues> = {
   error?: string;
   icon: keyof typeof Feather.glyphMap;
-  formProps: UseControllerProps<T>;
-  inputProps: TextInputProps;
+  formProps: UseControllerProps<T>; // **Aqui é importante o generic**
+  inputProps?: TextInputProps; // inputProps pode ser opcional
   label: string;
 };
 
@@ -32,6 +32,7 @@ export const Input = forwardRef(
   ) => {
     return (
       <Controller
+        {...formProps}
         render={({ field, fieldState }) => (
           <Container>
             <Label>{label}</Label>
@@ -62,7 +63,6 @@ export const Input = forwardRef(
             )}
           </Container>
         )}
-        {...formProps}
       />
     );
   }

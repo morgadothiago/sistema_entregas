@@ -1,6 +1,7 @@
 import type { AxiosResponse } from "axios";
 
 export type ApiResponse<T> = {
+  token: string;
   status: number;
   success: boolean;
   data: AxiosResponse;

@@ -47,6 +47,7 @@ export const showErrorToast = (message: string, title = "Erro") => {
     message,
     type: "danger",
     animation: "slideRight",
+
     position: "top",
     duration: 4000,
     titleStyle: {
@@ -58,7 +59,11 @@ export const showErrorToast = (message: string, title = "Erro") => {
       textAlign: "center",
     },
     contentContainerStyle: {
-      backgroundColor: "#dc1637", // vermelho
+      backgroundColor: theme.colors.buttonText,
+      borderColor: theme.colors.Error,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
       paddingVertical: 16,
       paddingHorizontal: 24,
       borderRadius: 8,
