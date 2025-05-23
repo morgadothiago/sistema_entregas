@@ -1,89 +1,34 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components/native";
+import React, { useEffect } from "react";
+import { Text, SafeAreaView, Button } from "react-native";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import type { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "../../types/RootParamsList";
+
 import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 
 export default function Home() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { logout, user } = useAuth();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permissão para acessar localização negada!");
-        setLoading(false);
-        return;
-      }
-
-      const loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc);
-      setLoading(false);
-    })();
-  }, []);
-
-  if (loading) {
-    return (
-      <Center>
-        <LoadingIndicator size="large" />
-        <LoadingText>Carregando localização...</LoadingText>
-      </Center>
-    );
-  }
-
-  if (errorMsg) {
-    return (
-      <Center>
-        <ErrorText>{errorMsg}</ErrorText>
-      </Center>
-    );
-  }
+  const handleLogout = async () => {
+    await logout();
+    // Após logout, isAuthenticated vai mudar e o useEffect vai redirecionar
+  };
 
   return (
-    <StyledMapView
-      region={{
-        latitude: location?.coords.latitude || 0,
-        longitude: location?.coords.longitude || 0,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }}
-      showsUserLocation
+    <SafeAreaView
+      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      {location && (
-        <Marker
-          coordinate={{
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-          }}
-          title="Você está aqui"
-        />
-      )}
-    </StyledMapView>
+      <Text>Bem-vindo à página inicial, {user?.name}!</Text>
+      <Text>Aguandando Informacoes da api de mapa do google,</Text>
+      <Button
+        title="Sair"
+        onPress={() => {
+          logout();
+        }}
+      />
+    </SafeAreaView>
   );
 }
-
-// Styled Components
-const Center = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-`;
-
-const LoadingText = styled.Text`
-  margin-top: 10px;
-  font-size: 16px;
-`;
-
-const ErrorText = styled.Text`
-  font-size: 16px;
-  color: red;
-`;
-
-const LoadingIndicator = styled.ActivityIndicator``;
-
-const StyledMapView = styled(MapView)`
-  flex: 1;
-`;

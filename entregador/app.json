@@ -20,8 +20,10 @@
       "supportsTablet": true,
       "icon": "./assets/ios-light.png",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Permita que o Entregador acesse sua localização para mostrar sua posição no mapa."
-      }
+        "NSLocationWhenInUseUsageDescription": "Permita que o Entregador acesse sua localização para mostrar sua posição no mapa.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.quickdelivery.entregador"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,7 +34,9 @@
       "package": "com.anonymous.entregador",
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
       "config": {
         "googleMaps": {

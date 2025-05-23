@@ -7,8 +7,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "eas-build-android": "eas build --profile development --platform android",
-    "eas-build-ios": "eas build --profile development --platform ios"
+    "eas-build-android": "eas build --platform android --profile development",
+    "eas-build-ios": "eas build --platform ios --profile development",
+    "eas-build-preview": "eas build --platform android --profile preview"
   },
   "dependencies": {
     "@expo-google-fonts/roboto": "^0.3.0",
@@ -32,6 +33,7 @@
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-maps": "1.20.1",
+    "react-native-maps-directions": "^1.9.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-responsive-fontsize": "^0.5.1",
     "react-native-responsive-screen": "^1.4.2",
