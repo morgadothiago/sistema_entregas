@@ -1,8 +1,9 @@
 import { Feather } from "@expo/vector-icons";
-import { Controller, useForm, type UseControllerProps } from "react-hook-form";
+import { Controller, type UseControllerProps } from "react-hook-form";
 
-import { Container, FormArea, Input, IconBox } from "./styles";
-import type { TextInputProps } from "react-native";
+import { Container, FormArea, Inputs, IconBox } from "./styles";
+import type { TextInput, TextInputProps } from "react-native";
+import { forwardRef } from "react";
 
 type Props = {
   icon: keyof typeof Feather.glyphMap;
@@ -10,21 +11,23 @@ type Props = {
   inputProps: TextInputProps;
 };
 
-export function TextInput({ icon, formProps, inputProps }: Props) {
-  return (
-    <Controller
-      render={() => (
-        <Container>
-          <FormArea>
-            <IconBox>
-              <Feather name={icon} size={24} color={"#fff"} />
-            </IconBox>
+export const Input = forwardRef<TextInput, Props>(
+  ({ icon, formProps, inputProps }, ref) => {
+    return (
+      <Controller
+        render={() => (
+          <Container>
+            <FormArea>
+              <IconBox>
+                <Feather name={icon} size={24} color={"#fff"} />
+              </IconBox>
 
-            <Input {...inputProps} />
-          </FormArea>
-        </Container>
-      )}
-      {...formProps}
-    />
-  );
-}
+              <Inputs {...inputProps} />
+            </FormArea>
+          </Container>
+        )}
+        {...formProps}
+      />
+    );
+  }
+);

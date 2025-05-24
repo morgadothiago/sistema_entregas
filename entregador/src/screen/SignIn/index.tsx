@@ -1,4 +1,4 @@
-import { Button, Keyboard, TouchableWithoutFeedback } from "react-native";
+import { Keyboard, TextInput, TouchableWithoutFeedback } from "react-native";
 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -7,7 +7,8 @@ import { AntDesign } from "@expo/vector-icons";
 import type { RootStackParamList } from "../../types/RootParamsList";
 import type { StackNavigationProp } from "@react-navigation/stack";
 
-import { TextInput } from "../../components/Input";
+import { Input } from "../../components/Input";
+import { Button } from "../../components/Button";
 import {
   GradientBackground,
   ImageContainer,
@@ -18,17 +19,20 @@ import {
   SocialLoginArea,
   SocialButton,
   SocialButtons,
-  SocialText,
 } from "./styles";
 
 import Logo from "../../../assets/ios-light.png";
 import { KeyboardAvoidingView } from "react-native";
 import { useForm } from "react-hook-form";
+import { useRef } from "react";
 
 export default function SignInScreen() {
   const { control } = useForm();
   const { login, isAuthenticated } = useAuth();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  const emailRef = useRef<TextInput>(null);
+
   // Simulate a login function
   const handleLogin = async () => {
     try {
@@ -56,7 +60,8 @@ export default function SignInScreen() {
 
           <KeyboardAvoidingView behavior="padding">
             <FormArea>
-              <TextInput
+              <Input
+                ref={emailRef}
                 formProps={{
                   name: "email",
                   control,
@@ -68,7 +73,7 @@ export default function SignInScreen() {
                 icon="user"
               />
 
-              <TextInput
+              <Input
                 formProps={{
                   name: "email",
                   control,
@@ -80,12 +85,11 @@ export default function SignInScreen() {
                 icon="lock"
               />
 
-              <Button title="Login" onPress={() => {}} />
+              <Button title="Login" onPress={handleLogin} />
             </FormArea>
           </KeyboardAvoidingView>
 
           <SocialLoginArea>
-            <SocialText>Or continue with</SocialText>
             <SocialButtons>
               <SocialButton>
                 <AntDesign name="apple1" size={24} color="#000" />
@@ -97,7 +101,8 @@ export default function SignInScreen() {
           </SocialLoginArea>
 
           <Footer>
-            <Button title="Login" onPress={handleLogin} />
+            <Button title="Esqueceu a senha?" onPress={() => {}} />
+            <Button title="Criar conta" onPress={() => {}} />
           </Footer>
         </>
       </GradientBackground>

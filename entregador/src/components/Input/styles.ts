@@ -46,7 +46,7 @@ export const IconBox = styled.View`
   justify-content: center;
 `;
 
-export const Input = styled.TextInput`
+export const Inputs = styled.TextInput`
   flex: 1;
   padding-left: 16px;
   height: 56px;

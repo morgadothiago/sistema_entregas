@@ -4,7 +4,7 @@
     "slug": "Entregador",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/ios-light.png",
     "userInterfaceStyle": "light",
     "androidStatusBar": {
       "barStyle": "light-content",

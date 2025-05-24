@@ -53,6 +53,8 @@ export const Footer = styled.View`
   width: 100%;
   align-items: center;
   padding: ${height * 0.025}px;
+  flex-direction: row;
+  justify-content: space-between;
 `;
 
 export const SocialLoginArea = styled.View`
