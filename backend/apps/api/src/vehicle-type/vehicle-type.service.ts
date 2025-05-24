@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { VehicleType } from "generated/prisma";
+import { VehicleType } from "@prisma/client";
 import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto";
 import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto";
 
@@ -71,9 +71,6 @@ export class VehicleTypeService {
       where: { id: vehicleType.id },
       data: vehicleType,
     });
-
-    const i = VehicleTypeService.data.findIndex((data) => data.type === type);
-    VehicleTypeService.data[i] = vehicleTypeDto;
   }
 
   async create(body: CreateVehicleTypeDto): Promise<void> {

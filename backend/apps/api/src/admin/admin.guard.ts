@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { Request } from "express";
-import { Role, User } from "generated/prisma";
+import { Role, User } from "@prisma/client";
 import { Observable } from "rxjs";
 
 @Injectable()
