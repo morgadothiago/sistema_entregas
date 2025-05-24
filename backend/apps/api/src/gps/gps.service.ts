@@ -6,7 +6,7 @@ import {
 import { CurrencyLocationDto } from "./dto/currency-location.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { GpsGateway } from "./gps.gateway";
-import { DeliveryStatus } from "generated/prisma";
+import { DeliveryStatus } from "@prisma/client";
 import { SocketDto } from "../websocket/dto/socket.dto";
 
 @Injectable()
