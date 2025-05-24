@@ -1,27 +1,52 @@
 version: '3.8'
 
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-
   postgres:
     image: postgres:15
     container_name: postgres
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: crm_psicologia
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: quick
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - .data/postgresql:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: youruser
+      RABBITMQ_DEFAULT_PASS: yourpassword
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  pgweb:
+    image: sosedoff/pgweb
+    ports:
+      - "8083:8081"
+    command: [
+      "--host=postgres",
+      "--user=postgres",
+      "--pass=mysecretpassword",
+      "--db=quick",
+       "--ssl=disable"  
+    ]
+    depends_on:
+      - postgres
 volumes:
   postgres_data:
+
+
+networks:
+  defaults:
+    name: minha_rede
+    driver: bridge
