@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { PrismaService } from "../prisma/prisma.service";
-import { JwtService } from "@nestjs/jwt";
+import { JsonWebTokenError, JwtService } from "@nestjs/jwt";
 import { Role, User } from "@prisma/client";
 
 @Injectable()
@@ -53,6 +53,9 @@ export class AuthMiddleware implements NestMiddleware {
       next();
     } catch (error) {
       this.logger.error(error);
+      if (error instanceof JsonWebTokenError)
+        throw new UnauthorizedException(error.message);
+
       throw error;
     }
   }

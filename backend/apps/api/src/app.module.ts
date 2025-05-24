@@ -7,6 +7,7 @@ import { AuthMiddleware } from "./auth/auth.middleware";
 import { JwtModule } from "@nestjs/jwt";
 import { VehicleTypeModule } from "./vehicle-type/vehicle-type.module";
 import { ProfitModule } from "./profit/profit.module";
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ProfitModule } from "./profit/profit.module";
     }),
     VehicleTypeModule,
     ProfitModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
