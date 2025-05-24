@@ -37,12 +37,7 @@ import { LinkButton } from "../../components/Link";
 import { theme } from "../../global/theme";
 import { api } from "../../services/api";
 
-import type { ApiResponse } from "../../types/Axios";
-import type { LoginResponse } from "../../types/SignIn";
-
 import { showAppToast, showErrorToast } from "../../util/Toast";
-import type { SignInFormData } from "../../types/SignInForm";
-import { SigninSchema } from "../../util/schemasValidations";
 
 export default function SignInScreen() {
   const {
