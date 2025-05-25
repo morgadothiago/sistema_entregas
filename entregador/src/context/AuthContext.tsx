@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (data: SignInFormData): Promise<void> => {
     try {
       const response = await api.post<ApiResponse<LoginResponse>>(
-        "/signin",
+        "/auth/login",
         data
       );
 
