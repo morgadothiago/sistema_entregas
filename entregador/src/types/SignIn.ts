@@ -1,10 +1,15 @@
+// Em SignIn.ts
 export interface User {
   name: string;
   email: string;
-  role: string; // <-- Aqui está a role
+  token: string; // <- NÃO ESQUEÇA ESSA LINHA
 }
 
-export type LoginResponse = {
+export interface LoginResponse {
   token: string;
-  user: User;
-};
+  user: {
+    name: string;
+    email: string;
+    token: string;
+  };
+}

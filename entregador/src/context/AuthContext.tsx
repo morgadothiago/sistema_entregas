@@ -6,23 +6,23 @@ import React, {
   useEffect,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { api } from "../services/api";
 import type { ApiResponse } from "../types/Axios";
 import type { LoginResponse } from "../types/SignIn";
 import type { SignInFormData } from "../types/SignInForm";
 import { showAppToast, showErrorToast } from "../util/Toast";
 
-// Tipagem do usuário (ajuste conforme necessário)
 interface User {
   name: string;
   email: string;
-  // Adicione outras propriedades conforme o LoginResponse
+  token: string;
+  // adicione mais campos conforme necessário
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
+  loading: boolean;
   login: (data: SignInFormData) => Promise<void>;
   logout: () => Promise<void>;
   checkAuthStatus: () => boolean;
@@ -33,6 +33,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Restaura o token e o usuário ao abrir o app
+  useEffect(() => {
+    const loadStoredAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("@auth:token");
+        const userJson = await AsyncStorage.getItem("@auth:user");
+
+        if (token && userJson) {
+          const userData: User = JSON.parse(userJson);
+          setIsAuthenticated(true);
+          setUser({
+            name: userData.name,
+            email: userData.email,
+            token: token,
+          });
+          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          console.log("✅ Sessão restaurada com token:", token);
+        }
+      } catch (err) {
+        console.log("❌ Erro ao restaurar sessão:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStoredAuth();
+  }, []);
 
   const login = async (data: SignInFormData): Promise<void> => {
     try {
@@ -40,29 +69,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         "/auth/login",
         data
       );
+      const loginData = response.data;
 
-      const loginData = response.data.data;
-
-      if (response.status === 200 && loginData?.token && loginData?.user) {
+      if (response.status === 200 && loginData?.token && loginData?.data) {
         const token = loginData.token;
-        const userData = loginData.user;
+        const userData = loginData.data;
 
-        // Salvar no AsyncStorage
+        console.log(userData);
+
         await AsyncStorage.setItem("@auth:token", token);
         await AsyncStorage.setItem("@auth:user", JSON.stringify(userData));
 
-        // Atualizar estado global
         setIsAuthenticated(true);
-        setUser(userData);
-
-        console.log(userData);
+        setUser({
+          name: userData.user.name,
+          email: userData.user.email,
+          token: token,
+        });
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
         showAppToast({
           message: response.data.message,
           type: "success",
         });
 
-        console.log("✅ Login efetuado com sucesso.");
+        console.log("✅ Login efetuado.");
       } else {
         showErrorToast(response.data?.message);
         setIsAuthenticated(false);
@@ -71,8 +102,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       const message =
         error?.response?.data?.message || "Erro de conexão ou login inválido.";
-
-      console.error("🔥 Erro de exceção:", message);
 
       showErrorToast(message);
       setIsAuthenticated(false);
@@ -92,7 +121,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, login, logout, checkAuthStatus }}
+      value={{
+        isAuthenticated,
+        user,
+        login,
+        logout,
+        checkAuthStatus,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>

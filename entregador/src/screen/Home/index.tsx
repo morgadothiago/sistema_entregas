@@ -4,7 +4,6 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "../../types/RootParamsList";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Home() {
   const { isAuthenticated, logout, user } = useAuth();
@@ -25,7 +24,8 @@ export default function Home() {
     <SafeAreaView
       style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
     >
-      <Text>Bem-vindo à página inicial, {user?.name}!</Text>
+      <Text>Bem-vindo à página inicial, {user?.email}!</Text>
+      <Text>Token: {user?.token}</Text>
       <Button title="Sair" onPress={handleLogout} />
     </SafeAreaView>
   );

@@ -35,9 +35,7 @@ import Logo from "../../../assets/ios-light.png";
 
 import { LinkButton } from "../../components/Link";
 import { theme } from "../../global/theme";
-import { api } from "../../services/api";
 
-import { showAppToast, showErrorToast } from "../../util/Toast";
 import { SigninSchema } from "../../util/schemasValidations";
 import { ValidationError } from "yup";
 
