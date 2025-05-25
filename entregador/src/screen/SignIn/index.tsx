@@ -1,4 +1,15 @@
-import { Keyboard, TextInput, TouchableWithoutFeedback } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+
+import {
+  Keyboard,
+  Platform,
+  TextInput,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+} from "react-native";
+
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -13,7 +24,6 @@ import {
   GradientBackground,
   ImageContainer,
   Image,
-  Title,
   FormArea,
   Footer,
   SocialLoginArea,
@@ -22,87 +32,182 @@ import {
 } from "./styles";
 
 import Logo from "../../../assets/ios-light.png";
-import { KeyboardAvoidingView } from "react-native";
-import { useForm } from "react-hook-form";
-import { useRef } from "react";
+
+import { LinkButton } from "../../components/Link";
+import { theme } from "../../global/theme";
+
+import { SigninSchema } from "../../util/schemasValidations";
+import { ValidationError } from "yup";
 
 export default function SignInScreen() {
-  const { control } = useForm();
-  const { login, isAuthenticated } = useAuth();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { login, isAuthenticated } = useAuth();
+
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardOpen(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardOpen(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const emailRef = useRef<TextInput>(null);
 
-  // Simulate a login function
-  const handleLogin = async () => {
-    try {
-      // Simulate an API call
-
-      await login();
-
-      // Check authentication status after login
-      if (isAuthenticated) {
-        navigation.navigate("Home");
+  const handleLogin = async (data: any) => {
+    const validation = await SigninSchema.validate(data).catch((err: any) => {
+      if (err instanceof ValidationError) {
+        setError(
+          err.path as string,
+          {
+            message: err.message,
+            type: "validate",
+          },
+          {
+            shouldFocus: true,
+          }
+        );
       }
-    } catch (error) {
-      console.error("Login failed", error);
-    }
+    });
+
+    if (!validation) return;
+
+    // if (!data.email || !data.password) {
+    //   setLoading(false);
+    //   setButtonDisabled(false);
+
+    //   console.warn("Preencha o email e a senha.");
+    //   showErrorToast("Preencha o email e a senha.");
+    //   return;
+    // }
+
+    setLoading(true);
+    setButtonDisabled(true);
+
+    await login(data);
+
+    setLoading(false);
+    setButtonDisabled(false);
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <GradientBackground>
         <>
-          <ImageContainer>
-            <Image source={Logo} resizeMode="cover" />
-            <Title>Sign In</Title>
-          </ImageContainer>
+          {!keyboardVisible && (
+            <ImageContainer>
+              <Image source={Logo} resizeMode="cover" />
+            </ImageContainer>
+          )}
 
-          <KeyboardAvoidingView behavior="padding">
-            <FormArea>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+          >
+            <FormArea keyboardOpen={keyboardOpen}>
               <Input
-                ref={emailRef}
+                label="E-mail"
+                error={errors.email?.message}
                 formProps={{
                   name: "email",
                   control,
+                  rules: {
+                    required: "Email e obrigatorio",
+                  },
                 }}
                 inputProps={{
                   placeholder: "Email",
                   placeholderTextColor: "#FFF",
+                  onSubmitEditing: () => emailRef.current?.focus(),
+                  returnKeyType: "next",
                 }}
                 icon="user"
               />
 
               <Input
+                label="Senha"
+                error={errors.password?.message}
+                ref={emailRef}
                 formProps={{
-                  name: "email",
+                  name: "password",
                   control,
+                  rules: {
+                    required: "Senha e obrigatorio",
+                  },
                 }}
                 inputProps={{
                   placeholder: "Password",
                   placeholderTextColor: "#FFF",
+                  onSubmitEditing: handleSubmit(handleLogin),
+                  secureTextEntry: true,
                 }}
                 icon="lock"
               />
 
-              <Button title="Login" onPress={handleLogin} />
+              <Button
+                onPress={handleSubmit(handleLogin)}
+                disabled={loading}
+                loading={loading}
+                label="Entrar"
+              />
             </FormArea>
           </KeyboardAvoidingView>
 
           <SocialLoginArea>
             <SocialButtons>
               <SocialButton>
-                <AntDesign name="apple1" size={24} color="#000" />
+                <AntDesign
+                  name="apple1"
+                  size={24}
+                  color={theme.colors.buttonText}
+                />
               </SocialButton>
               <SocialButton>
-                <AntDesign name="google" size={24} color="black" />
+                <AntDesign
+                  name="google"
+                  size={24}
+                  color={theme.colors.buttonText}
+                />
               </SocialButton>
             </SocialButtons>
           </SocialLoginArea>
 
           <Footer>
-            <Button title="Esqueceu a senha?" onPress={() => {}} />
-            <Button title="Criar conta" onPress={() => {}} />
+            <LinkButton linkTitle="Esqueceu sua senha" onPress={() => {}} />
+            <LinkButton
+              linkTitle="Criar conta"
+              onPress={() => navigation.navigate("SignUp")}
+            />
           </Footer>
         </>
       </GradientBackground>

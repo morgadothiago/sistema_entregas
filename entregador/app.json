@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Entregador",
-    "slug": "Entregador",
+    "slug": "entregador",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/ios-light.png",
@@ -45,6 +45,6 @@
         "projectId": "ca0f3a90-7d85-46b1-8d9f-13ffa3c2ae04"
       }
     },
-    "owner": "thiago_morgado",
+    "owner": "thiago_morgado"
   }
 }
