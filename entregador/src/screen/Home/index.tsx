@@ -13,6 +13,7 @@ export default function Home() {
     if (!isAuthenticated) {
       navigation.navigate("SignIn");
     }
+    console.log(isAuthenticated);
   }, [isAuthenticated, navigation]);
 
   const handleLogout = async () => {

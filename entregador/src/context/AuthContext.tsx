@@ -7,25 +7,16 @@ import React, {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { api } from "../services/api";
-import type { ApiResponse } from "../types/Axios";
-import type { LoginResponse } from "../types/SignIn";
-import type { SignInFormData } from "../types/SignInForm";
-import { showAppToast, showErrorToast } from "../util/Toast";
 
-interface User {
-  name: string;
-  email: string;
-  token: string;
-  // adicione mais campos conforme necessário
-}
+import { showAppToast, showErrorToast } from "../util/Toast";
+import type { User } from "../types/SignIn";
+import type { SignInFormData } from "../types/SignInForm";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  loading: boolean;
   login: (data: SignInFormData) => Promise<void>;
   logout: () => Promise<void>;
-  checkAuthStatus: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,76 +24,42 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Restaura o token e o usuário ao abrir o app
-  useEffect(() => {
-    const loadStoredAuth = async () => {
-      try {
-        const token = await AsyncStorage.getItem("@auth:token");
-        const userJson = await AsyncStorage.getItem("@auth:user");
-
-        if (token && userJson) {
-          const userData: User = JSON.parse(userJson);
-          setIsAuthenticated(true);
-          setUser({
-            name: userData.name,
-            email: userData.email,
-            token: token,
-          });
-          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-          console.log("✅ Sessão restaurada com token:", token);
-        }
-      } catch (err) {
-        console.log("❌ Erro ao restaurar sessão:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStoredAuth();
-  }, []);
 
   const login = async (data: SignInFormData): Promise<void> => {
     try {
-      const response = await api.post<ApiResponse<LoginResponse>>(
-        "/auth/login",
-        data
-      );
-      const loginData = response.data;
+      const response = await api.post("/auth/login", data);
+      console.log("📦 response.data:", response.data);
 
-      if (response.status === 200 && loginData?.token && loginData?.data) {
-        const token = loginData.token;
-        const userData = loginData.data;
+      const token = response.data.token;
+      const userFromApi = response.data.user;
+      const message = response.data.message;
 
-        console.log(userData);
+      if (token && userFromApi) {
+        // Cria novo objeto user incluindo o token
+        const userData = {
+          ...userFromApi,
+          token,
+        };
 
+        // Armazena token e user (com token) no AsyncStorage
         await AsyncStorage.setItem("@auth:token", token);
         await AsyncStorage.setItem("@auth:user", JSON.stringify(userData));
 
+        // Atualiza estado React
         setIsAuthenticated(true);
-        setUser({
-          name: userData.user.name,
-          email: userData.user.email,
-          token: token,
-        });
-        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setUser(userData);
 
+        // Mostra toast de sucesso
         showAppToast({
-          message: response.data.message,
+          message: message ?? "Login realizado com sucesso!",
           type: "success",
         });
-
-        console.log("✅ Login efetuado.");
       } else {
-        showErrorToast(response.data?.message);
-        setIsAuthenticated(false);
-        setUser(null);
+        showErrorToast("Token ou dados do usuário ausentes.");
       }
-    } catch (error: any) {
+    } catch (err: any) {
       const message =
-        error?.response?.data?.message || "Erro de conexão ou login inválido.";
-
+        err?.response?.data?.message || "Erro de conexão ou login inválido.";
       showErrorToast(message);
       setIsAuthenticated(false);
       setUser(null);
@@ -114,10 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem("@auth:user");
     setIsAuthenticated(false);
     setUser(null);
-    console.log("👋 Usuário deslogado.");
   };
-
-  const checkAuthStatus = () => isAuthenticated;
 
   return (
     <AuthContext.Provider
@@ -126,8 +80,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         login,
         logout,
-        checkAuthStatus,
-        loading,
       }}
     >
       {children}
@@ -135,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
