@@ -69,11 +69,14 @@ enum UserStatus {
 }
 
 model VehicleType {
-  id         Int      @id @default(autoincrement())
-  type       String   @unique
-  pricePerKm Float    @default(1)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  type              String   @unique
+  tarifaBase        Decimal  @db.Decimal(5, 2) @map("tarifa_base")
+  valorKMAdicional  Decimal  @db.Decimal(5, 2) @map("valor_km_adicional")
+  paradaAdicional   Decimal  @db.Decimal(5, 2) @map("parada_adicional")
+  ajudanteAdicional Decimal  @db.Decimal(5, 2) @map("ajudante_adicional")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @default(now()) @map("updated_at")
 
   @@map("vehicle_types")
 }
