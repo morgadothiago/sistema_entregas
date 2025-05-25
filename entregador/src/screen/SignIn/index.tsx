@@ -38,13 +38,16 @@ import { theme } from "../../global/theme";
 import { api } from "../../services/api";
 
 import { showAppToast, showErrorToast } from "../../util/Toast";
+import { SigninSchema } from "../../util/schemasValidations";
+import { ValidationError } from "yup";
 
 export default function SignInScreen() {
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({});
+    setError,
+  } = useForm();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { login, isAuthenticated } = useAuth();
 
@@ -85,14 +88,31 @@ export default function SignInScreen() {
   const emailRef = useRef<TextInput>(null);
 
   const handleLogin = async (data: any) => {
-    if (!data.email || !data.password) {
-      setLoading(false);
-      setButtonDisabled(false);
+    const validation = await SigninSchema.validate(data).catch((err: any) => {
+      if (err instanceof ValidationError) {
+        setError(
+          err.path as string,
+          {
+            message: err.message,
+            type: "validate",
+          },
+          {
+            shouldFocus: true,
+          }
+        );
+      }
+    });
 
-      console.warn("Preencha o email e a senha.");
-      showErrorToast("Preencha o email e a senha.");
-      return;
-    }
+    if (!validation) return;
+
+    // if (!data.email || !data.password) {
+    //   setLoading(false);
+    //   setButtonDisabled(false);
+
+    //   console.warn("Preencha o email e a senha.");
+    //   showErrorToast("Preencha o email e a senha.");
+    //   return;
+    // }
 
     setLoading(true);
     setButtonDisabled(true);

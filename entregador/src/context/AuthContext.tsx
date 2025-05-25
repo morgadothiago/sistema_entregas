@@ -58,13 +58,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log(userData);
 
         showAppToast({
-          message: response.data.message || "Login realizado com sucesso!",
+          message: response.data.message,
           type: "success",
         });
 
         console.log("✅ Login efetuado com sucesso.");
       } else {
-        showErrorToast(response.data?.message || "Erro ao fazer login.");
+        showErrorToast(response.data?.message);
         setIsAuthenticated(false);
         setUser(null);
       }

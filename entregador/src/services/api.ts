@@ -1,4 +1,4 @@
-import axios from "axios";
+import Axios from "axios";
 import { Platform } from "react-native";
 
 // Substitua pelo IP do seu PC
@@ -9,6 +9,6 @@ const baseURL =
     ? `http://${LOCAL_IP}:3001`
     : `http://${LOCAL_IP}:3001`;
 
-export const api = axios.create({
+export const api = Axios.create({
   baseURL,
 });
