@@ -11,12 +11,11 @@ interface LayoutProps {
 }
 
 export default async function Layout({ children }: LayoutProps) {
-  const session = await auth()
-  
-  if(!session){
-    redirect('/signin')
+  const session = await auth();
+
+  if (!session) {
+    redirect("/signin");
   }
-  
 
   return (
     <div>

@@ -1,47 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SideBarSheet from "../sidebarsheet";
 import { getSession } from "next-auth/react";
 import { User } from "@/app/types/User";
 import Image from "next/image";
 
 export default function Header() {
-  const [, setIsNotification] = useState(false);
   const [user, setUser] = useState<User>({} as User);
 
-  const notifications = [
-    {
-      id: 1,
-      message: "Nova mensagem recebida",
-      timestamp: new Date().toLocaleTimeString(),
-    },
-    {
-      id: 2,
-      message: "Seu pedido foi enviado",
-      timestamp: new Date().toLocaleTimeString(),
-    },
-    {
-      id: 3,
-      message: "Atualização disponível",
-      timestamp: new Date().toLocaleTimeString(),
-    },
-  ];
-
-  React.useEffect(() => {
-    // Simulate fetching notifications from an API or other source
-    const fetchNotifications = async () => {
-      // Here you can set the notifications array
-      // For now, we will use the hardcoded notifications
-      setIsNotification(notifications.length > 0);
-    };
-
+  useEffect(() => {
     getSession().then((data) => {
       if (data) setUser(data.user as unknown as User);
     });
-
-    fetchNotifications();
-  }, [notifications.length]); // Add notifications.length as dependency since it's used in the effect
+  }, []); // Add notifications.length as dependency since it's used in the effect
 
   return (
     <div className="flex flex-row md:flex-row justify-between items-center p-1 bg-white ">

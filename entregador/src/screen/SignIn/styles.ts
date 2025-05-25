@@ -1,7 +1,7 @@
 import styled from "styled-components/native";
 import { LinearGradient } from "expo-linear-gradient";
-
-import { Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
+import { theme } from "../../global/theme";
 
 const { width, height } = Dimensions.get("window");
 
@@ -17,73 +17,76 @@ export const GradientBackground = styled(LinearGradient).attrs({
   flex: 1;
   justify-content: center;
   align-items: center;
-  padding: ${height * 0.01}px;
+  padding: 16px;
 `;
 
-export const ImageContainer = styled.View`
+export const ImageContainer = styled.View<ImageProps>`
   width: 100%;
-  height: ${height * 0.2}px;
-
+  height: ${({ keyboardOpen }: ImageProps) => (keyboardOpen ? "0px" : "20%")};
   align-items: center;
+  justify-content: center;
+  margin-bottom: ${({ keyboardOpen }: ImageProps) =>
+    keyboardOpen ? "0px" : "12px"};
+  overflow: hidden;
 `;
 
 export const Image = styled.Image<ImageProps>`
-  width: ${({ keyboardOpen }: ImageProps) =>
-    keyboardOpen ? "0px" : `${width * 0.3}px`};
-  height: ${({ keyboardOpen }: ImageProps) =>
-    keyboardOpen ? `${height * 0.2}px` : `${height * 0.15}px`};
+  width: ${({ keyboardOpen }: ImageProps) => (keyboardOpen ? "0px" : "30%")};
+  height: ${({ keyboardOpen }: ImageProps) => (keyboardOpen ? "60px" : "90px")};
   border-radius: 10px;
 `;
 
 export const Title = styled.Text`
-  font-size: ${width * 0.06}px;
+  font-size: ${width < 360 ? "18px" : "22px"};
   font-weight: bold;
   color: #fff;
+  text-align: center;
 `;
 
-export const FormArea = styled.View`
+export const FormArea = styled.View<ImageProps>`
   width: 100%;
-  margin-top: ${height * 0.01}px;
-  margin-bottom: ${height * 0.03}px;
+  margin-top: 5px;
+  margin-bottom: ${({ keyboardOpen }: ImageProps) =>
+    keyboardOpen ? "10%" : "32px"};
 `;
 
 export const Footer = styled.View`
   position: absolute;
-  bottom: ${height * 0.01}px;
+  bottom: 10px;
   width: 100%;
   align-items: center;
-  padding: ${height * 0.025}px;
+  padding: 16px;
   flex-direction: row;
   justify-content: space-between;
 `;
 
 export const SocialLoginArea = styled.View`
-  margin-top: ${height * 0.03}px;
+  margin-top: 8px;
   align-items: center;
 `;
 
 export const SocialText = styled.Text`
   color: #fff;
-  margin-bottom: ${height * 0.015}px;
-  font-size: ${width * 0.045}px;
+  margin-bottom: 10px;
+  font-size: ${width < 360 ? "14px" : "16px"};
+  text-align: center;
 `;
 
 export const SocialButtons = styled.View`
   flex-direction: row;
   justify-content: center;
-  gap: ${width * 0.04}px;
+  gap: 20px;
 `;
 
 export const SocialButton = styled.TouchableOpacity`
-  background-color: #fff;
+  background-color: ${theme.colors.button};
   border-radius: 10px;
-  padding: ${width * 0.02}px;
+  padding: 10px;
   align-items: center;
   justify-content: center;
 `;
 
 export const SocialIcon = styled.Image`
-  width: ${width * 0.08}px;
-  height: ${width * 0.08}px;
-  resize-mode: contain;
+  width: 32px;
+  height: 32px;
 `;

@@ -53,6 +53,11 @@ export const itemAdm = [
     url: "/admin/solicitacao-acesso",
     icon: User,
   },
+  {
+    title: "Listagem de Usuarios",
+    url: "/admin/solicitacao-acesso",
+    icon: User,
+  },
 ];
 
 export const itemSupport = [
