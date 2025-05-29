@@ -14,11 +14,14 @@ import { redirect, RedirectType } from "next/navigation";
 import { loginValidation } from "../schema/login.schema";
 
 export default function SignInPage() {
-  const [actionState, action, isPending] = useActionState<ActionState, FormData>(loginRequester, {
+  const [actionState, action, isPending] = useActionState<
+    ActionState,
+    FormData
+  >(loginRequester, {
     message: "",
     error: "",
     success: false,
-  })
+  });
 
   const {
     register,
@@ -27,41 +30,41 @@ export default function SignInPage() {
     formState: { errors },
   } = useForm<SignInFormData>();
 
-  
   React.useEffect(() => {
     Object.keys(loginValidation.fields).forEach((key) => {
-        setError(key as keyof SignInFormData, {
-          type: "manual",
-          message: '',
-        });
+      setError(key as keyof SignInFormData, {
+        type: "manual",
+        message: "",
+      });
     });
 
     if (actionState.error) {
-        let message = "Erro ao realizar login!";
-        
-        if (typeof actionState.error !== 'string') {
-          message = actionState.error.message;
-          const name = actionState.error.path as keyof SignInFormData
-         
-          setError(name, {
-            type: "manual",
-            message: actionState.error.message,
-          })
+      console.log(actionState);
+      let message = "Erro ao realizar login!";
 
-          setFocus(name, { shouldSelect: true });
-        }
+      if (typeof actionState.error !== "string") {
+        message = actionState.error.message;
+        const name = actionState.error.path as keyof SignInFormData;
 
-        toast.error("Credenciais invalidas", {
-          description: message,
-          duration: 3000,
-          position: "top-right",
-          richColors: true,
-        });  
+        setError(name, {
+          type: "manual",
+          message: actionState.error.message,
+        });
 
-        return;      
+        setFocus(name, { shouldSelect: true });
       }
 
-    if (actionState.success){
+      toast.error("Credenciais invalidas", {
+        description: message,
+        duration: 3000,
+        position: "top-right",
+        richColors: true,
+      });
+
+      return;
+    }
+
+    if (actionState.success) {
       toast.success("Login realizado com sucesso!", {
         description: "Você está sendo redirecionado para a página inicial",
         duration: 3000,
@@ -71,8 +74,7 @@ export default function SignInPage() {
 
       redirect("/dashboard", RedirectType.replace);
     }
-        
-  }, [actionState]); 
+  }, [actionState]);
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -116,7 +118,7 @@ export default function SignInPage() {
             defaultValue={actionState.payload?.get?.("password") as string}
             {...register("password")}
           />
-          
+
           <div className="flex flex-col items-start w-full">
             <Link
               href="/reset-password"

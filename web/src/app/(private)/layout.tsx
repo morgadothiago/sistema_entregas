@@ -1,7 +1,7 @@
 "use server";
 import React, { ReactNode } from "react";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { SideBar } from "../components/MenuSheet";
 import { redirect } from "next/navigation";
 import { auth } from "../util/auth";
@@ -13,7 +13,7 @@ interface LayoutProps {
 export default async function Layout({ children }: LayoutProps) {
   const session = await auth();
 
-  if (!session) {
+  if (!session?.accessToken) {
     redirect("/signin");
   }
 
@@ -22,11 +22,6 @@ export default async function Layout({ children }: LayoutProps) {
       <SidebarProvider>
         <SideBar />
 
-        <SidebarTrigger
-          className=" w-15  h-15 lg:hidden "
-          size="lg"
-          variant="outline"
-        />
         {children}
       </SidebarProvider>
     </div>

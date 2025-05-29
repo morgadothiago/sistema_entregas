@@ -6,7 +6,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Bell, BellDot } from "lucide-react";
+import { BellDotIcon, BellIcon } from "lucide-react";
 import React from "react";
 
 interface SideBarSheetProps {
@@ -16,7 +16,9 @@ interface SideBarSheetProps {
 export default function SideBarSheet({ isNotification }: SideBarSheetProps) {
   return (
     <Sheet>
-      <SheetTrigger>{isNotification ? <BellDot /> : <Bell />}</SheetTrigger>
+      <SheetTrigger>
+        {isNotification ? <BellDotIcon /> : <BellIcon />}
+      </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Are you absolutely sure?</SheetTitle>

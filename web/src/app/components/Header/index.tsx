@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import SideBarSheet from "../sidebarsheet";
 import { getSession } from "next-auth/react";
 import { User } from "@/app/types/User";
-import Image from "next/image";
+
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import SideBarSheet from "../sidebarsheet";
+import { Button } from "@/components/ui/button";
 
 export default function Header() {
   const [user, setUser] = useState<User>({} as User);
@@ -13,26 +15,33 @@ export default function Header() {
     getSession().then((data) => {
       if (data) setUser(data.user as unknown as User);
     });
-  }, []); // Add notifications.length as dependency since it's used in the effect
+  }, []);
 
   return (
-    <div className="flex flex-row md:flex-row justify-between items-center p-1 bg-white ">
-      <div className="text-lg font-semibold">Olá: {user?.Company?.name}</div>
-      <div className="text-lg font-bold mt-2 md:mt-0 bg-gray-200 rounded-full px-4 py-1">
-        R$ {user?.Balance?.amount || 0}
+    <header className="bg-white shadow-md px-4 py-3 flex items-center justify-between">
+      {/* Menu e Nome da Empresa */}
+      <div className="flex items-center flex-1/2 bg-red-500">
+        <SidebarTrigger className="lg:hidden" size="lg" variant="outline" />
+        <span className="text-gray-700 font-semibold text-lg">
+          Olá, {user?.Company?.name || "Usuário"}
+        </span>
       </div>
-      <div className="flex items-center space-x-4 mt-2 md:mt-0">
-        <SideBarSheet isNotification={true} />
-        <button className="p-2 rounded-full hover:bg-gray-100 transition">
-          <Image
-            src="/path/to/message-icon.svg"
-            alt="Message"
-            width={24}
-            height={24}
-            className="w-6 h-6"
-          />
-        </button>
+
+      {/* Saldo */}
+      <div className="md:flex items-center bg-gray-100 text-gray-800 font-medium px-4 py-1 rounded-full">
+        R$ {user?.Balance?.amount?.toFixed(2) || "0,00"}
       </div>
-    </div>
+
+      {/* Ações */}
+      <div className="flex items-center space-x-4">
+        <Button
+          asChild
+          variant={"outline"}
+          className="p-2 rounded-full hover:bg-gray-100 transition"
+        >
+          <SideBarSheet isNotification={true} />
+        </Button>
+      </div>
+    </header>
   );
 }

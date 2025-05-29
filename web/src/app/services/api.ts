@@ -4,7 +4,7 @@ import Axios, {
   type AxiosResponse,
   type AxiosError,
 } from "axios";
-import type { ILoginResponse } from "../types/SingInType";
+
 import type { ICreateUser } from "../types/User";
 
 interface IErrorResponse {
@@ -16,81 +16,100 @@ class ApiService {
   private api: AxiosInstance;
   static instance: ApiService;
   private token: string = "";
+  private requestInterceptorId?: number;
 
-  constructor() {
+  private constructor() {
     this.api = Axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_HOST,
     });
 
-    this.setupIntercepters();
+    this.setupInterceptors();
   }
 
-  setupIntercepters() {
-    this.api.interceptors.request.use(
-      (config) => {
-        config.headers.Authorization ??= this.token;
+  private setupInterceptors() {
+    // Remove o interceptor anterior, se existir
+    if (this.requestInterceptorId !== undefined) {
+      this.api.interceptors.request.eject(this.requestInterceptorId);
+    }
 
+    // Adiciona um novo interceptor de requisição
+    this.requestInterceptorId = this.api.interceptors.request.use(
+      (config) => {
+        // Evita o uso de localStorage no lado do servidor
+        if (typeof window !== "undefined") {
+          const token = localStorage.getItem("token");
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+        }
         return config;
       },
-
-      // se der algum erro na request rejeita a promessa
       (error) => Promise.reject(error)
     );
   }
 
-  setToken(token: string) {
+  public setToken(token: string) {
     this.token = `Bearer ${token}`;
+    // Atualiza o interceptor com o novo token
+    this.setupInterceptors();
   }
 
-  cleanToken() {
+  public cleanToken() {
     this.token = "";
+    // Remove o interceptor de requisição
+    if (this.requestInterceptorId !== undefined) {
+      this.api.interceptors.request.eject(this.requestInterceptorId);
+      this.requestInterceptorId = undefined;
+    }
   }
 
-  async getInfo() {
-    this.api.get("");
+  public async login(email: string, password: string) {
+    try {
+      const response = await this.api.post("/auth/login", { email, password });
+      const { token } = response.data;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", token);
+      }
+      this.setToken(token);
+      return response.data;
+    } catch (error) {
+      throw this.getError(error as AxiosError);
+    }
   }
 
-  async login(email: string, password: string) {
-    return this.api
-      .post("/auth/login", { email, password })
-      .then(this.getResponse<ILoginResponse>)
-      .catch(this.getError);
+  public async newUser(data: ICreateUser) {
+    try {
+      const response = await this.api.post("/auth/signup/company", data);
+      return this.getResponse(response);
+    } catch (error) {
+      throw this.getError(error as AxiosError);
+    }
   }
 
-  async newUser(data: ICreateUser) {
-    const response = await this.api
-      .post("/auth/signup/company", data)
-      .then(this.getResponse)
-      .catch(this.getError);
-
-    return response;
+  public async getUser() {
+    try {
+      const response = await this.api.get("/users");
+      return this.getResponse(response);
+    } catch (error) {
+      throw this.getError(error as AxiosError);
+    }
   }
 
   private getResponse<T>(response: AxiosResponse): T {
     return response.data;
   }
-  private getError(error: AxiosError<any>): IErrorResponse {
-    if (error.status === 422) {
-      return {
-        message: error.response?.data?.message,
-        status: error.status,
-      };
-    }
-    if (error.status === 409) {
-      return {
-        message: error.response?.data?.message,
-        status: error.status,
-      };
-    }
 
-    return {
-      message: error.response?.data?.message,
-      status: error.status || 500, // Default to 500 if status is undefined
-    };
+  private getError(error: AxiosError<any>): IErrorResponse {
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.message || "Erro desconhecido";
+    return { message, status };
   }
 
-  static getInstance() {
-    return (ApiService.instance ??= new ApiService());
+  public static getInstance() {
+    if (!ApiService.instance) {
+      ApiService.instance = new ApiService();
+    }
+    return ApiService.instance;
   }
 }
 

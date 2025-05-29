@@ -1,71 +1,24 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import type { SignInFormData } from "@/app/types/SingInType";
-import api from "../services/api";
-import type { User } from "../types/User";
-import type { AuthContextType } from "../types/AuthContextType";
+import React, { createContext, useContext, useEffect } from "react";
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import api from "../services/api";
+import { getCsrfToken } from "next-auth/react";
+
+const AuthContext = createContext({});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
-
-    if (token && user) {
-      setToken(token);
-      setUser(JSON.parse(user));
-    }
+    getCsrfToken().then((token) => {
+      if (token) {
+        api.setToken(token);
+      }
+      console.log("CSRF Token set:", token);
+    });
   }, []);
 
-  const login = async (data: SignInFormData): Promise<boolean> => {
-    const response = await api.login(data.email, data.password);
-
-    if ("status" in response) {
-      return false;
-    }
-
-    saveToken(response.token);
-    saveUser(response.user);
-    return true;
-  };
-
-  const saveToken = (token: string) => {
-    localStorage.setItem("token", token);
-    api.setToken(token);
-    setToken(token);
-  };
-
-  const isAuthenticated = (): boolean => {
-    return !!token;
-  };
-
-  const saveUser = (user: User) => {
-    localStorage.setItem("user", JSON.stringify(user));
-    setUser(user);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    api.cleanToken();
-
-    setUser(null);
-    setToken(null);
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{ user, login, logout, token, isAuthenticated }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{}}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

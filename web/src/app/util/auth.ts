@@ -1,7 +1,16 @@
 import NextAuth, { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import api from "@/app/services/api";
+import axios from "axios";
 import { User } from "@/app/types/User";
+
+declare module "next-auth" {
+  interface Session {
+    accessToken?: string;
+  }
+  interface User {
+    token: string;
+  }
+}
 
 if (!process.env.NEXTAUTH_SECRET) {
   throw new Error("NEXTAUTH_SECRET is not defined");
@@ -16,33 +25,31 @@ export const authOptions: NextAuthConfig = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(
-        credentials: Partial<Record<"email" | "password", unknown>>
-      ) {
-        if (
-          !credentials
-        ) {
+      async authorize(credentials) {
+        if (!credentials) {
           return null;
         }
+
         try {
-          if (!credentials) {
-            return null;
-          }
+          // Realiza a requisição de login diretamente usando axios
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_HOST}/auth/login`,
+            {
+              email: credentials.email,
+              password: credentials.password,
+            }
+          );
 
-          const res = await api.login(credentials.email as string, credentials.password as string);
+          const { token, user } = response.data;
 
-          if ("status" in res) return null;
-
-          const { token, user } = res;
-
-          api.setToken(token);
-
+          // Retorna o usuário com o token para ser armazenado no JWT
           return {
             ...user,
-            id: user.id.toString(), // Ensure the 'id' is a string as required by next-auth
-          };
+            id: String(user.id), // Garante que o id seja string
+            token,
+          } as User & { token: string; id: string };
         } catch (error) {
-          console.error("Authorization error:", error);
+          console.error("Erro na autorização:", error);
           return null;
         }
       },
@@ -51,15 +58,14 @@ export const authOptions: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.accessToken = user.token;
         token.user = user;
       }
-
       return token;
     },
-
     async session({ session, token }) {
-      (session as unknown as { user: User }).user = token.user as User;
-
+      session.user = token.user as typeof session.user;
+      session.accessToken = token.accessToken as typeof session.accessToken;
       return session;
     },
   },
@@ -67,14 +73,14 @@ export const authOptions: NextAuthConfig = {
     strategy: "jwt",
   },
   pages: {
-    signIn: "/signin", // Página de login personalizada
-    error: "/signin", // Redireciona erros de volta para o login
+    signIn: "/signin",
+    error: "/signin",
   },
 };
 
 export const {
-    handlers: {GET, POST},
-    auth,
-    signIn,
-    signOut
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
 } = NextAuth(authOptions);
