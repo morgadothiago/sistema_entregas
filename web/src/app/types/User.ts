@@ -18,6 +18,7 @@ export interface User {
   Extract: IExtract[];
   emailVerified?: Date | null; // ← necessário para NextAuth
   token: string;
+  status: string;
 }
 export interface ICreateUser {
   name: string;
