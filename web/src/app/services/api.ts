@@ -86,9 +86,20 @@ class ApiService {
     }
   }
 
-  public async getUser() {
+  public async getUser(filters?: {
+    status?: string;
+    role?: string;
+    name?: string;
+    email?: string;
+  }) {
     try {
-      const response = await this.api.get("/users");
+      const params = new URLSearchParams();
+      if (filters?.status) params.append("status", filters.status);
+      if (filters?.role) params.append("role", filters.role);
+      if (filters?.name) params.append("name", filters.name);
+      if (filters?.email) params.append("email", filters.email);
+
+      const response = await this.api.get(`/users?${params.toString()}`);
       return this.getResponse(response);
     } catch (error) {
       throw this.getError(error as AxiosError);
