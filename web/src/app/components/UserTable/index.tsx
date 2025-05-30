@@ -1,44 +1,40 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import type { User } from "@/app/types/User";
 import { Badge } from "@/components/ui/badge";
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-};
+import { Button } from "@/components/ui/button";
+import { FiEye } from "react-icons/fi";
 
 interface UserTableProps {
   users: User[];
-  loading: boolean;
-  usersPerPage: number;
-  onView?: (user: User) => void;
-  onEdit?: (user: User) => void;
-  onDelete?: (user: User) => void;
+  onView: (user: User) => void;
+  currentPage: number;
+  totalItems: number;
+  itemsPerPage: number;
 }
 
-export const UserTable: React.FC<UserTableProps> = ({
+export default function UserTable({
   users,
-  loading,
-  usersPerPage,
   onView,
-}) => {
+  currentPage,
+  totalItems,
+  itemsPerPage,
+}: UserTableProps) {
+  // Calcula o intervalo de itens sendo exibidos
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  console.log("UserTable - Página atual:", currentPage);
+  console.log("UserTable - Itens nesta página:", users.length);
+  console.log("UserTable - Intervalo:", `${startItem} - ${endItem}`);
+  console.log("UserTable - Total de itens:", totalItems);
+
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "active":
+    switch (status) {
+      case "ACTIVE":
         return "bg-green-100 text-green-800";
-      case "inactive":
+      case "INACTIVE":
+        return "bg-yellow-100 text-yellow-800";
+      case "BLOCKED":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -46,125 +42,120 @@ export const UserTable: React.FC<UserTableProps> = ({
   };
 
   const getRoleColor = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "administrador":
-        return "bg-blue-100 text-blue-800";
-      case "usuário":
+    switch (role) {
+      case "ADMIN":
         return "bg-purple-100 text-purple-800";
+      case "DELIVERY":
+        return "bg-blue-100 text-blue-800";
+      case "COMPANY":
+        return "bg-orange-100 text-orange-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return "Ativo";
+      case "INACTIVE":
+        return "Inativo";
+      case "BLOCKED":
+        return "Bloqueado";
+      default:
+        return status;
+    }
+  };
+
+  const getRoleText = (role: string) => {
+    switch (role) {
+      case "ADMIN":
+        return "Administrador";
+      case "DELIVERY":
+        return "Entregador";
+      case "COMPANY":
+        return "Empresa";
+      default:
+        return role;
+    }
+  };
+
   return (
-    <div className="overflow-x-auto border-[#5DADE2] P-10 my-10">
-      <div className="overflow-x-auto">
-        <Table className="min-w-full table-auto">
-          <TableHeader>
-            <TableRow className="bg-[#003873]">
-              <TableHead className="hidden sm:table-cell whitespace-nowrap text-left font-semibold py-3 px-4 text-[#FFFFFF]">
-                Nome
-              </TableHead>
-              <TableHead className="hidden sm:table-cell whitespace-nowrap text-left font-semibold py-3 px-4 text-[#FFFFFF]">
-                Email
-              </TableHead>
-              <TableHead className="hidden sm:table-cell whitespace-nowrap text-left font-semibold py-3 px-4 text-[#FFFFFF]">
-                Status
-              </TableHead>
-              <TableHead className="hidden sm:table-cell whitespace-nowrap text-left font-semibold py-3 px-4 text-[#FFFFFF]">
-                Cargo
-              </TableHead>
-              <TableHead className="whitespace-nowrap text-left font-semibold py-3 px-4 text-[#FFFFFF]">
-                Ações
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              Array.from({ length: usersPerPage }).map((_, index) => (
-                <TableRow key={index} className="border-t border-[#5DADE2]">
-                  <TableCell className="py-3 px-4">
-                    <Skeleton className="h-4 w-[100px]" />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : users && users.length > 0 ? (
-              users.map((user) => (
-                <TableRow
-                  key={user.id}
-                  className="border-t border-[#5DADE2] even:bg-gray-50 transition-colors duration-200 cursor-pointer hover:bg-gray-100"
-                >
-                  <TableCell className="hidden sm:table-cell py-3 px-4 whitespace-nowrap font-medium text-[#2C3E50]">
-                    {user.name}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell py-3 px-4 whitespace-nowrap text-[#2C3E50]">
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell py-3 px-4 whitespace-nowrap">
-                    <Badge
-                      className={`${getStatusColor(
-                        user.status
-                      )} px-3 py-1 rounded-full text-sm font-medium`}
-                    >
-                      {user.status === "active" ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell py-3 px-4 whitespace-nowrap">
-                    <Badge
-                      className={`${getRoleColor(
-                        user.role
-                      )} px-3 py-1 rounded-full text-sm font-medium`}
-                    >
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="py-3 px-4">
-                    <div className="sm:hidden mb-2">
-                      <p className="font-medium text-[#2C3E50]">{user.name}</p>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                      <div className="flex gap-2 mt-1">
-                        <Badge
-                          className={`${getStatusColor(
-                            user.status
-                          )} px-2 py-0.5 rounded-full text-xs`}
-                        >
-                          {user.status === "active" ? "Ativo" : "Inativo"}
-                        </Badge>
-                        <Badge
-                          className={`${getRoleColor(
-                            user.role
-                          )} px-2 py-0.5 rounded-full text-xs`}
-                        >
-                          {user.role}
-                        </Badge>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-[#00FFB3] text-[#003873] border-[#003873] hover:bg-[#003873] hover:text-[#00FFB3] transition-colors duration-200"
-                      onClick={() => onView && onView(user)}
-                    >
-                      Ver mais
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="text-center text-[#2C3E50] py-8"
-                >
-                  Nenhum usuário encontrado com os filtros selecionados.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+    <div className="overflow-x-auto">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm text-gray-500">
+          Página {currentPage} - Mostrando {users.length} itens
+        </div>
+        <div className="text-sm text-gray-500">Total: {totalItems} itens</div>
       </div>
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th
+              scope="col"
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Email
+            </th>
+            <th
+              scope="col"
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th
+              scope="col"
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Cargo
+            </th>
+            <th scope="col" className="relative px-6 py-3">
+              <span className="sr-only">Ações</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {users.map((user) => (
+            <tr
+              key={user.id}
+              className="hover:bg-gray-50 transition-colors duration-150"
+            >
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-500">{user.email}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <Badge
+                  className={`${getStatusColor(
+                    user.status
+                  )} px-2 py-1 rounded-full text-xs font-medium`}
+                >
+                  {getStatusText(user.status)}
+                </Badge>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <Badge
+                  className={`${getRoleColor(
+                    user.role
+                  )} px-2 py-1 rounded-full text-xs font-medium`}
+                >
+                  {getRoleText(user.role)}
+                </Badge>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <Button
+                  onClick={() => onView(user)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-[#003873] hover:text-[#002a5c] hover:bg-[#003873]/10"
+                >
+                  <FiEye className="h-4 w-4 mr-1" />
+                  Visualizar
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-};
-
-export default UserTable;
+}

@@ -1,0 +1,77 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "email": "admin@admin.com",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "information": "admin criado com seed"
+    },
+    {
+      "id": 2,
+      "email": "user1@example.com",
+      "role": "USER",
+      "status": "INACTIVE",
+      "information": "usuário teste 1"
+    },
+    {
+      "id": 3,
+      "email": "user2@example.com",
+      "role": "USER",
+      "status": "ACTIVE",
+      "information": "usuário teste 2"
+    },
+    {
+      "id": 4,
+      "email": "manager1@example.com",
+      "role": "MANAGER",
+      "status": "ACTIVE",
+      "information": "gerente de vendas"
+    },
+    {
+      "id": 5,
+      "email": "dev1@example.com",
+      "role": "DEV",
+      "status": "INACTIVE",
+      "information": "desenvolvedor backend"
+    },
+    {
+      "id": 6,
+      "email": "support1@example.com",
+      "role": "SUPPORT",
+      "status": "ACTIVE",
+      "information": "suporte técnico nível 1"
+    },
+    {
+      "id": 7,
+      "email": "user3@example.com",
+      "role": "USER",
+      "status": "ACTIVE",
+      "information": "usuário comum"
+    },
+    {
+      "id": 8,
+      "email": "admin2@example.com",
+      "role": "ADMIN",
+      "status": "INACTIVE",
+      "information": "admin secundário"
+    },
+    {
+      "id": 9,
+      "email": "qa1@example.com",
+      "role": "QA",
+      "status": "ACTIVE",
+      "information": "analista de testes"
+    },
+    {
+      "id": 10,
+      "email": "user4@example.com",
+      "role": "USER",
+      "status": "ACTIVE",
+      "information": "usuário ativo"
+    }
+  ],
+  "total": 10,
+  "currentPage": 1,
+  "totalPage": 1
+}

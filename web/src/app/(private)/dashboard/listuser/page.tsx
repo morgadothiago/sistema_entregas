@@ -1,77 +1,155 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "@/app/services/api";
 import type { User } from "@/app/types/User";
+import { ERole } from "@/app/types/User";
 import { useSession } from "next-auth/react";
 import UserTable from "@/app/components/UserTable";
 import ButtonFilter from "@/app/components/ButtonFilter";
+import { Pagination } from "@/app/components/Pagination";
+import { FilterModal } from "@/app/components/FilterModal";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FiCheck, FiFilter, FiSearch, FiX } from "react-icons/fi";
+
+// Enum para os status possíveis
+enum EStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BLOCKED = "BLOCKED",
+}
 
 export default function ListUser() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const [isFilterModal, setIsFilterModal] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
-  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<EStatus | "">("");
+  const [selectedRole, setSelectedRole] = useState<ERole | "">("");
   const [searchName, setSearchName] = useState<string>("");
   const [searchEmail, setSearchEmail] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 5;
 
-  const filterRef = useRef<HTMLDivElement>(null);
+  // Função auxiliar para limpar filtros undefined
+  const cleanFilters = (filters: Record<string, unknown>) => {
+    const cleanedFilters = { ...filters };
+    Object.keys(cleanedFilters).forEach((key) => {
+      if (cleanedFilters[key] === undefined) {
+        delete cleanedFilters[key];
+      }
+    });
+    return cleanedFilters;
+  };
 
+  // Função principal para buscar usuários da API
+  const fetchUsers = async (filters: {
+    status?: EStatus;
+    role?: ERole;
+    name?: string;
+    email?: string;
+    page: number;
+    limit: number;
+  }) => {
+    try {
+      setLoading(true);
+      const currentFilters = cleanFilters({
+        ...filters,
+        size: 5, // Fixa em 5 itens por página
+        page: filters.page - 1, // Ajusta para começar do 0
+      });
+      delete currentFilters.limit;
+
+      console.log("Enviando requisição com filtros:", currentFilters);
+      const response = await api.getUser(currentFilters);
+      console.log("Resposta completa da API:", response);
+
+      if (response) {
+        // Atualiza o estado com os dados da API
+        const usersArray = response.users || [];
+        const totalItems = response.totalItems || 0;
+        const totalPages = Math.ceil(totalItems / 5);
+
+        console.log("Dados da API:", {
+          usersCount: usersArray.length,
+          totalItems,
+          totalPages,
+          currentPage: filters.page,
+          itemsPerPage: 5,
+        });
+
+        setUsers(usersArray);
+        setTotalPages(totalPages);
+        setTotalItems(totalItems);
+      } else {
+        console.error("Resposta vazia da API");
+        setUsers([]);
+        setTotalPages(1);
+        setTotalItems(0);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados dos usuários:", error);
+      setUsers([]);
+      setTotalPages(1);
+      setTotalItems(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Efeito para gerenciar o token da sessão
   useEffect(() => {
     if (session?.accessToken) {
       localStorage.setItem("token", session.accessToken);
     }
   }, [session]);
 
-  const fetchUsers = async (filters?: {
-    status?: string;
-    role?: string;
-    name?: string;
-    email?: string;
-  }) => {
-    try {
-      setLoading(true);
-      console.log("Buscando usuários com filtros:", filters);
-      const data = await api.getUser(filters);
-      console.log("Resultado da busca:", data);
-      setUsers(Array.isArray(data) ? data : []);
-    } catch (error: unknown) {
-      console.error("Erro ao buscar usuários:", error);
-      setUsers([]);
-    } finally {
-      setLoading(false);
+  // Efeito para buscar usuários quando os filtros ou página mudam
+  useEffect(() => {
+    console.log("Efeito disparado - Página atual:", currentPage);
+    const currentFilters = {
+      status: selectedStatus || undefined,
+      role: selectedRole || undefined,
+      name: searchName || undefined,
+      email: searchEmail || undefined,
+    };
+
+    console.log("Buscando usuários com filtros:", {
+      ...currentFilters,
+      page: currentPage,
+      limit: 5,
+    });
+
+    fetchUsers({
+      ...currentFilters,
+      page: currentPage,
+      limit: 5,
+    });
+  }, [selectedStatus, selectedRole, searchName, searchEmail, currentPage]);
+
+  // Handlers para paginação e filtros
+  const handlePageChange = (newPage: number) => {
+    console.log("Mudando para página:", newPage);
+    if (newPage < 1 || newPage > totalPages) {
+      console.log("Página inválida:", newPage);
+      return;
     }
+    setCurrentPage(newPage);
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   const handleApplyFilters = () => {
-    const filters = {
-      status: selectedStatus,
-      role: selectedRole,
-      name: searchName,
-      email: searchEmail,
-    };
-    console.log("Filtros aplicados:", filters);
-    fetchUsers(filters);
+    setCurrentPage(1);
     setIsFilterModal(false);
   };
 
   const handleClearFilters = () => {
-    console.log("Limpando todos os filtros");
     setSelectedStatus("");
     setSelectedRole("");
     setSearchName("");
     setSearchEmail("");
-    fetchUsers();
+    setCurrentPage(1);
     setIsFilterModal(false);
   };
 
@@ -80,166 +158,127 @@ export default function ListUser() {
   };
 
   return (
-    <div className="p-4 sm:p-8 w-full h-auto mx-auto bg-gradient-to-br from-white to-gray-50 border border-gray-100 sm:mt-20">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4 mt-10 sm:gap-6 sm:mt-10">
+    <div className="p-4 sm:p-8 w-full h-full mx-auto bg-[#FFFFFF] border-[#003873] sm:mt-16">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4 sm:gap-6">
         <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 justify-between">
-          <h1 className="text-2xl sm:text-4xl font-extrabold bg-gradient-to-r from-[#003873] to-[#0056b3] bg-clip-text text-transparent tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#003873] tracking-tight drop-shadow-sm">
             👥 Listagem de Usuários
           </h1>
-          <span className="flex flex-wrap items-center text-[#2C3E50] text-sm font-semibold px-4 py-2 rounded-xl bg-white shadow-sm border border-gray-100 sm:justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500">Atualizado em</span>
-              <span className="font-medium">
-                {new Date().toLocaleDateString("pt-BR")}
-              </span>
-            </div>
-            <div className="relative" ref={filterRef}>
-              <ButtonFilter onClick={openIsFilterModal} />
-            </div>
+          <span className="flex flex-wrap items-center text-[#2C3E50] text-sm font-semibold px-3 sm:px-4 sm:py-1 rounded-full shadow sm:justify-between gap-2 justify-between">
+            <div>Atualizado em {new Date().toLocaleDateString("pt-BR")}</div>
+            <ButtonFilter onClick={openIsFilterModal} />
           </span>
         </div>
       </header>
 
-      <div className="w-full h-full overflow-hidden rounded-xl bg-white shadow-sm border border-gray-100 transition-all duration-300">
+      <div className="w-full h-full overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300">
         <div className="p-4 sm:p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-[#003873]">
-              Usuários Cadastrados
-            </h2>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-lg">
-                Total: {users.length} usuários
-              </span>
+          <div className="mb-4 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-[#003873]">
+                Usuários Cadastrados
+              </h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">
+                  Total: {totalItems} usuários
+                </span>
+              </div>
             </div>
+
+            {(selectedStatus || selectedRole || searchName || searchEmail) && (
+              <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <span className="text-sm font-medium text-gray-700">
+                  Filtros ativos:
+                </span>
+                {selectedStatus && (
+                  <Badge className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                    Status:{" "}
+                    {selectedStatus === "ACTIVE"
+                      ? "Ativo"
+                      : selectedStatus === "INACTIVE"
+                      ? "Inativo"
+                      : "Bloqueado"}
+                  </Badge>
+                )}
+                {selectedRole && (
+                  <Badge className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                    Cargo:{" "}
+                    {selectedRole === "ADMIN"
+                      ? "Administrador"
+                      : selectedRole === "DELIVERY"
+                      ? "Entregador"
+                      : "Empresa"}
+                  </Badge>
+                )}
+                {searchName && (
+                  <Badge className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                    Nome: {searchName}
+                  </Badge>
+                )}
+                {searchEmail && (
+                  <Badge className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">
+                    Email: {searchEmail}
+                  </Badge>
+                )}
+                <Button
+                  onClick={handleClearFilters}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Limpar filtros
+                </Button>
+              </div>
+            )}
+
+            {users.length === 0 && !loading && (
+              <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-gray-600">
+                  {selectedStatus || selectedRole || searchName || searchEmail
+                    ? "Nenhum usuário encontrado com os filtros selecionados."
+                    : "Nenhum usuário cadastrado."}
+                </p>
+              </div>
+            )}
           </div>
-          <UserTable
-            users={users}
-            loading={loading}
-            usersPerPage={10}
-            onView={(user) => console.log("Visualizar:", user)}
+
+          <div className="relative">
+            <UserTable
+              users={users}
+              onView={(user) => console.log("Visualizar:", user)}
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+            {loading && (
+              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#003873]"></div>
+              </div>
+            )}
+          </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>
 
-      {isFilterModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl transform transition-all duration-300 ease-in-out border border-gray-100">
-            <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#003873]/10 rounded-lg">
-                  <FiFilter className="text-[#003873]" size={24} />
-                </div>
-                <h3 className="text-2xl font-bold text-[#003873]">Filtros</h3>
-              </div>
-              <Button
-                onClick={openIsFilterModal}
-                variant="ghost"
-                size="icon"
-                className="hover:bg-gray-100/80 rounded-full transition-colors"
-              >
-                <FiX size={24} />
-              </Button>
-            </div>
-
-            <div className="space-y-8">
-              <div className="relative group">
-                <FiSearch
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#003873] transition-colors"
-                  size={20}
-                />
-                <Input
-                  type="text"
-                  placeholder="Filtrar por nome..."
-                  value={searchName}
-                  onChange={(e) => setSearchName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003873]/20 focus:border-[#003873] transition-all text-base"
-                />
-              </div>
-
-              <div className="relative group">
-                <FiSearch
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#003873] transition-colors"
-                  size={20}
-                />
-                <Input
-                  type="text"
-                  placeholder="Filtrar por e-mail..."
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#003873]/20 focus:border-[#003873] transition-all text-base"
-                />
-              </div>
-
-              <div className="space-y-4">
-                <Label className="block text-base font-semibold text-gray-800">
-                  Filtrar por Status:
-                </Label>
-                <div className="grid grid-cols-2 gap-4">
-                  {["active", "inactive"].map((status) => (
-                    <Label
-                      key={status}
-                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:bg-gray-50/80 cursor-pointer transition-all group"
-                    >
-                      <Input
-                        type="radio"
-                        name="status"
-                        value={status}
-                        checked={selectedStatus === status}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="form-radio text-[#003873] w-5 h-5"
-                      />
-                      <span className="text-base font-medium group-hover:text-[#003873] transition-colors">
-                        {status === "active" ? "Ativo" : "Inativo"}
-                      </span>
-                    </Label>
-                  ))}
-                </div>
-
-                <Label className="block text-base font-semibold text-gray-800">
-                  Filtrar por Cargo:
-                </Label>
-                <div className="grid grid-cols-2 gap-4">
-                  {["Administrador", "Usuário"].map((role) => (
-                    <Label
-                      key={role}
-                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:bg-gray-50/80 cursor-pointer transition-all group"
-                    >
-                      <Input
-                        type="radio"
-                        name="role"
-                        value={role}
-                        checked={selectedRole === role}
-                        onChange={(e) => setSelectedRole(e.target.value)}
-                        className="form-radio text-[#003873] w-5 h-5"
-                      />
-                      <span className="text-base font-medium group-hover:text-[#003873] transition-colors">
-                        {role}
-                      </span>
-                    </Label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
-                <Button
-                  onClick={handleClearFilters}
-                  variant="outline"
-                  className="px-6 py-3 text-gray-700 hover:bg-gray-50/80 transition-all text-base font-medium rounded-xl"
-                >
-                  Limpar Filtros
-                </Button>
-                <Button
-                  onClick={handleApplyFilters}
-                  className="px-6 py-3 bg-gradient-to-r from-[#003873] to-[#0056b3] text-white rounded-xl hover:from-[#002a5c] hover:to-[#004494] transition-all flex items-center gap-2 text-base font-medium shadow-lg shadow-[#003873]/20"
-                >
-                  <FiCheck size={20} />
-                  Aplicar Filtros
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterModal
+        isOpen={isFilterModal}
+        onClose={openIsFilterModal}
+        selectedStatus={selectedStatus}
+        selectedRole={selectedRole}
+        searchEmail={searchEmail}
+        onStatusChange={setSelectedStatus}
+        onRoleChange={setSelectedRole}
+        onEmailChange={setSearchEmail}
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
+      />
     </div>
   );
 }
