@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { Plus, Loader } from "lucide-react";
@@ -10,10 +9,11 @@ import { toast } from "sonner";
 import type { SignInFormData } from "../types/SingInType";
 import { TextInput } from "../components/TextInput";
 import { ActionState, loginRequester } from "../actions/login";
-import { redirect, RedirectType } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { loginValidation } from "../schema/login.schema";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [actionState, action, isPending] = useActionState<
     ActionState,
     FormData
@@ -72,9 +72,18 @@ export default function SignInPage() {
         richColors: true,
       });
 
-      redirect("/dashboard", RedirectType.replace);
+      // Salva o token no localStorage
+      if (typeof window !== "undefined") {
+        const token = actionState.payload?.get("token");
+        if (token) {
+          localStorage.setItem("token", token.toString());
+        }
+      }
+
+      // Redireciona para a dashboard
+      router.push("/dashboard");
     }
-  }, [actionState]);
+  }, [actionState, router]);
 
   return (
     <div className="flex flex-col lg:flex-row">

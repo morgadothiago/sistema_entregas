@@ -8,6 +8,12 @@ export enum ERole {
   COMPANY = "COMPANY",
 }
 
+export enum EStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BLOCKED = "BLOCKED",
+}
+
 export interface User {
   id: number;
   name: string;

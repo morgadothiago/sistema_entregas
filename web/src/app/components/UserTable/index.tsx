@@ -10,14 +10,16 @@ interface UserTableProps {
   currentPage: number;
   totalItems: number;
   itemsPerPage: number;
+  onClick: () => void;
 }
 
 export default function UserTable({
   users,
-  onView,
+
   currentPage,
   totalItems,
   itemsPerPage,
+  onClick,
 }: UserTableProps) {
   // Calcula o intervalo de itens sendo exibidos
   const startItem = (currentPage - 1) * itemsPerPage + 1;
@@ -143,7 +145,7 @@ export default function UserTable({
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <Button
-                  onClick={() => onView(user)}
+                  onClick={onClick}
                   variant="ghost"
                   size="sm"
                   className="text-[#003873] hover:text-[#002a5c] hover:bg-[#003873]/10"

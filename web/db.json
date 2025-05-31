@@ -1,77 +1,55 @@
 {
-  "data": [
+  "users": [
     {
       "id": 1,
-      "email": "admin@admin.com",
+      "name": "Admin",
+      "email": "admin@example.com",
       "role": "ADMIN",
       "status": "ACTIVE",
-      "information": "admin criado com seed"
+      "Balance": {
+        "id": 1,
+        "amount": 1000.00
+      },
+      "Company": {
+        "id": 1,
+        "name": "Empresa Principal"
+      },
+      "Extract": [],
+      "token": "fake-jwt-token-1"
     },
     {
       "id": 2,
-      "email": "user1@example.com",
-      "role": "USER",
-      "status": "INACTIVE",
-      "information": "usuário teste 1"
+      "name": "Entregador",
+      "email": "entregador@example.com",
+      "role": "DELIVERY",
+      "status": "ACTIVE",
+      "Balance": {
+        "id": 2,
+        "amount": 500.00
+      },
+      "Company": {
+        "id": 2,
+        "name": "Empresa Secundária"
+      },
+      "Extract": [],
+      "token": "fake-jwt-token-2"
     },
     {
       "id": 3,
-      "email": "user2@example.com",
-      "role": "USER",
-      "status": "ACTIVE",
-      "information": "usuário teste 2"
-    },
-    {
-      "id": 4,
-      "email": "manager1@example.com",
-      "role": "MANAGER",
-      "status": "ACTIVE",
-      "information": "gerente de vendas"
-    },
-    {
-      "id": 5,
-      "email": "dev1@example.com",
-      "role": "DEV",
+      "name": "Empresa",
+      "email": "empresa@example.com",
+      "role": "COMPANY",
       "status": "INACTIVE",
-      "information": "desenvolvedor backend"
-    },
-    {
-      "id": 6,
-      "email": "support1@example.com",
-      "role": "SUPPORT",
-      "status": "ACTIVE",
-      "information": "suporte técnico nível 1"
-    },
-    {
-      "id": 7,
-      "email": "user3@example.com",
-      "role": "USER",
-      "status": "ACTIVE",
-      "information": "usuário comum"
-    },
-    {
-      "id": 8,
-      "email": "admin2@example.com",
-      "role": "ADMIN",
-      "status": "INACTIVE",
-      "information": "admin secundário"
-    },
-    {
-      "id": 9,
-      "email": "qa1@example.com",
-      "role": "QA",
-      "status": "ACTIVE",
-      "information": "analista de testes"
-    },
-    {
-      "id": 10,
-      "email": "user4@example.com",
-      "role": "USER",
-      "status": "ACTIVE",
-      "information": "usuário ativo"
+      "Balance": {
+        "id": 3,
+        "amount": 2000.00
+      },
+      "Company": {
+        "id": 3,
+        "name": "Empresa Terceira"
+      },
+      "Extract": [],
+      "token": "fake-jwt-token-3"
     }
-  ],
-  "total": 10,
-  "currentPage": 1,
-  "totalPage": 1
+  ]
 }

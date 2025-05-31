@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import api from "@/app/services/api";
 import type { User } from "@/app/types/User";
-import { ERole } from "@/app/types/User";
+import { ERole, EStatus } from "@/app/types/User";
 import { useSession } from "next-auth/react";
 import UserTable from "@/app/components/UserTable";
 import ButtonFilter from "@/app/components/ButtonFilter";
@@ -12,12 +12,7 @@ import { FilterModal } from "@/app/components/FilterModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-// Enum para os status possíveis
-enum EStatus {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  BLOCKED = "BLOCKED",
-}
+import { redirect } from "next/navigation"; // Mova este import para cá
 
 export default function ListUser() {
   const [users, setUsers] = useState<User[]>([]);
@@ -31,13 +26,14 @@ export default function ListUser() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+
   const itemsPerPage = 5;
 
   // Função auxiliar para limpar filtros undefined
   const cleanFilters = (filters: Record<string, unknown>) => {
     const cleanedFilters = { ...filters };
     Object.keys(cleanedFilters).forEach((key) => {
-      if (cleanedFilters[key] === undefined) {
+      if (cleanedFilters[key] === undefined || cleanedFilters[key] === "") {
         delete cleanedFilters[key];
       }
     });
@@ -55,34 +51,34 @@ export default function ListUser() {
   }) => {
     try {
       setLoading(true);
+      console.log("Filtros originais:", filters);
+
+      // Verifica se o token está presente
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token não encontrado");
+        throw new Error(
+          "Token não encontrado. Por favor, faça login novamente."
+        );
+      }
+
       const currentFilters = cleanFilters({
         ...filters,
         size: 5, // Fixa em 5 itens por página
-        page: filters.page - 1, // Ajusta para começar do 0
+        page: filters.page, // Mantém a página 1 como início
       });
       delete currentFilters.limit;
 
+      console.log("Filtros após limpeza:", currentFilters);
       console.log("Enviando requisição com filtros:", currentFilters);
+
       const response = await api.getUser(currentFilters);
-      console.log("Resposta completa da API:", response);
+      console.log("Resposta da API:", response);
 
       if (response) {
-        // Atualiza o estado com os dados da API
-        const usersArray = response.users || [];
-        const totalItems = response.totalItems || 0;
-        const totalPages = Math.ceil(totalItems / 5);
-
-        console.log("Dados da API:", {
-          usersCount: usersArray.length,
-          totalItems,
-          totalPages,
-          currentPage: filters.page,
-          itemsPerPage: 5,
-        });
-
-        setUsers(usersArray);
-        setTotalPages(totalPages);
-        setTotalItems(totalItems);
+        setUsers(response.users);
+        setTotalPages(response.totalPages);
+        setTotalItems(response.totalItems);
       } else {
         console.error("Resposta vazia da API");
         setUsers([]);
@@ -94,6 +90,18 @@ export default function ListUser() {
       setUsers([]);
       setTotalPages(1);
       setTotalItems(0);
+
+      // Exibe mensagem de erro para o usuário
+      if (error instanceof Error) {
+        if (error.message.includes("Token não encontrado")) {
+          // Redireciona para a página de login se o token não estiver presente
+          window.location.href = "/login";
+        } else {
+          alert(`Erro ao carregar usuários: ${error.message}`);
+        }
+      } else {
+        alert("Erro ao carregar usuários. Por favor, tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
@@ -108,26 +116,30 @@ export default function ListUser() {
 
   // Efeito para buscar usuários quando os filtros ou página mudam
   useEffect(() => {
-    console.log("Efeito disparado - Página atual:", currentPage);
-    const currentFilters = {
-      status: selectedStatus || undefined,
-      role: selectedRole || undefined,
-      name: searchName || undefined,
-      email: searchEmail || undefined,
+    const fetchData = async () => {
+      console.log("Efeito disparado - Página atual:", currentPage);
+      const currentFilters = {
+        status: selectedStatus || undefined,
+        role: selectedRole || undefined,
+        name: searchName || undefined,
+        email: searchEmail || undefined,
+      };
+
+      console.log("Buscando usuários com filtros:", {
+        ...currentFilters,
+        page: currentPage,
+        limit: 5,
+      });
+
+      await fetchUsers({
+        ...currentFilters,
+        page: currentPage,
+        limit: 5,
+      });
     };
 
-    console.log("Buscando usuários com filtros:", {
-      ...currentFilters,
-      page: currentPage,
-      limit: 5,
-    });
-
-    fetchUsers({
-      ...currentFilters,
-      page: currentPage,
-      limit: 5,
-    });
-  }, [selectedStatus, selectedRole, searchName, searchEmail, currentPage]);
+    fetchData();
+  }, [currentPage, selectedStatus, selectedRole, searchName, searchEmail]);
 
   // Handlers para paginação e filtros
   const handlePageChange = (newPage: number) => {
@@ -249,6 +261,7 @@ export default function ListUser() {
               currentPage={currentPage}
               totalItems={totalItems}
               itemsPerPage={itemsPerPage}
+              onClick={() => redirect(`/dashboard/listuser/${users}`)}
             />
             {loading && (
               <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">

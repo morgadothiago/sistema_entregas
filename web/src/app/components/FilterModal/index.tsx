@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FiCheck, FiFilter, FiSearch, FiX } from "react-icons/fi";
-import { EStatus } from "@/app/types/User";
-import { ERole } from "@/app/types/User";
+import { ERole, EStatus } from "@/app/types/User";
 
 interface FilterModalProps {
   isOpen: boolean;

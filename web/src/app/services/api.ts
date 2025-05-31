@@ -6,18 +6,34 @@ import Axios, {
 } from "axios";
 
 import type { ICreateUser } from "../types/User";
-import { ERole } from "../types/User";
+import { ERole, EStatus } from "../types/User";
+import type { IBalance } from "../types/Belance";
+import type { ICompany } from "../types/Compny";
+import type { IExtract } from "../types/Extract";
 
 interface IErrorResponse {
   message: string;
   status: number;
 }
 
-// Enum para os status possíveis
-enum EStatus {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  BLOCKED = "BLOCKED",
+interface IApiResponse<T> {
+  users: T[];
+  totalPages: number;
+  currentPage: number;
+  totalItems: number;
+}
+
+interface IUser {
+  id: number;
+  name: string;
+  email: string;
+  role: ERole;
+  status: EStatus;
+  Balance: IBalance;
+  Company: ICompany;
+  Extract: IExtract[];
+  emailVerified?: Date | null;
+  token: string;
 }
 
 class ApiService {
@@ -29,6 +45,10 @@ class ApiService {
   private constructor() {
     this.api = Axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_HOST,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
     });
 
     this.setupInterceptors();
@@ -46,13 +66,43 @@ class ApiService {
         // Evita o uso de localStorage no lado do servidor
         if (typeof window !== "undefined") {
           const token = localStorage.getItem("token");
+          console.log("Token encontrado:", token ? "Sim" : "Não");
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
         }
+        console.log("Configuração da requisição:", {
+          url: config.url,
+          method: config.method,
+          headers: config.headers,
+          params: config.params,
+          baseURL: config.baseURL,
+        });
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => {
+        console.error("Erro no interceptor de requisição:", error);
+        return Promise.reject(error);
+      }
+    );
+
+    // Adiciona interceptor de resposta
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        console.error("Erro na resposta da API:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          config: {
+            url: error.config?.url,
+            method: error.config?.method,
+            headers: error.config?.headers,
+            params: error.config?.params,
+            baseURL: error.config?.baseURL,
+          },
+        });
+        return Promise.reject(error);
+      }
     );
   }
 
@@ -94,6 +144,108 @@ class ApiService {
     }
   }
 
+  private buildQueryParams(filters?: {
+    status?: EStatus;
+    role?: ERole;
+    name?: string;
+    email?: string;
+    page?: number;
+    size?: number;
+  }): URLSearchParams {
+    const queryParams = new URLSearchParams();
+
+    console.log("Construindo parâmetros da query com filtros:", filters);
+
+    if (filters?.status) {
+      const status = filters.status.toUpperCase();
+      console.log("Status após toUpperCase:", status);
+      if (Object.values(EStatus).includes(status as EStatus)) {
+        queryParams.append("status", status);
+      }
+    }
+    if (filters?.role) {
+      const role = filters.role.toUpperCase();
+      console.log("Role após toUpperCase:", role);
+      if (Object.values(ERole).includes(role as ERole)) {
+        queryParams.append("role", role);
+      }
+    }
+    if (filters?.name && filters.name.trim() !== "") {
+      queryParams.append("name", filters.name.trim());
+    }
+    if (filters?.email && filters.email.trim() !== "") {
+      queryParams.append("email", filters.email.trim());
+    }
+    if (filters?.page !== undefined) {
+      queryParams.append("page", filters.page.toString());
+    }
+    if (filters?.size) {
+      queryParams.append("size", filters.size.toString());
+    }
+
+    console.log("Parâmetros finais da query:", Object.fromEntries(queryParams));
+    return queryParams;
+  }
+
+  private parseApiResponse(response: AxiosResponse): IApiResponse<IUser> {
+    if (!response.data) {
+      return {
+        users: [],
+        totalPages: 1,
+        currentPage: 1,
+        totalItems: 0,
+      };
+    }
+
+    // Se a resposta for um array direto
+    if (Array.isArray(response.data)) {
+      return {
+        users: response.data,
+        totalPages: Math.ceil(response.data.length / 5),
+        currentPage: 1,
+        totalItems: response.data.length,
+      };
+    }
+
+    // Verifica diferentes formatos de resposta
+    const responseFormats = [
+      { key: "users", totalKey: "totalItems" },
+      { key: "content", totalKey: "totalElements" },
+      { key: "items", totalKey: "totalItems" },
+      { key: "data", totalKey: "totalItems" },
+    ];
+
+    for (const format of responseFormats) {
+      if (
+        response.data[format.key] &&
+        Array.isArray(response.data[format.key])
+      ) {
+        const totalItems =
+          response.data[format.totalKey] || response.data[format.key].length;
+        const currentPage = response.data.currentPage || 1;
+        const totalPages =
+          response.data.totalPages || Math.ceil(totalItems / 5);
+
+        // Ajusta a página atual para começar em 1
+        return {
+          users: response.data[format.key],
+          totalPages: totalPages,
+          currentPage: currentPage,
+          totalItems: totalItems,
+        };
+      }
+    }
+
+    // Se nenhum formato for encontrado
+    console.warn("Formato de resposta não reconhecido:", response.data);
+    return {
+      users: [],
+      totalPages: 1,
+      currentPage: 1,
+      totalItems: 0,
+    };
+  }
+
   public async getUser(filters?: {
     status?: EStatus;
     role?: ERole;
@@ -101,123 +253,35 @@ class ApiService {
     email?: string;
     page?: number;
     size?: number;
-  }) {
+  }): Promise<IApiResponse<IUser>> {
     try {
-      // Constrói os parâmetros da query
-      const queryParams = new URLSearchParams();
-
-      if (filters?.status) {
-        const status = filters.status.toUpperCase();
-        if (Object.values(EStatus).includes(status as EStatus)) {
-          queryParams.append("status", status);
-        }
-      }
-      if (filters?.role) {
-        const role = filters.role.toUpperCase();
-        if (Object.values(ERole).includes(role as ERole)) {
-          queryParams.append("role", role);
-        }
-      }
-      if (filters?.name && filters.name.trim() !== "") {
-        queryParams.append("name", filters.name.trim());
-      }
-      if (filters?.email && filters.email.trim() !== "") {
-        queryParams.append("email", filters.email.trim());
-      }
-      // Adiciona parâmetros de paginação
-      if (filters?.page !== undefined) {
-        queryParams.append("page", filters.page.toString());
-      }
-      if (filters?.size) {
-        queryParams.append("size", filters.size.toString());
+      if (!process.env.NEXT_PUBLIC_API_HOST) {
+        console.error("URL base da API não configurada");
+        throw new Error("URL base da API não configurada");
       }
 
-      console.log("Parâmetros da busca:", Object.fromEntries(queryParams));
+      console.log("URL base da API:", process.env.NEXT_PUBLIC_API_HOST);
 
-      const response = await this.api.get("/users", { params: queryParams });
-      console.log("Resposta bruta da API:", response);
+      const queryParams = this.buildQueryParams(filters);
+      const url = "/users";
 
-      // Verifica se a resposta tem a estrutura esperada
-      if (response.data) {
-        // Se a resposta for um array direto
-        if (Array.isArray(response.data)) {
-          console.log("Dados retornados (array):", response.data);
-          return {
-            users: response.data,
-            totalPages: Math.ceil(response.data.length / 5),
-            currentPage: 1,
-            totalItems: response.data.length,
-          };
-        }
-        // Se a resposta tiver a propriedade users
-        else if (response.data.users && Array.isArray(response.data.users)) {
-          console.log("Dados retornados (users):", response.data.users);
-          return {
-            users: response.data.users,
-            totalPages:
-              response.data.totalPages ||
-              Math.ceil(response.data.totalItems / 5),
-            currentPage: response.data.currentPage || 1,
-            totalItems: response.data.totalItems || response.data.users.length,
-          };
-        }
-        // Se a resposta tiver a propriedade content (comum em APIs paginadas)
-        else if (
-          response.data.content &&
-          Array.isArray(response.data.content)
-        ) {
-          console.log("Dados retornados (content):", response.data.content);
-          return {
-            users: response.data.content,
-            totalPages:
-              response.data.totalPages ||
-              Math.ceil(response.data.totalElements / 5),
-            currentPage: response.data.currentPage || 1,
-            totalItems:
-              response.data.totalElements || response.data.content.length,
-          };
-        }
-        // Se a resposta tiver a propriedade items
-        else if (response.data.items && Array.isArray(response.data.items)) {
-          console.log("Dados retornados (items):", response.data.items);
-          return {
-            users: response.data.items,
-            totalPages:
-              response.data.totalPages ||
-              Math.ceil(response.data.totalItems / 5),
-            currentPage: response.data.currentPage || 1,
-            totalItems: response.data.totalItems || response.data.items.length,
-          };
-        }
-        // Se a resposta tiver a propriedade data
-        else if (response.data.data && Array.isArray(response.data.data)) {
-          console.log("Dados retornados (data):", response.data.data);
-          return {
-            users: response.data.data,
-            totalPages:
-              response.data.totalPages ||
-              Math.ceil(response.data.totalItems / 5),
-            currentPage: response.data.currentPage || 1,
-            totalItems: response.data.totalItems || response.data.data.length,
-          };
-        } else {
-          console.warn("Formato de resposta inesperado:", response.data);
-          return {
-            users: [],
-            totalPages: 1,
-            currentPage: 1,
-            totalItems: 0,
-          };
-        }
-      } else {
-        console.warn("Resposta da API sem dados:", response);
-        return {
-          users: [],
-          totalPages: 1,
-          currentPage: 1,
-          totalItems: 0,
-        };
-      }
+      console.log("Fazendo requisição para:", {
+        url,
+        baseURL: process.env.NEXT_PUBLIC_API_HOST,
+        params: Object.fromEntries(queryParams),
+      });
+
+      const response = await this.api.get(url, {
+        params: queryParams,
+        validateStatus: (status) => status < 500,
+      });
+
+      console.log("Resposta recebida:", {
+        status: response.status,
+        data: response.data,
+      });
+
+      return this.parseApiResponse(response);
     } catch (error) {
       console.error("Erro na requisição:", error);
       if (error && typeof error === "object" && "response" in error) {
@@ -225,7 +289,13 @@ class ApiService {
         console.error("Detalhes do erro:", {
           status: axiosError.response?.status,
           data: axiosError.response?.data,
-          config: axiosError.config,
+          config: {
+            url: axiosError.config?.url,
+            method: axiosError.config?.method,
+            headers: axiosError.config?.headers,
+            params: axiosError.config?.params,
+            baseURL: axiosError.config?.baseURL,
+          },
         });
       }
       throw this.getError(error as AxiosError);
@@ -234,6 +304,16 @@ class ApiService {
 
   private getResponse<T>(response: AxiosResponse): T {
     return response.data;
+  }
+
+  // Dentro da classe ApiService, adicione:
+  async getUserById(id: number): Promise<IUser> {
+    try {
+      const response = await this.api.get(`/users/${id}`);
+      return response.data;
+    } catch (error) {
+      throw this.getError(error as AxiosError);
+    }
   }
 
   private getError(error: AxiosError<any>): IErrorResponse {
