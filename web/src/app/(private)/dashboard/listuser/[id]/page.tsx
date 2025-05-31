@@ -1,18 +1,20 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiArrowLeft, FiMail, FiUser, FiShield, FiClock } from "react-icons/fi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 import api from "@/app/services/api";
 import type { User } from "@/app/types/User";
+import { EStatus, ERole } from "@/app/types/User";
 
 export default function UserId() {
   const { id } = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,61 +24,68 @@ export default function UserId() {
         const response = await api.getUserById(Number(id));
         setUser(response);
       } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Erro ao carregar usuário";
+        toast({
+          title: "Erro",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        router.push("/dashboard/listuser");
       } finally {
         setLoading(false);
       }
     };
 
     fetchUser();
-  }, [id]);
+  }, [id, router, toast]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: EStatus) => {
     switch (status) {
-      case "ACTIVE":
+      case EStatus.ACTIVE:
         return "bg-green-100 text-green-800";
-      case "INACTIVE":
+      case EStatus.INACTIVE:
         return "bg-yellow-100 text-yellow-800";
-      case "BLOCKED":
+      case EStatus.BLOCKED:
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getRoleColor = (role: string) => {
+  const getRoleColor = (role: ERole) => {
     switch (role) {
-      case "ADMIN":
+      case ERole.ADMIN:
         return "bg-purple-100 text-purple-800";
-      case "DELIVERY":
+      case ERole.DELIVERY:
         return "bg-blue-100 text-blue-800";
-      case "COMPANY":
+      case ERole.COMPANY:
         return "bg-orange-100 text-orange-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getStatusText = (status: string) => {
+  const getStatusText = (status: EStatus) => {
     switch (status) {
-      case "ACTIVE":
+      case EStatus.ACTIVE:
         return "Ativo";
-      case "INACTIVE":
+      case EStatus.INACTIVE:
         return "Inativo";
-      case "BLOCKED":
+      case EStatus.BLOCKED:
         return "Bloqueado";
       default:
         return status;
     }
   };
 
-  const getRoleText = (role: string) => {
+  const getRoleText = (role: ERole) => {
     switch (role) {
-      case "ADMIN":
+      case ERole.ADMIN:
         return "Administrador";
-      case "DELIVERY":
+      case ERole.DELIVERY:
         return "Entregador";
-      case "COMPANY":
+      case ERole.COMPANY:
         return "Empresa";
       default:
         return role;

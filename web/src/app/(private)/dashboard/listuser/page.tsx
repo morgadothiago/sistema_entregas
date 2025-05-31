@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import api from "@/app/services/api";
-import type { User } from "@/app/types/User";
+import type { User, IUserFilters } from "@/app/types/User";
 import { ERole, EStatus } from "@/app/types/User";
 import { useSession } from "next-auth/react";
 import UserTable from "@/app/components/UserTable";
@@ -11,8 +11,8 @@ import { Pagination } from "@/app/components/Pagination";
 import { FilterModal } from "@/app/components/FilterModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-import { redirect } from "next/navigation"; // Mova este import para cá
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 export default function ListUser() {
   const [users, setUsers] = useState<User[]>([]);
@@ -26,128 +26,89 @@ export default function ListUser() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const itemsPerPage = 5;
 
-  // Função auxiliar para limpar filtros undefined
-  const cleanFilters = (filters: Record<string, unknown>) => {
-    const cleanedFilters = { ...filters };
-    Object.keys(cleanedFilters).forEach((key) => {
-      if (cleanedFilters[key] === undefined || cleanedFilters[key] === "") {
-        delete cleanedFilters[key];
-      }
-    });
-    return cleanedFilters;
-  };
-
-  // Função principal para buscar usuários da API
-  const fetchUsers = async (filters: {
-    status?: EStatus;
-    role?: ERole;
-    name?: string;
-    email?: string;
-    page: number;
-    limit: number;
-  }) => {
+  const fetchUsers = async (filters: IUserFilters) => {
     try {
       setLoading(true);
-      console.log("Filtros originais:", filters);
 
-      // Verifica se o token está presente
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("Token não encontrado");
-        throw new Error(
-          "Token não encontrado. Por favor, faça login novamente."
-        );
+        toast({
+          title: "Erro de autenticação",
+          description: "Token não encontrado. Por favor, faça login novamente.",
+          variant: "destructive",
+        });
+        router.push("/login");
+        return;
       }
 
-      const currentFilters = cleanFilters({
+      const response = await api.getUser({
         ...filters,
-        size: 5, // Fixa em 5 itens por página
-        page: filters.page, // Mantém a página 1 como início
+        page: filters.page,
+        size: itemsPerPage,
       });
-      delete currentFilters.limit;
 
-      console.log("Filtros após limpeza:", currentFilters);
-      console.log("Enviando requisição com filtros:", currentFilters);
-
-      const response = await api.getUser(currentFilters);
-      console.log("Resposta da API:", response);
-
-      if (response) {
-        setUsers(response.users);
-        setTotalPages(response.totalPages);
-        setTotalItems(response.totalItems);
-      } else {
-        console.error("Resposta vazia da API");
-        setUsers([]);
-        setTotalPages(1);
-        setTotalItems(0);
-      }
+      setUsers(response.data);
+      setTotalPages(response.totalPages);
+      setTotalItems(response.totalItems);
     } catch (error) {
-      console.error("Erro ao buscar dados dos usuários:", error);
+      console.error("Erro ao buscar usuários:", error);
+
+      if (error instanceof Error && error.message === "jwt expired") {
+        toast({
+          title: "Sessão expirada",
+          description: "Sua sessão expirou. Por favor, faça login novamente.",
+          variant: "destructive",
+        });
+        localStorage.removeItem("token");
+        router.push("/login");
+        return;
+      }
+
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar usuários",
+        variant: "destructive",
+      });
       setUsers([]);
       setTotalPages(1);
       setTotalItems(0);
-
-      // Exibe mensagem de erro para o usuário
-      if (error instanceof Error) {
-        if (error.message.includes("Token não encontrado")) {
-          // Redireciona para a página de login se o token não estiver presente
-          window.location.href = "/login";
-        } else {
-          alert(`Erro ao carregar usuários: ${error.message}`);
-        }
-      } else {
-        alert("Erro ao carregar usuários. Por favor, tente novamente.");
-      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Efeito para gerenciar o token da sessão
   useEffect(() => {
     if (session?.accessToken) {
       localStorage.setItem("token", session.accessToken);
     }
   }, [session]);
 
-  // Efeito para buscar usuários quando os filtros ou página mudam
   useEffect(() => {
-    const fetchData = async () => {
-      console.log("Efeito disparado - Página atual:", currentPage);
-      const currentFilters = {
-        status: selectedStatus || undefined,
-        role: selectedRole || undefined,
-        name: searchName || undefined,
-        email: searchEmail || undefined,
-      };
-
-      console.log("Buscando usuários com filtros:", {
-        ...currentFilters,
-        page: currentPage,
-        limit: 5,
-      });
-
-      await fetchUsers({
-        ...currentFilters,
-        page: currentPage,
-        limit: 5,
-      });
-    };
-
-    fetchData();
-  }, [currentPage, selectedStatus, selectedRole, searchName, searchEmail]);
-
-  // Handlers para paginação e filtros
-  const handlePageChange = (newPage: number) => {
-    console.log("Mudando para página:", newPage);
-    if (newPage < 1 || newPage > totalPages) {
-      console.log("Página inválida:", newPage);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
       return;
     }
+
+    const filters: IUserFilters = {
+      status: selectedStatus || undefined,
+      role: selectedRole || undefined,
+      name: searchName || undefined,
+      email: searchEmail || undefined,
+      page: currentPage,
+      size: itemsPerPage,
+    };
+
+    fetchUsers(filters);
+  }, [currentPage, selectedStatus, selectedRole, searchName, searchEmail]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
   };
 
@@ -183,114 +144,115 @@ export default function ListUser() {
         </div>
       </header>
 
-      <div className="w-full h-full overflow-hidden rounded-lg bg-white shadow-lg transition-all duration-300">
-        <div className="p-4 sm:p-6">
-          <div className="mb-4 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[#003873]">
-                Usuários Cadastrados
-              </h2>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">
-                  Total: {totalItems} usuários
-                </span>
-              </div>
+      <div className="p-4 sm:p-6">
+        <div className="mb-4 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[#003873]">
+              Usuários Cadastrados
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">
+                Total: {totalItems} usuários
+              </span>
             </div>
-
-            {(selectedStatus || selectedRole || searchName || searchEmail) && (
-              <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <span className="text-sm font-medium text-gray-700">
-                  Filtros ativos:
-                </span>
-                {selectedStatus && (
-                  <Badge className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                    Status:{" "}
-                    {selectedStatus === "ACTIVE"
-                      ? "Ativo"
-                      : selectedStatus === "INACTIVE"
-                      ? "Inativo"
-                      : "Bloqueado"}
-                  </Badge>
-                )}
-                {selectedRole && (
-                  <Badge className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                    Cargo:{" "}
-                    {selectedRole === "ADMIN"
-                      ? "Administrador"
-                      : selectedRole === "DELIVERY"
-                      ? "Entregador"
-                      : "Empresa"}
-                  </Badge>
-                )}
-                {searchName && (
-                  <Badge className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                    Nome: {searchName}
-                  </Badge>
-                )}
-                {searchEmail && (
-                  <Badge className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">
-                    Email: {searchEmail}
-                  </Badge>
-                )}
-                <Button
-                  onClick={handleClearFilters}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  Limpar filtros
-                </Button>
-              </div>
-            )}
-
-            {users.length === 0 && !loading && (
-              <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-gray-600">
-                  {selectedStatus || selectedRole || searchName || searchEmail
-                    ? "Nenhum usuário encontrado com os filtros selecionados."
-                    : "Nenhum usuário cadastrado."}
-                </p>
-              </div>
-            )}
           </div>
 
-          <div className="relative">
-            <UserTable
-              users={users}
-              onView={(user) => console.log("Visualizar:", user)}
-              currentPage={currentPage}
-              totalItems={totalItems}
-              itemsPerPage={itemsPerPage}
-              onClick={() => redirect(`/dashboard/listuser/${users}`)}
-            />
-            {loading && (
-              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#003873]"></div>
-              </div>
-            )}
-          </div>
+          {(selectedStatus || selectedRole || searchName || searchEmail) && (
+            <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <span className="text-sm font-medium text-gray-700">
+                Filtros ativos:
+              </span>
+              {selectedStatus && (
+                <Badge className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  Status:{" "}
+                  {selectedStatus === "ACTIVE"
+                    ? "Ativo"
+                    : selectedStatus === "INACTIVE"
+                    ? "Inativo"
+                    : "Bloqueado"}
+                </Badge>
+              )}
+              {selectedRole && (
+                <Badge className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                  Cargo:{" "}
+                  {selectedRole === "ADMIN"
+                    ? "Administrador"
+                    : selectedRole === "DELIVERY"
+                    ? "Entregador"
+                    : "Empresa"}
+                </Badge>
+              )}
+              {searchName && (
+                <Badge className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                  Nome: {searchName}
+                </Badge>
+              )}
+              {searchEmail && (
+                <Badge className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm">
+                  Email: {searchEmail}
+                </Badge>
+              )}
+              <Button
+                onClick={handleClearFilters}
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Limpar filtros
+              </Button>
+            </div>
+          )}
 
-          <Pagination
+          {users.length === 0 && !loading && (
+            <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+              <p className="text-gray-600">
+                {selectedStatus || selectedRole || searchName || searchEmail
+                  ? "Nenhum usuário encontrado com os filtros selecionados."
+                  : "Nenhum usuário cadastrado."}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="relative">
+          <UserTable
+            users={users}
+            onView={(user) => router.push(`/dashboard/listuser/${user.id}`)}
             currentPage={currentPage}
-            totalPages={totalPages}
             totalItems={totalItems}
             itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
           />
+          {loading && (
+            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#003873]"></div>
+            </div>
+          )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="mt-4 flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+          </div>
+        )}
       </div>
 
       <FilterModal
         isOpen={isFilterModal}
-        onClose={openIsFilterModal}
-        selectedStatus={selectedStatus}
-        selectedRole={selectedRole}
-        searchEmail={searchEmail}
-        onStatusChange={setSelectedStatus}
-        onRoleChange={setSelectedRole}
-        onEmailChange={setSearchEmail}
+        onClose={() => setIsFilterModal(false)}
         onApplyFilters={handleApplyFilters}
         onClearFilters={handleClearFilters}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
+        selectedRole={selectedRole}
+        onRoleChange={setSelectedRole}
+        searchEmail={searchEmail}
+        onEmailChange={setSearchEmail}
       />
     </div>
   );

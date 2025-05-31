@@ -14,18 +14,41 @@ export enum EStatus {
   BLOCKED = "BLOCKED",
 }
 
+export interface IPaginationParams {
+  page: number;
+  size: number;
+}
+
+export interface IUserFilters extends IPaginationParams {
+  status?: EStatus;
+  role?: ERole;
+  name?: string;
+  email?: string;
+}
+
+export interface IPaginatedResponse<T> {
+  data: T[];
+  totalPages: number;
+  currentPage: number;
+  totalItems: number;
+}
+
 export interface User {
   id: number;
   name: string;
   email: string;
   role: ERole;
+  status: EStatus;
   Balance: IBalance;
   Company: ICompany;
   Extract: IExtract[];
   emailVerified?: Date | null; // ← necessário para NextAuth
   token: string;
-  status: string;
+  information?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
+
 export interface ICreateUser {
   name: string;
   email: string;

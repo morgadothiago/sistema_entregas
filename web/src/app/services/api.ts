@@ -1,11 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Axios, {
   type AxiosInstance,
   type AxiosResponse,
   type AxiosError,
 } from "axios";
 
-import type { ICreateUser } from "../types/User";
+import type {
+  ICreateUser,
+  User,
+  IUserFilters,
+  IPaginatedResponse,
+} from "../types/User";
 import { ERole, EStatus } from "../types/User";
 import type { IBalance } from "../types/Belance";
 import type { ICompany } from "../types/Compny";
@@ -14,8 +18,12 @@ import type { IExtract } from "../types/Extract";
 interface IErrorResponse {
   message: string;
   status: number;
+  code?: string;
 }
 
+/**
+ * Interface que define a estrutura de resposta da API para listagem de usuários
+ */
 interface IApiResponse<T> {
   users: T[];
   totalPages: number;
@@ -23,6 +31,9 @@ interface IApiResponse<T> {
   totalItems: number;
 }
 
+/**
+ * Interface que define a estrutura de um usuário
+ */
 interface IUser {
   id: number;
   name: string;
@@ -34,6 +45,7 @@ interface IUser {
   Extract: IExtract[];
   emailVerified?: Date | null;
   token: string;
+  information?: string;
 }
 
 class ApiService {
@@ -49,72 +61,98 @@ class ApiService {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
+      timeout: 10000, // 10 segundos
     });
 
     this.setupInterceptors();
   }
 
   private setupInterceptors() {
-    // Remove o interceptor anterior, se existir
     if (this.requestInterceptorId !== undefined) {
       this.api.interceptors.request.eject(this.requestInterceptorId);
     }
 
-    // Adiciona um novo interceptor de requisição
     this.requestInterceptorId = this.api.interceptors.request.use(
       (config) => {
-        // Evita o uso de localStorage no lado do servidor
         if (typeof window !== "undefined") {
           const token = localStorage.getItem("token");
-          console.log("Token encontrado:", token ? "Sim" : "Não");
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
         }
-        console.log("Configuração da requisição:", {
-          url: config.url,
-          method: config.method,
-          headers: config.headers,
-          params: config.params,
-          baseURL: config.baseURL,
-        });
         return config;
       },
       (error) => {
         console.error("Erro no interceptor de requisição:", error);
-        return Promise.reject(error);
+        return Promise.reject(this.handleError(error));
       }
     );
 
-    // Adiciona interceptor de resposta
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
-        console.error("Erro na resposta da API:", {
-          status: error.response?.status,
-          data: error.response?.data,
-          config: {
-            url: error.config?.url,
-            method: error.config?.method,
-            headers: error.config?.headers,
-            params: error.config?.params,
-            baseURL: error.config?.baseURL,
-          },
-        });
-        return Promise.reject(error);
+        console.error("Erro na resposta da API:", error);
+        return Promise.reject(this.handleError(error));
       }
     );
   }
 
+  private handleError(error: AxiosError): IErrorResponse {
+    if (error.response) {
+      const status = error.response.status;
+      const data = error.response.data as any;
+      const message = data?.message || "Erro na requisição";
+      const code = data?.code;
+
+      // Tratamento específico para erros de autenticação
+      if (status === 401) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+        return {
+          message: "Sessão expirada. Por favor, faça login novamente.",
+          status,
+          code,
+        };
+      }
+
+      // Outros tratamentos de erro
+      switch (status) {
+        case 403:
+          return {
+            message: "Você não tem permissão para realizar esta ação.",
+            status,
+            code,
+          };
+        case 404:
+          return { message: "Recurso não encontrado.", status, code };
+        case 422:
+          return {
+            message: "Dados inválidos. Por favor, verifique os campos.",
+            status,
+            code,
+          };
+        default:
+          return { message, status, code };
+      }
+    } else if (error.request) {
+      return {
+        message: "Servidor não respondeu. Tente novamente mais tarde.",
+        status: 0,
+      };
+    } else {
+      return { message: "Erro ao configurar a requisição.", status: 0 };
+    }
+  }
+
   public setToken(token: string) {
     this.token = `Bearer ${token}`;
-    // Atualiza o interceptor com o novo token
     this.setupInterceptors();
   }
 
   public cleanToken() {
     this.token = "";
-    // Remove o interceptor de requisição
     if (this.requestInterceptorId !== undefined) {
       this.api.interceptors.request.eject(this.requestInterceptorId);
       this.requestInterceptorId = undefined;
@@ -131,7 +169,7 @@ class ApiService {
       this.setToken(token);
       return response.data;
     } catch (error) {
-      throw this.getError(error as AxiosError);
+      throw this.handleError(error as AxiosError);
     }
   }
 
@@ -140,57 +178,49 @@ class ApiService {
       const response = await this.api.post("/auth/signup/company", data);
       return this.getResponse(response);
     } catch (error) {
-      throw this.getError(error as AxiosError);
+      throw this.handleError(error as AxiosError);
     }
   }
 
-  private buildQueryParams(filters?: {
-    status?: EStatus;
-    role?: ERole;
-    name?: string;
-    email?: string;
-    page?: number;
-    size?: number;
-  }): URLSearchParams {
+  /**
+   * Constrói os parâmetros de query para a requisição de usuários
+   * @param filters Filtros a serem aplicados na busca
+   * @returns URLSearchParams com os parâmetros formatados
+   */
+  private buildQueryParams(filters?: IUserFilters): URLSearchParams {
     const queryParams = new URLSearchParams();
 
-    console.log("Construindo parâmetros da query com filtros:", filters);
-
     if (filters?.status) {
-      const status = filters.status.toUpperCase();
-      console.log("Status após toUpperCase:", status);
-      if (Object.values(EStatus).includes(status as EStatus)) {
-        queryParams.append("status", status);
-      }
+      queryParams.append("status", filters.status);
     }
     if (filters?.role) {
-      const role = filters.role.toUpperCase();
-      console.log("Role após toUpperCase:", role);
-      if (Object.values(ERole).includes(role as ERole)) {
-        queryParams.append("role", role);
-      }
+      queryParams.append("role", filters.role);
     }
-    if (filters?.name && filters.name.trim() !== "") {
+    if (filters?.name?.trim()) {
       queryParams.append("name", filters.name.trim());
     }
-    if (filters?.email && filters.email.trim() !== "") {
+    if (filters?.email?.trim()) {
       queryParams.append("email", filters.email.trim());
     }
-    if (filters?.page !== undefined) {
+    if (filters?.page) {
       queryParams.append("page", filters.page.toString());
     }
     if (filters?.size) {
       queryParams.append("size", filters.size.toString());
     }
 
-    console.log("Parâmetros finais da query:", Object.fromEntries(queryParams));
     return queryParams;
   }
 
-  private parseApiResponse(response: AxiosResponse): IApiResponse<IUser> {
+  /**
+   * Processa a resposta da API para o formato padrão
+   * @param response Resposta da API
+   * @returns Dados processados no formato padrão
+   */
+  private parseApiResponse<T>(response: AxiosResponse): IPaginatedResponse<T> {
     if (!response.data) {
       return {
-        users: [],
+        data: [],
         totalPages: 1,
         currentPage: 1,
         totalItems: 0,
@@ -200,10 +230,21 @@ class ApiService {
     // Se a resposta for um array direto
     if (Array.isArray(response.data)) {
       return {
-        users: response.data,
+        data: response.data,
         totalPages: Math.ceil(response.data.length / 5),
         currentPage: 1,
         totalItems: response.data.length,
+      };
+    }
+
+    // Se a resposta vier dentro de data
+    if (response.data.data && Array.isArray(response.data.data)) {
+      return {
+        data: response.data.data,
+        totalPages:
+          response.data.totalPages || Math.ceil(response.data.data.length / 5),
+        currentPage: response.data.currentPage || 1,
+        totalItems: response.data.totalItems || response.data.data.length,
       };
     }
 
@@ -222,83 +263,57 @@ class ApiService {
       ) {
         const totalItems =
           response.data[format.totalKey] || response.data[format.key].length;
-        const currentPage = response.data.currentPage || 1;
-        const totalPages =
-          response.data.totalPages || Math.ceil(totalItems / 5);
-
-        // Ajusta a página atual para começar em 1
         return {
-          users: response.data[format.key],
-          totalPages: totalPages,
-          currentPage: currentPage,
-          totalItems: totalItems,
+          data: response.data[format.key],
+          totalPages: response.data.totalPages || Math.ceil(totalItems / 5),
+          currentPage: response.data.currentPage || 1,
+          totalItems,
         };
       }
     }
 
-    // Se nenhum formato for encontrado
-    console.warn("Formato de resposta não reconhecido:", response.data);
     return {
-      users: [],
+      data: [],
       totalPages: 1,
       currentPage: 1,
       totalItems: 0,
     };
   }
 
-  public async getUser(filters?: {
-    status?: EStatus;
-    role?: ERole;
-    name?: string;
-    email?: string;
-    page?: number;
-    size?: number;
-  }): Promise<IApiResponse<IUser>> {
+  /**
+   * Busca uma lista de usuários com filtros opcionais
+   * @param filters Filtros para a busca
+   * @returns Lista de usuários e informações de paginação
+   */
+  public async getUser(
+    filters?: IUserFilters
+  ): Promise<IPaginatedResponse<User>> {
     try {
       if (!process.env.NEXT_PUBLIC_API_HOST) {
-        console.error("URL base da API não configurada");
         throw new Error("URL base da API não configurada");
       }
 
-      console.log("URL base da API:", process.env.NEXT_PUBLIC_API_HOST);
-
       const queryParams = this.buildQueryParams(filters);
-      const url = "/users";
+      console.log(
+        "URL da requisição:",
+        `${process.env.NEXT_PUBLIC_API_HOST}/users`
+      );
+      console.log("Parâmetros da query:", queryParams.toString());
 
-      console.log("Fazendo requisição para:", {
-        url,
-        baseURL: process.env.NEXT_PUBLIC_API_HOST,
-        params: Object.fromEntries(queryParams),
-      });
-
-      const response = await this.api.get(url, {
+      const response = await this.api.get("/users", {
         params: queryParams,
         validateStatus: (status) => status < 500,
       });
 
-      console.log("Resposta recebida:", {
-        status: response.status,
-        data: response.data,
-      });
+      console.log("Resposta bruta da API:", response.data);
 
-      return this.parseApiResponse(response);
+      const parsedResponse = this.parseApiResponse<User>(response);
+      console.log("Resposta processada:", parsedResponse);
+
+      return parsedResponse;
     } catch (error) {
-      console.error("Erro na requisição:", error);
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as AxiosError;
-        console.error("Detalhes do erro:", {
-          status: axiosError.response?.status,
-          data: axiosError.response?.data,
-          config: {
-            url: axiosError.config?.url,
-            method: axiosError.config?.method,
-            headers: axiosError.config?.headers,
-            params: axiosError.config?.params,
-            baseURL: axiosError.config?.baseURL,
-          },
-        });
-      }
-      throw this.getError(error as AxiosError);
+      console.error("Erro na requisição getUser:", error);
+      throw this.handleError(error as AxiosError);
     }
   }
 
@@ -306,20 +321,27 @@ class ApiService {
     return response.data;
   }
 
-  // Dentro da classe ApiService, adicione:
-  async getUserById(id: number): Promise<IUser> {
+  /**
+   * Busca um usuário específico pelo ID
+   * @param id ID do usuário
+   * @returns Dados do usuário
+   */
+  public async getUserById(id: number): Promise<User> {
     try {
+      if (!id || isNaN(id)) {
+        throw new Error("ID inválido");
+      }
+
       const response = await this.api.get(`/users/${id}`);
+
+      if (!response.data) {
+        throw new Error("Usuário não encontrado");
+      }
+
       return response.data;
     } catch (error) {
-      throw this.getError(error as AxiosError);
+      throw this.handleError(error as AxiosError);
     }
-  }
-
-  private getError(error: AxiosError<any>): IErrorResponse {
-    const status = error.response?.status || 500;
-    const message = error.response?.data?.message || "Erro desconhecido";
-    return { message, status };
   }
 
   public static getInstance() {
