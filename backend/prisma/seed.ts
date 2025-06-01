@@ -6,11 +6,55 @@ const prisma = new PrismaClient();
 
 async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
   const vehicleTypes = [
-    { type: "Carro", pricePerKm: 1.5 },
-    { type: "Motocicleta", pricePerKm: 1.0 },
-    { type: "Caminhão", pricePerKm: 2.5 },
-    { type: "Ônibus", pricePerKm: 2.0 },
-    { type: "Bicicleta", pricePerKm: 0.5 },
+    {
+      type: "Bike",
+      tarifaBase: 6,
+      valorKMAdicional: 1,
+      paradaAdicional: 2,
+      ajudanteAdicional: 0,
+    },
+    {
+      type: "Moto",
+      tarifaBase: 9,
+      valorKMAdicional: 1.5,
+      paradaAdicional: 2.5,
+      ajudanteAdicional: 30,
+    },
+    {
+      type: "Carro",
+      tarifaBase: 12,
+      valorKMAdicional: 2,
+      paradaAdicional: 3,
+      ajudanteAdicional: 30,
+    },
+    {
+      type: "Carretinha",
+      tarifaBase: 18,
+      valorKMAdicional: 2.5,
+      paradaAdicional: 3.5,
+      ajudanteAdicional: 30,
+    },
+    {
+      type: "Utilitário Pequeno",
+      tarifaBase: 25,
+      valorKMAdicional: 3,
+      paradaAdicional: 5,
+      ajudanteAdicional: 25,
+    },
+    {
+      type: "Utilitário Médio",
+      tarifaBase: 35,
+      valorKMAdicional: 4,
+      paradaAdicional: 6,
+      ajudanteAdicional: 30,
+    },
+    {
+      type: "Utilitário Grande",
+      tarifaBase: 45,
+      valorKMAdicional: 5,
+      paradaAdicional: 8,
+      ajudanteAdicional: 35,
+    },
   ];
 
   logger.log(`Seeding vehicle types`);

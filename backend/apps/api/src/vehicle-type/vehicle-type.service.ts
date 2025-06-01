@@ -7,6 +7,8 @@ import { PrismaService } from "../prisma/prisma.service";
 import { VehicleType } from "@prisma/client";
 import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto";
 import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto";
+import { IPaginateResponse, paginateResponse } from "../utils/fn";
+import { Decimal } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class VehicleTypeService {
@@ -63,13 +65,19 @@ export class VehicleTypeService {
     }
 
     const vehicleTypeDto = {
-      pricePerKm: updateVehicleTypeDto.pricePerKm,
+      tarifaBase: updateVehicleTypeDto.tarifaBase as unknown as Decimal,
+      valorKMAdicional:
+        updateVehicleTypeDto.valorKMAdicional as unknown as Decimal,
+      ParadaAdicional:
+        updateVehicleTypeDto.ParadaAdicional as unknown as Decimal,
+      AjudanteAdicional:
+        updateVehicleTypeDto.AjudanteAdicional as unknown as Decimal,
       type: updateVehicleTypeDto.type,
     };
 
     await this.prisma.vehicleType.update({
       where: { id: vehicleType.id },
-      data: vehicleType,
+      data: vehicleTypeDto,
     });
   }
 
@@ -84,29 +92,37 @@ export class VehicleTypeService {
       throw new ConflictException(`Tipo de veiculo '${body.type}' já existe`);
 
     const vehicleTypeDto = {
-      pricePerKm: body.pricePerKm,
       type: body.type,
+      tarifaBase: new Decimal(body.tarifaBase),
+      valorKMAdicional: new Decimal(body.valorKMAdicional),
+      paradaAdicional: new Decimal(body.ParadaAdicional),
+      ajudanteAdicional: new Decimal(body.AjudanteAdicional),
     };
 
     await this.prisma.vehicleType.create({
       data: vehicleTypeDto,
     });
-
-    VehicleTypeService.data.push(vehicleTypeDto);
   }
 
-  async findAll(): Promise<Partial<VehicleType>[]> {
-    if (!VehicleTypeService.data.length) {
-      VehicleTypeService.data = await this.prisma.vehicleType.findMany({
-        where: {},
-        select: {
-          id: true,
-          type: true,
-          pricePerKm: true,
-        },
-      });
-    }
+  async findAll(
+    page: number,
+    registers: number,
+  ): Promise<IPaginateResponse<Partial<VehicleType>>> {
+    const where = {};
 
-    return VehicleTypeService.data;
+    const [data, total] = await Promise.all([
+      this.prisma.vehicleType.findMany({
+        where,
+        omit: { createdAt: true, updatedAt: true },
+        skip: (page - 1) * registers,
+        take: registers,
+      }),
+
+      this.prisma.vehicleType.count({
+        where,
+      }),
+    ]);
+
+    return paginateResponse(data, page, registers, total);
   }
 }
