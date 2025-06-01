@@ -1,21 +1,46 @@
-"use server";
-import React, { ReactNode } from "react";
+"use client";
+import React, { ReactNode, useEffect } from "react";
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SideBar } from "../components/MenuSheet";
 import { redirect } from "next/navigation";
-import { auth } from "../util/auth";
+import { useAuth } from "../context";
+import { getSession } from "next-auth/react";
+import { User } from "../types/User";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-export default async function Layout({ children }: LayoutProps) {
-  const session = await auth();
+export default function Layout({ children }: LayoutProps) {
+  const { setUser, setToken } = useAuth();
 
-  if (!session) {
-    redirect("/signin");
-  }
+  useEffect(() => {
+    let isMounted = true;
+    
+    const checkSession = async () => {
+      try {
+        const data = await getSession();
+        if (!isMounted) return;
+        
+        if (data) {
+          setUser(data.user as unknown as User);
+          setToken((data as unknown as { token: string }).token);
+        } else {
+          redirect("/signin");
+        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+      }
+    };
+    
+    // Verificar sessão apenas uma vez ao montar
+    checkSession();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div>

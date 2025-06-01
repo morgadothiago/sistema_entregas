@@ -1,20 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import SideBarSheet from "../sidebarsheet";
-import { getSession } from "next-auth/react";
-import { User } from "@/app/types/User";
+
 import Image from "next/image";
+import { useAuth } from "@/app/context";
 
 export default function Header() {
-  const [user, setUser] = useState<User>({} as User);
-
-  useEffect(() => {
-    getSession().then((data) => {
-      if (data) setUser(data.user as unknown as User);
-    });
-  }, []); // Add notifications.length as dependency since it's used in the effect
-
+  const { user } = useAuth()
+  
   return (
     <div className="flex flex-row md:flex-row justify-between items-center p-1 bg-white ">
       <div className="text-lg font-semibold">Olá: {user?.Company?.name}</div>

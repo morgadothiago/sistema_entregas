@@ -14,20 +14,15 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { LogOutIcon, User2 } from "lucide-react";
-import Image from "next/image";
-
-import LogoMenuLateral from "@/app/assets/img2.png";
-
 import { itemAdm, items, itemSupport } from "@/app/utils/menu";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import api from "@/app/services/api";
-import { User } from "@/app/types/User";
+import { useAuth } from "@/app/context";
 
 export function SideBar() {
-  const [user, setUser] = useState<User>({} as User);
-
+  const {user} = useAuth()
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const router = useRouter();
 
@@ -36,12 +31,6 @@ export function SideBar() {
     api.cleanToken();
     router.push("/signin");
   };
-
-  useEffect(() => {
-    getSession().then((data) => {
-      if (data) setUser(data.user as unknown as User);
-    });
-  }, []);
 
   function handleNextPage(itemTitle: string) {
     setSelectedItem(itemTitle);
@@ -54,11 +43,11 @@ export function SideBar() {
         <SidebarHeader className="bg-none">
           <div className="flex items-center mb-4">
             <div className="w-[57px] h-[56px] rounded-full overflow-hidden shadow-md">
-              <Image
-                src={LogoMenuLateral}
+              {/* <Image
+                
                 alt="Logo"
                 className="w-full h-full object-cover"
-              />
+              /> */}
             </div>
             <h1 className="text-white font-bold text-1xl ml-2">
               Nome da empresa
@@ -97,7 +86,7 @@ export function SideBar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-          {user.role === "ADMIN" && (
+          {user?.role === "ADMIN" && (
             <SidebarGroup>
               <SidebarGroupLabel className="text-lg text-white">
                 Administrativa
