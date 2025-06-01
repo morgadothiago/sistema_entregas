@@ -16,22 +16,26 @@ export const items = [
     icon: Home,
   },
   {
-    title: "Simulação de entrega",
+    title: "simulate",
+    subTile: "Simulação de entrega",
     url: "/simulate",
     icon: RefreshCcw,
   },
   {
-    title: "Entregador",
+    title: "delivry",
+    subTile: "Entregador",
     url: "/delivery",
     icon: Car,
   },
   {
-    title: "Débitos",
+    title: "debts",
+    subTile: "Débitos",
     url: "/debts",
     icon: DollarSign,
   },
   {
-    title: "Notificações",
+    title: "notifications",
+    subTile: "Notificações",
     url: "/dashboard/notifications",
     icon: Bell,
   },
@@ -39,23 +43,27 @@ export const items = [
 
 export const itemAdm = [
   {
-    title: "Cadastro de Entregador",
+    title: "add-new-delivery",
+    subTile: "Cadastro de Entregador",
     url: "/admin/delivery",
     icon: Car,
   },
   {
-    title: "Repasse de valores",
+    title: "payments",
+    subTile: "Repasse de valores",
     url: "/admin/repassar-valores",
     icon: DollarSign,
   },
   {
-    title: "Solicitação de acesso",
+    title: "acess-user",
+    subTile: "Solicitação de acesso",
     url: "/admin/solicitacao-acesso",
     icon: User,
   },
   {
-    title: "Listagem de Usuarios",
-    url: "/admin/solicitacao-acesso",
+    title: "listuser",
+    subTile: "Listagem de Usuario",
+    url: "/listuser",
     icon: User,
   },
 ];
