@@ -109,7 +109,7 @@ export function SideBar() {
                         >
                           <item.icon className="mr-2" />
                           <span className="text-sm md:text-sm">
-                            {item.title}
+                            {item.subTile}
                           </span>
                         </a>
                       </SidebarMenuButton>
