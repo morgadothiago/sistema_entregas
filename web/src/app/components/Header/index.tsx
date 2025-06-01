@@ -1,22 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import SideBarSheet from "../sidebarsheet";
-import { getSession } from "next-auth/react";
-import { User } from "@/app/types/User";
+import React from "react";
+import { useAuth } from "@/app/context";
 import { Bell, MessageCircle, Menu } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback/* , AvatarImage */ } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 export default function Header() {
-  const [user, setUser] = useState<User>({} as User);
-
-  useEffect(() => {
-    getSession().then((data) => {
-      if (data) setUser(data.user as unknown as User);
-    });
-  }, []);
+  const { user } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
@@ -32,7 +24,7 @@ export default function Header() {
 
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src={user?.image} alt={user?.name} />
+              {/* <AvatarImage src={user?.image} alt={user?.name} /> */}
               <AvatarFallback className="bg-primary/10 text-primary">
                 {user?.name?.charAt(0)}
               </AvatarFallback>

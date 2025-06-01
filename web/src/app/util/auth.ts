@@ -3,10 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import api from "@/app/services/api";
 import { User } from "@/app/types/User";
 
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error("NEXTAUTH_SECRET is not defined");
-}
-
 export const authOptions: NextAuthConfig = {
   trustHost: true,
   providers: [
@@ -38,11 +34,12 @@ export const authOptions: NextAuthConfig = {
           api.setToken(token);
 
           return {
-            ...user,
+            data: user,
+            token,
             id: user.id.toString(), // Ensure the 'id' is a string as required by next-auth
           };
-        } catch (error) {
-          console.error("Authorization error:", error);
+        } catch {
+          //console.error("Authorization error:", error);
           return null;
         }
       },
@@ -51,14 +48,20 @@ export const authOptions: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.user = user;
+        token.user = (user as {data: User}).data;
+        token.token = (user as {token: string}).token;
       }
 
       return token;
     },
 
     async session({ session, token }) {
+      if (token.token) {
+        api.setToken((token as {token: string})?.token);
+      }
+      
       (session as unknown as { user: User }).user = token.user as User;
+      (session as unknown as { token: string }).token = token.token as string;
 
       return session;
     },
@@ -76,5 +79,5 @@ export const {
     handlers: {GET, POST},
     auth,
     signIn,
-    signOut
+    signOut,
 } = NextAuth(authOptions);

@@ -63,7 +63,7 @@ export const itemAdm = [
   {
     title: "/admin/listuser",
     subTile: "Listagem de Usuario",
-    url: "/admin/listuser",
+    url: "/user",
     icon: User,
   },
 ];
