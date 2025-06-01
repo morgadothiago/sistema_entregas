@@ -1,9 +1,15 @@
+import React, { useEffect, useRef, useState } from "react";
+
 import {
   Keyboard,
   Platform,
   TextInput,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from "react-native";
+
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -18,7 +24,6 @@ import {
   GradientBackground,
   ImageContainer,
   Image,
-  Title,
   FormArea,
   Footer,
   SocialLoginArea,
@@ -27,30 +32,34 @@ import {
 } from "./styles";
 
 import Logo from "../../../assets/ios-light.png";
-import { KeyboardAvoidingView } from "react-native";
-import { useForm } from "react-hook-form";
-import { useEffect, useRef, useState } from "react";
+
 import { LinkButton } from "../../components/Link";
 import { theme } from "../../global/theme";
 
+import { SigninSchema } from "../../util/schemasValidations";
+import { ValidationError } from "yup";
+
 export default function SignInScreen() {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { login, isAuthenticated } = useAuth();
+
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
 
-  const { control } = useForm();
-  const { login, isAuthenticated } = useAuth();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
-      console.log("Keyboard shown");
       setKeyboardVisible(true);
     });
     const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      console.log("Keyboard hidden");
       setKeyboardVisible(false);
     });
 
@@ -76,20 +85,40 @@ export default function SignInScreen() {
 
   const emailRef = useRef<TextInput>(null);
 
-  // Simulate a login function
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
+  const handleLogin = async (data: any) => {
+    const validation = await SigninSchema.validate(data).catch((err: any) => {
+      if (err instanceof ValidationError) {
+        setError(
+          err.path as string,
+          {
+            message: err.message,
+            type: "validate",
+          },
+          {
+            shouldFocus: true,
+          }
+        );
+      }
+    });
 
-      // Simula requisição
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (!validation) return;
 
-      setLoading(false);
-      setButtonDisabled(true);
-      console.log("Login");
-    } catch (error) {
-      console.error("Login failed", error);
-    }
+    // if (!data.email || !data.password) {
+    //   setLoading(false);
+    //   setButtonDisabled(false);
+
+    //   console.warn("Preencha o email e a senha.");
+    //   showErrorToast("Preencha o email e a senha.");
+    //   return;
+    // }
+
+    setLoading(true);
+    setButtonDisabled(true);
+
+    await login(data);
+
+    setLoading(false);
+    setButtonDisabled(false);
   };
 
   return (
@@ -107,32 +136,46 @@ export default function SignInScreen() {
           >
             <FormArea keyboardOpen={keyboardOpen}>
               <Input
-                ref={emailRef}
+                label="E-mail"
+                error={errors.email?.message}
                 formProps={{
                   name: "email",
                   control,
+                  rules: {
+                    required: "Email e obrigatorio",
+                  },
                 }}
                 inputProps={{
                   placeholder: "Email",
                   placeholderTextColor: "#FFF",
+                  onSubmitEditing: () => emailRef.current?.focus(),
+                  returnKeyType: "next",
                 }}
                 icon="user"
               />
 
               <Input
+                label="Senha"
+                error={errors.password?.message}
+                ref={emailRef}
                 formProps={{
-                  name: "email",
+                  name: "password",
                   control,
+                  rules: {
+                    required: "Senha e obrigatorio",
+                  },
                 }}
                 inputProps={{
                   placeholder: "Password",
                   placeholderTextColor: "#FFF",
+                  onSubmitEditing: handleSubmit(handleLogin),
+                  secureTextEntry: true,
                 }}
                 icon="lock"
               />
 
               <Button
-                onPress={handleLogin}
+                onPress={handleSubmit(handleLogin)}
                 disabled={loading}
                 loading={loading}
                 label="Entrar"

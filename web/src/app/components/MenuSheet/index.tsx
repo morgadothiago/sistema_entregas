@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/app/context";
+
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -19,21 +19,29 @@ import Image from "next/image";
 import LogoMenuLateral from "@/app/assets/img2.png";
 
 import { itemAdm, items, itemSupport } from "@/app/utils/menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 import api from "@/app/services/api";
+import { User } from "@/app/types/User";
 
 export function SideBar() {
-  const { user } = useAuth();
+  const [user, setUser] = useState<User>({} as User);
+
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const router = useRouter();
 
   const handleLogOut = async () => {
-    await signOut({redirect: false});
+    await signOut({ redirect: false });
     api.cleanToken();
     router.push("/signin");
   };
+
+  useEffect(() => {
+    getSession().then((data) => {
+      if (data) setUser(data.user as unknown as User);
+    });
+  }, []);
 
   function handleNextPage(itemTitle: string) {
     setSelectedItem(itemTitle);
@@ -89,7 +97,7 @@ export function SideBar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-          {user?.role === "ADMIN" && (
+          {user.role === "ADMIN" && (
             <SidebarGroup>
               <SidebarGroupLabel className="text-lg text-white">
                 Administrativa
@@ -112,7 +120,7 @@ export function SideBar() {
                         >
                           <item.icon className="mr-2" />
                           <span className="text-sm md:text-sm">
-                            {item.title}
+                            {item.subTile}
                           </span>
                         </a>
                       </SidebarMenuButton>

@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+DOCKER/.data
 /.data
 # next.js
 /.next/

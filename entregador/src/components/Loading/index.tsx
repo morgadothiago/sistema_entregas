@@ -1,3 +1,4 @@
+import React from "react";
 // src/components/Loading.tsx
 import {
   Container,
@@ -9,13 +10,11 @@ import { useEffect, useState } from "react";
 
 export function Loading({ onFinish }: { onFinish: () => void }) {
   const [progress, setProgress] = useState(0);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
-          onFinish(); // ✅ Chama função passada de App
           return 100;
         }
         return prev + 1;
@@ -27,7 +26,7 @@ export function Loading({ onFinish }: { onFinish: () => void }) {
 
   useEffect(() => {
     if (progress >= 100) {
-      onFinish();
+      onFinish(); // Só será chamado uma vez
     }
   }, [progress]);
 

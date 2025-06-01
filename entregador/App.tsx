@@ -1,3 +1,4 @@
+import React from "react";
 import { StyleSheet, Text, View, StatusBar } from "react-native";
 import {
   useFonts,
@@ -7,7 +8,7 @@ import {
   Roboto_700Bold,
 } from "@expo-google-fonts/roboto";
 import { Loading } from "./src/components/Loading";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AppRoutes from "./src/routes";
 import { AuthProvider } from "./src/context/AuthContext";
 
@@ -32,6 +33,7 @@ export default function App() {
   return (
     <AuthProvider>
       <StatusBar barStyle={"light-content"} backgroundColor={"transparent"} />
+
       <AppRoutes />
     </AuthProvider>
   );

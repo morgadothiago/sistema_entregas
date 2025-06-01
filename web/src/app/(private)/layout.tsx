@@ -11,23 +11,17 @@ interface LayoutProps {
 }
 
 export default async function Layout({ children }: LayoutProps) {
-  const session = await auth()
-  
-  if(!session){
-    redirect('/signin')
+  const session = await auth();
+
+  if (!session) {
+    redirect("/signin");
   }
-  
 
   return (
     <div>
       <SidebarProvider>
         <SideBar />
 
-        <SidebarTrigger
-          className=" w-15  h-15 lg:hidden "
-          size="lg"
-          variant="outline"
-        />
         {children}
       </SidebarProvider>
     </div>
