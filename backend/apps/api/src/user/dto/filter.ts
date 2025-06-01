@@ -1,4 +1,10 @@
-import { IsEmail, IsOptional, IsString, IsIn, IsNumber } from "class-validator";
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsIn,
+  IsNumberString,
+} from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Role, UserStatus } from "@prisma/client";
 
@@ -34,7 +40,7 @@ export class IUserQueryParams {
     default: "1",
   })
   @IsOptional()
-  @IsNumber({ allowInfinity: false })
+  @IsNumberString()
   page?: string;
 
   @ApiProperty({
@@ -43,6 +49,6 @@ export class IUserQueryParams {
     default: "100",
   })
   @IsOptional()
-  @IsNumber({ allowInfinity: false })
+  @IsNumberString()
   limit?: string;
 }
