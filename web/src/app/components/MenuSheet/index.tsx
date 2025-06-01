@@ -104,7 +104,7 @@ export function SideBar() {
                     >
                       <SidebarMenuButton asChild>
                         <a
-                          onClick={() => handleNextPage(item.title)}
+                          onClick={() => handleNextPage(item.url)}
                           className="flex items-center p-2"
                         >
                           <item.icon className="mr-2" />
