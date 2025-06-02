@@ -39,13 +39,13 @@ export interface ICreateUser {
   zipCode: string;
 }
 
-
-export interface IUserPaginate  {
-    id: number,
-    email: string;
-    role: ERole;
-    status: EStatus;
-    information: string;
+export interface IUserPaginate {
+  id: number;
+  name: string;
+  email: string;
+  role: ERole;
+  status: EStatus;
+  information: string;
 }
 
 export interface IFilterUser {

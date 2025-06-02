@@ -12,6 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { LogOutIcon, User2 } from "lucide-react";
 import { itemAdm, items, itemSupport } from "@/app/utils/menu";
@@ -22,9 +23,10 @@ import api from "@/app/services/api";
 import { useAuth } from "@/app/context";
 
 export function SideBar() {
-  const {user} = useAuth()
+  const { user } = useAuth();
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const router = useRouter();
+  const { setOpenMobile } = useSidebar();
 
   const handleLogOut = async () => {
     await signOut({ redirect: false });
@@ -35,6 +37,7 @@ export function SideBar() {
   function handleNextPage(itemTitle: string) {
     setSelectedItem(itemTitle);
     router.push(`/dashboard/${itemTitle}`);
+    setOpenMobile(false);
   }
 
   return (

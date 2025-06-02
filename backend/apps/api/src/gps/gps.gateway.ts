@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -14,7 +13,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Logger } from "@nestjs/common";
 import { User } from "@prisma/client";
 
-@WebSocketGateway(2000, {
+@WebSocketGateway(8085, {
   namespace: "gps",
   transports: ["websocket"],
   pingTimeout: 10000,
@@ -32,7 +31,7 @@ export class GpsGateway
 
   constructor(
     private prismaService: PrismaService,
-    private jwt: JwtService,
+    private jwt: JwtService
   ) {}
 
   getClient(socketId: string): Socket | undefined {
@@ -67,7 +66,7 @@ export class GpsGateway
   emitRoom(
     roomCode: string,
     event: string,
-    data: { latitude: number; longitude: number },
+    data: { latitude: number; longitude: number }
   ) {
     this.server.to(roomCode).emit(event, data);
   }
@@ -105,7 +104,7 @@ export class GpsGateway
         if (room !== client.id) {
           return client.leave(room);
         }
-      }),
+      })
     );
   }
 

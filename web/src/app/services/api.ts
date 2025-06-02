@@ -5,7 +5,12 @@ import Axios, {
   type AxiosError,
 } from "axios";
 import type { ILoginResponse } from "../types/SingInType";
-import type { ICreateUser, IFilterUser, IUserPaginate, User } from "../types/User";
+import type {
+  ICreateUser,
+  IFilterUser,
+  IUserPaginate,
+  User,
+} from "../types/User";
 import { IPaginateResponse } from "../types/Paginate";
 import { signOut } from "next-auth/react";
 
@@ -14,7 +19,6 @@ interface IErrorResponse {
   status: number;
 }
 
-
 class ApiService {
   private api: AxiosInstance;
   static instance: ApiService;
@@ -22,13 +26,12 @@ class ApiService {
 
   constructor() {
     this.api = Axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_HOST,
+      baseURL: "http://localhost:8080",
     });
   }
 
   setToken(token: string) {
-
-    if(token) (ApiService.token = `Bearer ${token}`);
+    if (token) ApiService.token = `Bearer ${token}`;
   }
 
   cleanToken() {
@@ -80,7 +83,7 @@ class ApiService {
         // Retornar erro 401 mesmo se o signOut falhar
         return {
           message: error.response?.data?.message || "Não autorizado",
-          status: 401
+          status: 401,
         };
       }
     }
@@ -91,23 +94,28 @@ class ApiService {
     };
   }
 
-  async getUsers(filters: IFilterUser, token: string){
-    console.log('token pre', token)
-    return this.api.get('/users', 
-      {
-        params: filters, 
+  async getUsers(filters: IFilterUser, token: string) {
+    console.log("token pre", token);
+    return this.api
+      .get("/users", {
+        params: filters,
         headers: {
-          authorization: `Bearer ${token}`
-        }
+          authorization: `Bearer ${token}`,
+        },
       })
       .then(this.getResponse<IPaginateResponse<IUserPaginate>>)
-      .catch(this.getError)
+      .catch(this.getError);
   }
 
-  async getUser(id: string){
-    return this.api.get(`/users/${id}`)
+  async getUser(id: string, token: string) {
+    return this.api
+      .get(`/users/${id}`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
       .then(this.getResponse<User>)
-      .catch(this.getError)
+      .catch(this.getError);
   }
 
   static getInstance() {

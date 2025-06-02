@@ -15,17 +15,21 @@ export const authOptions: NextAuthConfig = {
       async authorize(
         credentials: Partial<Record<"email" | "password", unknown>>
       ) {
-        if (
-          !credentials
-        ) {
+        if (!credentials) {
           return null;
         }
+
         try {
           if (!credentials) {
             return null;
           }
 
-          const res = await api.login(credentials.email as string, credentials.password as string);
+          const res = await api.login(
+            credentials.email as string,
+            credentials.password as string
+          );
+
+          console.log(res);
 
           if ("status" in res) return null;
 
@@ -48,8 +52,8 @@ export const authOptions: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.user = (user as {data: User}).data;
-        token.token = (user as {token: string}).token;
+        token.user = (user as { data: User }).data;
+        token.token = (user as { token: string }).token;
       }
 
       return token;
@@ -57,9 +61,9 @@ export const authOptions: NextAuthConfig = {
 
     async session({ session, token }) {
       if (token.token) {
-        api.setToken((token as {token: string})?.token);
+        api.setToken((token as { token: string })?.token);
       }
-      
+
       (session as unknown as { user: User }).user = token.user as User;
       (session as unknown as { token: string }).token = token.token as string;
 
@@ -76,8 +80,8 @@ export const authOptions: NextAuthConfig = {
 };
 
 export const {
-    handlers: {GET, POST},
-    auth,
-    signIn,
-    signOut,
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
 } = NextAuth(authOptions);
