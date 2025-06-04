@@ -1,7 +1,7 @@
 "use client";
 import React, { ReactNode, useEffect } from "react";
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { SideBar } from "../components/MenuSheet";
 import { redirect } from "next/navigation";
 import { useAuth } from "../context";
@@ -17,12 +17,12 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const checkSession = async () => {
       try {
         const data = await getSession();
         if (!isMounted) return;
-        
+
         if (data) {
           setUser(data.user as unknown as User);
           setToken((data as unknown as { token: string }).token);
@@ -33,10 +33,10 @@ export default function Layout({ children }: LayoutProps) {
         console.error("Erro ao verificar sessão:", error);
       }
     };
-    
+
     // Verificar sessão apenas uma vez ao montar
     checkSession();
-    
+
     return () => {
       isMounted = false;
     };

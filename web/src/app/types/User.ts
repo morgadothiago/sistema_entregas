@@ -49,8 +49,8 @@ export interface IUserPaginate {
 }
 
 export interface IFilterUser {
-  status?: EStatus;
-  role?: ERole;
+  status?: EStatus | "";
+  role?: ERole | "";
   email?: string;
   page?: number;
   limit?: number;
