@@ -2,8 +2,8 @@ import {
   IsEmail,
   IsOptional,
   IsString,
-  IsNumberString,
   IsIn,
+  IsNumberString,
 } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Role, UserStatus } from "@prisma/client";

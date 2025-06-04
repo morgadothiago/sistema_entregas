@@ -8,11 +8,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { VehicleTypeService } from "./vehicle-type.service";
 import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto";
 import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto";
+import { VehicleTypeQueryparams } from "./dto/filters";
 
 @Controller("vehicle-types")
 @ApiTags("vehicle-type")
@@ -21,8 +23,11 @@ export class VehicleTypeController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Pega todos" })
-  async findAll() {
-    return this.vehicleTypeService.findAll();
+  async findAll(@Query() query: VehicleTypeQueryparams) {
+    return this.vehicleTypeService.findAll(
+      +Math.max(Number(query.page) || 1, 1),
+      +Math.max(Number(query.limit) || 100, 1),
+    );
   }
 
   @Post()

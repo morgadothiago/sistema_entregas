@@ -23,8 +23,8 @@ export class UserController {
   async paginate(@Query() filters: IUserQueryParams) {
     return this.userService.paginate(
       filters,
-      +(filters.page || 1),
-      +(filters.limit || 100),
+      +Math.max(Number(filters.page) || 1, 1),
+      +Math.max(Number(filters.limit) || 100, 1),
     );
   }
 
