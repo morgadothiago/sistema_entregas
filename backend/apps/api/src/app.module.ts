@@ -7,7 +7,7 @@ import { AuthMiddleware } from "./auth/auth.middleware";
 import { JwtModule } from "@nestjs/jwt";
 import { VehicleTypeModule } from "./vehicle-type/vehicle-type.module";
 import { ProfitModule } from "./profit/profit.module";
-import { UserModule } from './user/user.module';
+import { UserModule } from "./user/user.module";
 
 @Module({
   imports: [
@@ -31,7 +31,10 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude({ path: "/auth/*path", method: RequestMethod.ALL })
+      .exclude(
+        { path: "/auth/*path", method: RequestMethod.ALL },
+        { path: "/", method: RequestMethod.GET },
+      )
       .forRoutes("*");
   }
 }
