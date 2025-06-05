@@ -49,10 +49,10 @@ class ApiService {
       .catch(this.getError);
   }
 
-  async newUser(data: ICreateUser) {
+  async newUser(data: ICreateUser): Promise<void | IErrorResponse> {
     const response = await this.api
       .post("/auth/signup/company", data)
-      .then(this.getResponse)
+      .then(this.getResponse<void>)
       .catch(this.getError);
 
     return response;
