@@ -44,7 +44,7 @@ export class UserService {
         Company: {
           omit: { id: true, idUser: true, createdAt: true, updatedAt: true },
           include: {
-            Adress: true,
+            Address: true,
           },
         },
         DeliveryMan: {},
