@@ -31,7 +31,7 @@ export const paginateResponse = <T>(
 ): IPaginateResponse<T> => {
   const totalPage = Math.ceil(total / limit);
 
-  if (data.length === 0) {
+  if (!data.length) {
     throw new NotFoundException({
       data,
       total,
