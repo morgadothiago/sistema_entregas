@@ -14,24 +14,24 @@ export class UserService {
       role: filters.role,
     };
 
-    console.log(where, page);
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        omit: {
+          password: true,
+          createdAt: true,
+          updatedAt: true,
+          balanceId: true,
+        },
+        skip: (page - 1) * registers, // Pula os itens das páginas anteriores
+        take: registers,
+      }),
 
-    const users = await this.prisma.user.findMany({
-      where,
-      omit: {
-        password: true,
-        createdAt: true,
-        updatedAt: true,
-        balanceId: true,
-      },
-      skip: (page - 1) * registers, // Pula os itens das páginas anteriores
-      take: registers,
-    });
+      this.prisma.user.count({
+        where,
+      }),
+    ]);
 
-    const total = await this.prisma.user.count({
-      where,
-    });
-    console.log(users, total);
     return paginateResponse(users, page, registers, total);
   }
 
