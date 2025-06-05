@@ -25,6 +25,18 @@ export default function UserDetailPage() {
         if (!id) throw new Error("ID do usuário não encontrado");
         const response = await api.getUser(id.toString(), token);
 
+        if (response.status === 500) {
+          console.log("Aqui");
+          toast.error("Usuário não encontrado", {
+            description:
+              "Ocorreu um erro ao buscar os dados do usuário. Por favor, tente novamente mais tarde.",
+            duration: 3000,
+            position: "top-right",
+            richColors: true,
+          });
+          setUserDetail(null);
+        }
+
         if (response.status === 404) {
           toast.error("Usuário não encontrado", {
             description:
@@ -34,6 +46,7 @@ export default function UserDetailPage() {
             richColors: true,
           });
           setUserDetail(null);
+
           return;
         }
 
@@ -95,100 +108,92 @@ export default function UserDetailPage() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 px-6 py-10 max-w-screen-xl mx-auto bg-gradient-to-br from-gray-50/50 to-white/80">
+    <div className="flex flex-col lg:flex-row gap-6 px-4 py-8 max-w-screen-xl mx-auto">
       {/* User Details Card */}
-      <Card className="w-full lg:w-1/3 xl:w-1/4 border border-gray-200/80 shadow-xl rounded-2xl bg-white/95 backdrop-blur-md hover:shadow-[#5DADE2]/20 transition-all duration-500 transform hover:-translate-y-1">
-        <CardHeader className="p-6 sm:p-8 bg-gradient-to-r from-[#003873]/5 to-[#5DADE2]/5 rounded-t-2xl">
-          <CardTitle className="text-[#003873] text-xl sm:text-2xl font-bold flex items-center gap-3">
-            <UserIcon className="w-7 h-7 text-[#5DADE2]" /> Informações do
+      <Card className="w-full lg:w-1/3 xl:w-1/4 border border-gray-100/50 shadow-lg rounded-xl bg-white/90 backdrop-blur-md hover:shadow-[#5DADE2]/10 transition-all duration-500">
+        <CardHeader className="p-4 sm:p-6 bg-gray-50/50">
+          <CardTitle className="text-[#003873] text-lg sm:text-xl flex items-center gap-2">
+            <UserIcon className="w-6 h-6 text-[#5DADE2]" /> Informações do
             Usuário
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col space-y-2">
-            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+        <CardContent className="p-4 sm:p-6 space-y-4">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-500">
               ID do Usuário
             </span>
-            <span className="text-gray-900 font-mono text-lg bg-gray-50 p-2 rounded-lg">
+            <span className="text-gray-900 font-mono text-base">
               #{userDetail.id}
             </span>
           </div>
-          <div className="flex flex-col space-y-2">
-            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-              Email
-            </span>
-            <span className="text-gray-900 break-all text-lg bg-gray-50 p-2 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-500">Email</span>
+            <span className="text-gray-900 break-all text-base">
               {userDetail.email}
             </span>
           </div>
-          <div className="flex flex-col space-y-2">
-            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-              Perfil
-            </span>
-            <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-500">Perfil</span>
+            <span className="text-gray-900 text-base">
               {userDetail.role ?? "Usuário"}
             </span>
           </div>
-          <div className="flex flex-col space-y-2">
-            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-              Status
-            </span>
-            <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-500">Status</span>
+            <span className="text-gray-900 text-base">
               {userDetail.status ?? "Ativo"}
             </span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Container para Company e Address */}
+      {/* Container para Company e Address, ocupando o restante do espaço e empilhando em mobile */}
       {userDetail.Company && (
-        <div className="flex flex-col gap-8 w-full lg:w-2/3 xl:w-3/4">
+        <div className="flex flex-col gap-6 w-full lg:w-2/3 xl:w-3/4">
           {/* Company Details Card */}
-          <Card className="border border-gray-200/80 shadow-xl rounded-2xl bg-white/95 backdrop-blur-md hover:shadow-[#5DADE2]/20 transition-all duration-500 transform hover:-translate-y-1">
-            <CardHeader className="p-6 sm:p-8 bg-gradient-to-r from-[#003873]/5 to-[#5DADE2]/5 rounded-t-2xl">
-              <CardTitle className="text-[#003873] text-xl sm:text-2xl font-bold flex items-center gap-3">
-                <Store className="w-7 h-7 text-[#5DADE2]" /> Informações da
+          <Card className="border border-gray-100/50 shadow-lg rounded-xl bg-white/90 backdrop-blur-md hover:shadow-[#5DADE2]/10 transition-all duration-500">
+            <CardHeader className="p-4 sm:p-6 bg-gray-50/50">
+              <CardTitle className="text-[#003873] text-lg sm:text-xl flex items-center gap-2">
+                <Store className="w-6 h-6 text-[#5DADE2]" /> Informações da
                 Empresa
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 sm:p-8 space-y-6">
-              <div className="flex flex-col space-y-2">
-                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+            <CardContent className="p-4 sm:p-6 space-y-4">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-500">
                   Nome da Empresa
                 </span>
-                <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+                <span className="text-gray-900 text-base">
                   {userDetail.Company.name}
                 </span>
               </div>
-              <div className="flex flex-col space-y-2">
-                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                  CNPJ
-                </span>
-                <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-500">CNPJ</span>
+                <span className="text-gray-900 text-base">
                   {userDetail.Company.cnpj}
                 </span>
               </div>
-              <div className="flex flex-col space-y-2">
-                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-500">
                   Telefone
                 </span>
-                <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+                <span className="text-gray-900 text-base">
                   {userDetail.Company.phone}
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Address Info Card */}
+          {/* Address Info Card (Only if Company has Address info) */}
           {userDetail.Company.Adress && (
-            <Card className="border border-gray-200/80 shadow-xl rounded-2xl bg-white/95 backdrop-blur-md hover:shadow-[#5DADE2]/20 transition-all duration-500 transform hover:-translate-y-1">
-              <CardHeader className="p-6 sm:p-8 bg-gradient-to-r from-[#003873]/5 to-[#5DADE2]/5 rounded-t-2xl">
-                <CardTitle className="text-[#003873] text-xl sm:text-2xl font-bold flex items-center gap-3">
-                  <MapPin className="w-7 h-7 text-[#5DADE2]" />
+            <Card className="border border-gray-100/50 shadow-lg rounded-xl bg-white/90 backdrop-blur-sm hover:shadow-[#5DADE2]/10 transition-all duration-500">
+              <CardHeader className="p-4 sm:p-6 bg-gray-50/50">
+                <CardTitle className="text-[#003873] text-lg sm:text-xl flex items-center gap-2">
+                  <MapPin className="w-6 h-6 text-[#5DADE2]" />
                   Endereço
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 sm:p-8 space-y-4 text-lg text-gray-900 bg-gray-50 rounded-lg">
+              <CardContent className="p-4 sm:p-6 space-y-4 text-base text-gray-900">
                 <AddressDisplay Adress={userDetail.Company.Adress} />
               </CardContent>
             </Card>
