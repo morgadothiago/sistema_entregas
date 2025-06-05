@@ -8,7 +8,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
 import { CompanyDto } from "./dto/company.dto";
-import { Company, Role, UserStatus } from "@prisma/client";
+import { Balance, Company, Extract, Role, UserStatus } from "@prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -46,7 +46,7 @@ export class AuthService {
             name: company.name,
             cnpj: company.cnpj,
             phone: company.phone,
-            Adress: {
+            Address: {
               create: {
                 city: company.city,
                 state: company.state,
@@ -75,7 +75,7 @@ export class AuthService {
         Balance: true,
         Extract: true,
         Company: {
-          include: { Adress: true },
+          include: { Address: true },
         },
       },
     });
@@ -103,8 +103,8 @@ export class AuthService {
         id: user.id,
         email: user.email,
         role: user.role,
-        Balance: user.Balance,
-        Extract: user.Extract ?? [],
+        Balance: user.Balance as Balance,
+        Extract: (user.Extract ?? []) as Extract[],
         Company: user.Company as Company,
       },
     };

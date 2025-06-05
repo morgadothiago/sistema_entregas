@@ -16,13 +16,10 @@ export default function Layout({ children }: LayoutProps) {
   const { setUser, setToken } = useAuth();
 
   useEffect(() => {
-    let isMounted = true;
-
     const checkSession = async () => {
       try {
         const data = await getSession();
-        if (!isMounted) return;
-
+        console.log("data", data);
         if (data) {
           setUser(data.user as unknown as User);
           setToken((data as unknown as { token: string }).token);
@@ -31,15 +28,14 @@ export default function Layout({ children }: LayoutProps) {
         }
       } catch (error) {
         console.error("Erro ao verificar sessão:", error);
+        redirect("/signin");
       }
     };
 
     // Verificar sessão apenas uma vez ao montar
     checkSession();
 
-    return () => {
-      isMounted = false;
-    };
+    return () => {};
   }, []);
 
   return (

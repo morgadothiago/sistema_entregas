@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsNumber } from "class-validator";
+import { IsOptional, IsNumberString } from "class-validator";
 
 export class VehicleTypeQueryparams {
   @ApiProperty({
@@ -8,7 +8,7 @@ export class VehicleTypeQueryparams {
     default: "1",
   })
   @IsOptional()
-  @IsNumber({ allowInfinity: false })
+  @IsNumberString()
   page?: number;
 
   @ApiProperty({
@@ -17,6 +17,6 @@ export class VehicleTypeQueryparams {
     default: "100",
   })
   @IsOptional()
-  @IsNumber({ allowInfinity: false })
+  @IsNumberString()
   limit?: string;
 }
