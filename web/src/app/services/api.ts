@@ -26,7 +26,7 @@ class ApiService {
 
   constructor() {
     this.api = Axios.create({
-      baseURL: "http://localhost:8080",
+      baseURL: process.env.NEXTAUTH_API_HOST,
     });
   }
 
