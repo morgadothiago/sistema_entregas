@@ -31,7 +31,7 @@ model User {
   @@map("users")
 }
 
-model Adress {
+model Address {
   id         Int       @id @default(autoincrement())
   street     String
   number     String
@@ -43,8 +43,9 @@ model Adress {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   Company    Company[]
+  Client     Client[]
 
-  @@map("adresses")
+  @@map("addresses")
 }
 
 model Company {
@@ -53,7 +54,7 @@ model Company {
   phone     String
   cnpj      String   @unique
   idAddress Int
-  Adress    Adress   @relation(fields: [idAddress], references: [id])
+  Address   Address  @relation(fields: [idAddress], references: [id])
   idUser    Int      @unique
   User      User     @relation(fields: [idUser], references: [id])
   createdAt DateTime @default(now())
@@ -71,12 +72,12 @@ enum UserStatus {
 model VehicleType {
   id                Int      @id @default(autoincrement())
   type              String   @unique
-  tarifaBase        Decimal  @db.Decimal(5, 2) @map("tarifa_base")
-  valorKMAdicional  Decimal  @db.Decimal(5, 2) @map("valor_km_adicional")
-  paradaAdicional   Decimal  @db.Decimal(5, 2) @map("parada_adicional")
-  ajudanteAdicional Decimal  @db.Decimal(5, 2) @map("ajudante_adicional")
+  tarifaBase        Decimal  @map("tarifa_base") @db.Decimal(5, 2)
+  valorKMAdicional  Decimal  @map("valor_km_adicional") @db.Decimal(5, 2)
+  paradaAdicional   Decimal  @map("parada_adicional") @db.Decimal(5, 2)
+  ajudanteAdicional Decimal  @map("ajudante_adicional") @db.Decimal(5, 2)
   createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @default(now()) @map("updated_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("vehicle_types")
 }
@@ -180,27 +181,12 @@ model Delivery {
   @@map("deliveries")
 }
 
-model Address {
-  id        Int      @id @default(autoincrement())
-  street    String
-  number    String
-  city      String
-  state     String
-  zipCode   String
-  country   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Client    Client[]
-
-  @@map("addresses")
-}
-
 model Client {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   phone     String
-  Adress    Address  @relation(fields: [addressId], references: [id])
+  Address   Address  @relation(fields: [addressId], references: [id])
   addressId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
