@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 
 import type { EStatus } from "@/app/types/User";
+import { Mail } from "lucide-react";
 
 interface User {
   id: number;
@@ -20,13 +21,9 @@ interface User {
   status: EStatus;
 }
 
-interface UserTableProps {
-  users: User[];
-}
-
-export default function UserTable({ users }: User) {
+export default function UserTable() {
   // Estado local para refletir mudanças imediatamente
-  const [userList, setUserList] = React.useState<User[]>(users);
+  const [userList, setUserList] = React.useState<User[]>([]);
 
   const handleStatusChange = async (userId: number, newStatus: EStatus) => {
     try {
@@ -232,19 +229,7 @@ export default function UserTable({ users }: User) {
                 {user.name}
               </h3>
               <p className="text-[#2C3E50]/80 flex items-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <paths
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
+                <Mail className="w-4 h-4" />
                 {user.email}
               </p>
             </div>

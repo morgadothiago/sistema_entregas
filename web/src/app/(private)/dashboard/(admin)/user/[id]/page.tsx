@@ -1,37 +1,43 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/app/services/api";
 import { useAuth } from "@/app/context";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Loader2, User as UserIcon, Mail, Shield } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, UserIcon, Store, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role?: string;
-}
+import { toast } from "sonner";
+import type { User } from "@/app/types/User";
+import AddressDisplay from "@/app/components/AndressDisplay";
 
 export default function UserDetailPage() {
+  const { id } = useParams();
   const { token } = useAuth();
-  const params = useParams();
   const [userDetail, setUserDetail] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
+    if (!token) return;
     const fetchUser = async () => {
       try {
-        const id = params?.id;
-        if (!id || !token) {
-          console.warn("ID ou token não está disponível.");
+        if (!id) throw new Error("ID do usuário não encontrado");
+        const response = await api.getUser(id.toString(), token);
+
+        if (response.status === 404) {
+          toast.error("Usuário não encontrado", {
+            description:
+              "Ocorreu um erro ao buscar os dados do usuário. Por favor, tente novamente mais tarde.",
+            duration: 3000,
+            position: "top-right",
+            richColors: true,
+          });
+          setUserDetail(null);
           return;
         }
-        const response = await api.getUser(String(id), token);
+
+        console.log(response);
         setUserDetail(response as User);
       } catch (error: unknown) {
         console.error("Erro ao buscar usuário:", error);
@@ -41,7 +47,7 @@ export default function UserDetailPage() {
       }
     };
     fetchUser();
-  }, [params, token]);
+  }, [id, token]);
 
   if (loading) {
     return (
@@ -79,7 +85,7 @@ export default function UserDetailPage() {
         </div>
         <Button
           variant="outline"
-          onClick={() => router.back()}
+          onClick={() => router.push("/dashboard/user/")}
           className="mt-4"
         >
           Voltar
@@ -89,58 +95,106 @@ export default function UserDetailPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-[80vh] px-4 py-12 bg-gradient-to-b from-[#F5FAFF] to-white">
-      <Card className="w-full max-w-2xl border border-gray-100 shadow-2xl rounded-3xl bg-white/80 backdrop-blur-sm">
-        <CardContent>
-          <dl className="space-y-8">
-            {[
-              { icon: Shield, label: "ID", value: userDetail.id, type: "id" },
-              {
-                icon: UserIcon,
-                label: "Nome",
-                value: userDetail.name,
-                type: "text",
-              },
-              {
-                icon: Mail,
-                label: "Email",
-                value: userDetail.email,
-                type: "email",
-              },
-              {
-                icon: Shield,
-                label: "Perfil",
-                value: userDetail.role ?? "Usuário",
-                type: "role",
-              },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="group flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 p-4 rounded-xl hover:bg-gray-50/50 transition-all duration-300"
-              >
-                <dt className="flex items-center gap-2 text-sm font-medium text-gray-500 group-hover:text-[#5DADE2] transition-colors">
-                  <item.icon className="w-4 h-4" /> {item.label}
-                </dt>
-                <dd className="mt-1 sm:mt-0">
-                  {item.type === "role" ? (
-                    <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-[#00FFB3] to-[#00E6A3] text-[#003873] shadow-sm border border-[#003873]/10">
-                      {item.value}
-                    </span>
-                  ) : (
-                    <span
-                      className={`text-lg font-semibold ${
-                        item.type === "id" ? "font-mono" : ""
-                      } text-[#2C3E50] break-words`}
-                    >
-                      {item.value}
-                    </span>
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
+    <div className="flex flex-col lg:flex-row gap-8 px-6 py-10 max-w-screen-xl mx-auto bg-gradient-to-br from-gray-50/50 to-white/80">
+      {/* User Details Card */}
+      <Card className="w-full lg:w-1/3 xl:w-1/4 border border-gray-200/80 shadow-xl rounded-2xl bg-white/95 backdrop-blur-md hover:shadow-[#5DADE2]/20 transition-all duration-500 transform hover:-translate-y-1">
+        <CardHeader className="p-6 sm:p-8 bg-gradient-to-r from-[#003873]/5 to-[#5DADE2]/5 rounded-t-2xl">
+          <CardTitle className="text-[#003873] text-xl sm:text-2xl font-bold flex items-center gap-3">
+            <UserIcon className="w-7 h-7 text-[#5DADE2]" /> Informações do
+            Usuário
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col space-y-2">
+            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+              ID do Usuário
+            </span>
+            <span className="text-gray-900 font-mono text-lg bg-gray-50 p-2 rounded-lg">
+              #{userDetail.id}
+            </span>
+          </div>
+          <div className="flex flex-col space-y-2">
+            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+              Email
+            </span>
+            <span className="text-gray-900 break-all text-lg bg-gray-50 p-2 rounded-lg">
+              {userDetail.email}
+            </span>
+          </div>
+          <div className="flex flex-col space-y-2">
+            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+              Perfil
+            </span>
+            <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+              {userDetail.role ?? "Usuário"}
+            </span>
+          </div>
+          <div className="flex flex-col space-y-2">
+            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+              Status
+            </span>
+            <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+              {userDetail.status ?? "Ativo"}
+            </span>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Container para Company e Address */}
+      {userDetail.Company && (
+        <div className="flex flex-col gap-8 w-full lg:w-2/3 xl:w-3/4">
+          {/* Company Details Card */}
+          <Card className="border border-gray-200/80 shadow-xl rounded-2xl bg-white/95 backdrop-blur-md hover:shadow-[#5DADE2]/20 transition-all duration-500 transform hover:-translate-y-1">
+            <CardHeader className="p-6 sm:p-8 bg-gradient-to-r from-[#003873]/5 to-[#5DADE2]/5 rounded-t-2xl">
+              <CardTitle className="text-[#003873] text-xl sm:text-2xl font-bold flex items-center gap-3">
+                <Store className="w-7 h-7 text-[#5DADE2]" /> Informações da
+                Empresa
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 sm:p-8 space-y-6">
+              <div className="flex flex-col space-y-2">
+                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                  Nome da Empresa
+                </span>
+                <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+                  {userDetail.Company.name}
+                </span>
+              </div>
+              <div className="flex flex-col space-y-2">
+                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                  CNPJ
+                </span>
+                <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+                  {userDetail.Company.cnpj}
+                </span>
+              </div>
+              <div className="flex flex-col space-y-2">
+                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                  Telefone
+                </span>
+                <span className="text-gray-900 text-lg bg-gray-50 p-2 rounded-lg">
+                  {userDetail.Company.phone}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Address Info Card */}
+          {userDetail.Company.Adress && (
+            <Card className="border border-gray-200/80 shadow-xl rounded-2xl bg-white/95 backdrop-blur-md hover:shadow-[#5DADE2]/20 transition-all duration-500 transform hover:-translate-y-1">
+              <CardHeader className="p-6 sm:p-8 bg-gradient-to-r from-[#003873]/5 to-[#5DADE2]/5 rounded-t-2xl">
+                <CardTitle className="text-[#003873] text-xl sm:text-2xl font-bold flex items-center gap-3">
+                  <MapPin className="w-7 h-7 text-[#5DADE2]" />
+                  Endereço
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 sm:p-8 space-y-4 text-lg text-gray-900 bg-gray-50 rounded-lg">
+                <AddressDisplay Adress={userDetail.Company.Adress} />
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
     </div>
   );
 }

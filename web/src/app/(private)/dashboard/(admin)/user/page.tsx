@@ -3,6 +3,7 @@
 import { useAuth } from "@/app/context";
 import api from "@/app/services/api";
 import { IUserPaginate, type ERole, type EStatus } from "@/app/types/User";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -12,13 +13,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Ban,
   CheckCircle2,
   CircleOff,
   UserCog,
   Store,
   Car,
+  Eye,
+  Activity,
+  Search,
+  ArrowLeft,
+  ArrowRight,
+  Users,
+  Mail,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -36,6 +54,7 @@ const User: React.FC = () => {
   }>({});
   const [lastPage, setLastPage] = useState(1);
   const { token } = useAuth();
+  const router = useRouter();
 
   function nextPage() {
     setPage((currentPage) =>
@@ -66,7 +85,10 @@ const User: React.FC = () => {
         );
 
         if (
+          response &&
+          typeof response === "object" &&
           "data" in response &&
+          Array.isArray(response.data) &&
           "currentPage" in response &&
           "totalPage" in response &&
           "total" in response
@@ -75,7 +97,12 @@ const User: React.FC = () => {
           setPage(response.currentPage);
           setLastPage(response.totalPage);
           setTotal(response.total);
-        } else if ("status" in response && response.status === 401) {
+        } else if (
+          response &&
+          typeof response === "object" &&
+          "status" in response &&
+          response.status === 401
+        ) {
           console.log("Erro de autenticação:", response);
           toast.error("Sessão expirada. Por favor, faça login novamente.");
         } else {
@@ -109,38 +136,51 @@ const User: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-[#003873] mb-2 flex flex-col sm:flex-row sm:items-end gap-2">
-          Gerenciamento de Usuários
-          <span className="text-base font-normal text-gray-500">
-            ({total} usuários)
-          </span>
-        </h1>
-        <p className="text-gray-500 mb-6">
-          Gerencie e monitore todos os usuários do sistema
-        </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Header Section */}
+      <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 mb-8 backdrop-blur-sm bg-opacity-90">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#003873] to-[#0056b3] bg-clip-text text-transparent mb-2">
+              Gerenciamento de Usuários
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Gerencie e monitore todos os usuários do sistema
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl">
+            <Users className="w-5 h-5 text-[#003873]" />
+            <span className="text-gray-700 font-medium">{total} usuários</span>
+          </div>
+        </div>
 
         <form
           action={onSubmit}
-          className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end"
         >
           <div className="flex flex-col gap-2">
-            <label htmlFor="mail" className="text-sm font-medium text-gray-700">
+            <label
+              htmlFor="mail"
+              className="text-sm font-medium text-gray-700 flex items-center gap-2"
+            >
+              <Mail className="w-4 h-4" />
               E-mail
             </label>
             <Input
               type="email"
               name="mail"
               id="mail"
-              className="h-10 border-gray-200 focus:ring-[#003873] focus:border-[#003873] transition-all"
+              className="h-11 border-gray-200 focus:ring-2 focus:ring-[#003873] focus:border-[#003873] transition-all rounded-xl"
               defaultValue={filter.email || ""}
               placeholder="Buscar por e-mail"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Status</label>
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Status
+            </label>
             <Select
               name="status"
               value={filter.status || "ALL"}
@@ -151,10 +191,10 @@ const User: React.FC = () => {
                 }))
               }
             >
-              <SelectTrigger className="h-10 border-gray-200 focus:ring-[#003873] focus:border-[#003873] transition-all">
+              <SelectTrigger className="h-11 border-gray-200 focus:ring-2 focus:ring-[#003873] focus:border-[#003873] transition-all rounded-xl">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl">
                 <SelectItem value="ALL">Todos os status</SelectItem>
                 <SelectItem value="ACTIVE">
                   <div className="flex items-center">
@@ -179,7 +219,10 @@ const User: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Perfil</label>
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <UserCog className="w-4 h-4" />
+              Perfil
+            </label>
             <Select
               name="role"
               value={filter.role || "ALL"}
@@ -190,15 +233,15 @@ const User: React.FC = () => {
                 }))
               }
             >
-              <SelectTrigger className="h-10 border-gray-200 focus:ring-[#003873] focus:border-[#003873] transition-all">
+              <SelectTrigger className="h-11 border-gray-200 focus:ring-2 focus:ring-[#003873] focus:border-[#003873] transition-all rounded-xl">
                 <SelectValue placeholder="Todos os perfis" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl">
                 <SelectItem value="ALL">Todos os perfis</SelectItem>
                 <SelectItem value="DELIVERY">
                   <div className="flex items-center">
                     <Car className="w-4 h-4 mr-2 text-green-500" />
-                    <span>Motoboy</span>
+                    <span>Entregador</span>
                   </div>
                 </SelectItem>
                 <SelectItem value="ADMIN">
@@ -220,98 +263,90 @@ const User: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="h-10 px-6 rounded-lg bg-[#003873] text-white font-medium hover:bg-[#002a52] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="h-11 px-6 rounded-xl bg-gradient-to-r from-[#003873] to-[#0056b3] text-white font-medium hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span>Filtrando...</span>
               </>
             ) : (
-              <span>Filtrar</span>
+              <>
+                <Search className="w-4 h-4" />
+                <span>Filtrar</span>
+              </>
             )}
           </button>
         </form>
       </div>
 
+      {/* Loading State */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex justify-center items-center py-20 bg-white rounded-3xl shadow-lg border border-gray-100">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-8 h-8 border-4 border-[#003873] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[#003873] font-medium">
+            <div className="w-12 h-12 border-4 border-[#003873] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[#003873] font-medium text-lg">
               Carregando usuários...
             </span>
           </div>
         </div>
       ) : users.length ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50/50 hidden sm:table-header-group">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                  >
+            <Table className="min-w-full">
+              <TableHeader className="hidden sm:table-header-group bg-gray-50">
+                <TableRow>
+                  <TableHead className="h-14 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Código
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                  >
+                  </TableHead>
+                  <TableHead className="h-14 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     E-mail
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                  >
+                  </TableHead>
+                  <TableHead className="h-14 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Status
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                  >
+                  </TableHead>
+                  <TableHead className="h-14 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Perfil
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider"
-                  >
+                  </TableHead>
+                  <TableHead className="h-14 px-6 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200 block sm:table-row-group">
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody className="block sm:table-row-group divide-y divide-gray-200">
                 {users.map((user) => (
-                  <tr
+                  <TableRow
                     key={user.id}
                     className="group hover:bg-gray-50/80 transition-colors duration-200 border-b border-gray-200 mb-4 block sm:table-row last:mb-0"
                   >
-                    <td
+                    <TableCell
                       data-label="Código"
-                      className="px-6 py-3 whitespace-nowrap block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
+                      className="px-4 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
                     >
-                      <div className="flex items-center justify-end sm:justify-start">
-                        <div className="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                      <div className="flex items-center justify-end sm:justify-start w-full">
+                        <div className="flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-xl bg-gray-100 group-hover:bg-gray-200 transition-colors">
                           <span className="text-sm font-medium text-gray-600">
                             #{user.id}
                           </span>
                         </div>
                       </div>
-                    </td>
-                    <td
+                    </TableCell>
+
+                    <TableCell
                       data-label="E-mail"
-                      className="px-6 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
+                      className="px-4 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2 overflow-hidden"
                     >
-                      <div className="text-sm text-gray-900 break-words max-w-xs inline-block sm:block text-right sm:text-left">
+                      <div className="text-sm text-gray-900 break-words max-w-full sm:max-w-xs inline-block sm:block text-right sm:text-left">
                         {user.email}
                       </div>
-                    </td>
-                    <td
+                    </TableCell>
+
+                    <TableCell
                       data-label="Status"
-                      className="px-6 py-3 whitespace-nowrap block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
+                      className="px-4 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
                     >
-                      <div className="inline-flex sm:flex items-center justify-end sm:justify-start">
+                      <div className="flex items-center justify-end sm:justify-start w-full min-w-0 flex-wrap">
                         {user.status === "ACTIVE" && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20">
                             <CheckCircle2 className="w-4 h-4 mr-1.5 text-green-500" />
@@ -331,12 +366,13 @@ const User: React.FC = () => {
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td
+                    </TableCell>
+
+                    <TableCell
                       data-label="Perfil"
-                      className="px-6 py-3 whitespace-nowrap block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
+                      className="px-4 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
                     >
-                      <div className="inline-flex sm:flex items-center justify-end sm:justify-start">
+                      <div className="flex items-center justify-end sm:justify-start w-full min-w-0 flex-wrap">
                         {user.role === "DELIVERY" && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20">
                             <Car className="w-4 h-4 mr-1.5 text-green-500" />
@@ -356,40 +392,29 @@ const User: React.FC = () => {
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td
+                    </TableCell>
+
+                    <TableCell
                       data-label="Ações"
-                      className="px-6 py-3 whitespace-nowrap text-sm block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
+                      className="px-4 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
                     >
-                      <div className="inline-flex sm:flex items-center justify-end sm:justify-start">
-                        <button className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-[#003873] hover:bg-[#003873]/5 transition-colors duration-200">
-                          <svg
-                            className="w-4 h-4 mr-1.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
+                      <div className="flex items-center justify-end sm:justify-start w-full min-w-0 flex-wrap">
+                        <Button
+                          variant="link"
+                          onClick={() => {
+                            router.push(`/dashboard/user/${user.id}`);
+                          }}
+                          className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-[#003873] hover:bg-[#003873]/5 transition-colors duration-200"
+                        >
+                          <Eye className="w-4 h-4 mr-1.5" />
                           Ver detalhes
-                        </button>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
       ) : (
@@ -418,19 +443,7 @@ const User: React.FC = () => {
             className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             disabled={isLoading || page === 1}
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ArrowLeft className="w-4 h-4" />
             Anterior
           </button>
           <button
@@ -439,19 +452,7 @@ const User: React.FC = () => {
             disabled={isLoading || page === lastPage}
           >
             Próxima
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
