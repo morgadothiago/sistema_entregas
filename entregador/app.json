@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Entregador",
+    "slug": "entregador",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/ios-light.png",
+    "userInterfaceStyle": "light",
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#00439A"
+    },
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/adaptive-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#00439A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "icon": "./assets/ios-light.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#00439A"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.entregador"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "most-recent"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ca0f3a90-7d85-46b1-8d9f-13ffa3c2ae04"
+      }
+    },
+    "owner": "thiago_morgado"
+  }
+}

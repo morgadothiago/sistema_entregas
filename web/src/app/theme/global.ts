@@ -1,0 +1,10 @@
+export const globalTheme = {
+  COLORS: {
+    PRIMERYCOLOR: "#003B73",
+    SECONDYCOLOR: "#FFFFFF",
+    CONTRASTCOLOR: "#5DADE2",
+    STARCOLOR: "#FFD700",
+    BUTTONCOLOR: "#00FFB3",
+    TEXTCOLOR: "#2C3E50",
+  },
+};

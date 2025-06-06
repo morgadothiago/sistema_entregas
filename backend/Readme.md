@@ -3,7 +3,7 @@
 
 ## Autenticacao
 
-- [ ] login
+- [X] login
   - EMAIL, PASSWORD
 - [ ] autorização
   - header
