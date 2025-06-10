@@ -83,7 +83,7 @@ export function SideBar() {
                       >
                         <item.icon className="mr-2 flex-shrink-0" />
                         <span className="text-[16px] md:text-sm truncate">
-                          {item.title}
+                          {item.subTile}
                         </span>
                       </a>
                     </SidebarMenuButton>
@@ -103,7 +103,7 @@ export function SideBar() {
                     <SidebarMenuItem
                       key={item.title}
                       className={`transition duration-200 rounded-md ${
-                        selectedItem === item.title
+                        selectedItem === item.subTile
                           ? "bg-[#fff] text-black"
                           : "text-white hover:bg-white/10"
                       }`}
@@ -115,7 +115,7 @@ export function SideBar() {
                         >
                           <item.icon className="mr-2 flex-shrink-0" />
                           <span className="text-sm md:text-sm truncate">
-                            {item.subTile}
+                            {item.title}
                           </span>
                         </a>
                       </SidebarMenuButton>
