@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import type { SignInFormData } from "../../types/SingInType";
 import { toast } from "sonner";
-import { useAuth } from "@/app/context/";
+
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function SignIn() {
   const routes = useRouter();
-  const { login } = useAuth();
+
   const {
     register,
     handleSubmit,
@@ -22,9 +23,12 @@ export default function SignIn() {
 
   const onSubmit: SubmitHandler<SignInFormData> = async (data) => {
     try {
-      const response = await login(data);
+      const response = await signIn("credentials", {
+        ...data,
+        redirect: false,
+      });
 
-      if (response) {
+      if (response?.ok) {
         toast.success("Login realizado com sucesso!", {
           description: "Você está sendo redirecionado para a página inicial",
           duration: 3000,
@@ -47,7 +51,6 @@ export default function SignIn() {
         position: "top-right",
         richColors: true,
       });
-
     }
   };
 

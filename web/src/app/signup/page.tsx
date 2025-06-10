@@ -12,7 +12,6 @@ import { AccessDataStep } from "./AccessDataStep";
 import { unmaskInput } from "../util/unmaskInput";
 import type { ICreateUser } from "../types/User";
 
-// ✅ Tipagem completa do formulário
 type FormData = {
   companyName: string;
   cnpj: string;
@@ -33,74 +32,61 @@ export default function SignUpPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (step === 3) {
-      const unmaskedData: ICreateUser = {
-        name: data.companyName,
-        ...data,
-        zipCode: unmaskInput(data.zipCode),
-        phone: unmaskInput(data.phone),
-        cnpj: unmaskInput(data.cnpj),
-      };
-
-      try {
-        setIsLoading(true);
-        const response = await api.newUser(unmaskedData);
-
-        if (response) {
-          toast.success("Cadastro realizado com sucesso!", {
-            description: "Você será redirecionado para a página de login.",
-            duration: 3000,
-            position: "top-right",
-            richColors: true,
-          });
-          router.push("/signin");
-        } else {
-          toast.error("Erro ao criar usuário", {
-            description:
-              "Ocorreu um erro ao criar o usuário. Tente novamente mais tarde.",
-            duration: 3000,
-            position: "top-right",
-            richColors: true,
-          });
-        }
-      } catch (error: unknown) {
-        console.error("Erro ao criar usuário:", error);
-
-        let errorMessage = "Erro desconhecido";
-        let statusCode = "Erro";
-
-        if (
-          typeof error === "object" &&
-          error !== null &&
-          "response" in error &&
-          typeof (error as { response?: unknown }).response === "object"
-        ) {
-          const response = (
-            error as {
-              response?: { data?: { message?: string }; status?: number };
-            }
-          ).response;
-          errorMessage = response?.data?.message || errorMessage;
-          statusCode = String(response?.status || statusCode);
-        }
-
-        toast.error(`Erro ${statusCode}: ${errorMessage}`, {
-          description: "Tente novamente mais tarde.",
-          duration: 3000,
-          position: "top-right",
-          richColors: true,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      setStep((prev) => prev + 1);
-    }
-  };
-
   const handleBack = () => {
     if (step > 1) setStep((prev) => prev - 1);
+  };
+
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    if (step < 3) {
+      setStep((prev) => prev + 1);
+      return;
+    }
+
+    // Último passo: enviar dados
+    const unmaskedData: ICreateUser = {
+      name: data.companyName,
+      ...data,
+      zipCode: unmaskInput(data.zipCode),
+      phone: unmaskInput(data.phone),
+      cnpj: unmaskInput(data.cnpj),
+    };
+
+    console.log(unmaskedData);
+
+    setIsLoading(true);
+
+    try {
+      const response = await api.newUser(unmaskedData);
+
+      console.log(response);
+
+      if (response && "status" in response) {
+        if (response.status === 409) {
+          toast.warning(response.message, {
+            duration: 3000,
+            position: "top-right",
+            richColors: true,
+          });
+        }
+      } else {
+        console.log("O que esta acontecendo aqui?");
+      }
+
+      toast.success("Cadastro realizado com sucesso!", {
+        duration: 3000,
+        position: "top-right",
+        richColors: true,
+      });
+
+      setIsLoading(false);
+
+      setTimeout(() => {
+        router.push("/signin");
+      }, 1500);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -146,6 +132,7 @@ export default function SignUpPage() {
                 type="button"
                 className="bg-gray-500 hover:bg-gray-700 text-white px-6 py-2 rounded-md transition duration-200"
                 onClick={handleBack}
+                disabled={isLoading}
               >
                 Voltar
               </Button>

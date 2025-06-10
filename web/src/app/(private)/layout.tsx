@@ -15,11 +15,11 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { setUser, setToken } = useAuth();
 
-  useEffect(() => {   
+  useEffect(() => {
     const checkSession = async () => {
       try {
         const data = await getSession();
-                console.log("data", data);
+        console.log("data", data);
         if (data) {
           setUser(data.user as unknown as User);
           setToken((data as unknown as { token: string }).token);
@@ -31,10 +31,10 @@ export default function Layout({ children }: LayoutProps) {
         redirect("/signin");
       }
     };
-    
+
     // Verificar sessão apenas uma vez ao montar
     checkSession();
-    
+
     return () => {};
   }, []);
 

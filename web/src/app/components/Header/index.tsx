@@ -4,11 +4,14 @@ import React from "react";
 import { useAuth } from "@/app/context";
 import { Bell, MessageCircle, Menu } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback/* , AvatarImage */ } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback /* , AvatarImage */,
+} from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 export default function Header() {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
@@ -41,7 +44,7 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-full border border-primary/10">
-            <span className="text-sm font-medium text-gray-600">Saldo:</span>
+            <span className="text-sm font-medium text-gray-600">Debitos:</span>
             <span className="font-bold text-primary">
               R${" "}
               {user?.Balance?.amount?.toLocaleString("pt-BR", {

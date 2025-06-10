@@ -16,7 +16,7 @@ import { DeliverymanDto } from "./dto/deliverymen.dto";
 export class AuthService {
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async signupCompany(company: CompanyDto) {
@@ -174,6 +174,8 @@ export class AuthService {
       },
     });
 
+    console.log(user);
+
     if (!user) {
       throw new UnauthorizedException("Credenciais inválidas");
     }
@@ -186,7 +188,7 @@ export class AuthService {
 
     const isPasswordValid = await bcrypt.compare(
       loginDto.password,
-      user.password,
+      user.password
     );
 
     if (!isPasswordValid) {
