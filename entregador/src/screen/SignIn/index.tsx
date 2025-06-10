@@ -203,7 +203,10 @@ export default function SignInScreen() {
           </SocialLoginArea>
 
           <Footer>
-            <LinkButton linkTitle="Esqueceu sua senha" onPress={() => {}} />
+            <LinkButton
+              linkTitle="Esqueceu sua senha"
+              onPress={() => navigation.navigate("ResetPassword")}
+            />
             <LinkButton
               linkTitle="Criar conta"
               onPress={() => navigation.navigate("SignUp")}

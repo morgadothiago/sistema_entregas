@@ -10,6 +10,7 @@ import { theme } from "../../global/theme";
 import { Button } from "../../components/Button";
 import { KeyboardAvoidingView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { api } from "../../services/api";
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
@@ -19,9 +20,11 @@ export default function SignUpScreen() {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log("Dados do formulário:", data);
-    // Aqui você pode enviar os dados para sua API ou fazer outra ação
+    try {
+      const respponse = await api.post("/");
+    } catch (err) {}
   };
 
   return (
@@ -60,8 +63,13 @@ export default function SignUpScreen() {
                   control,
                   rules: { required: "Nome é obrigatório" },
                 }}
-                error={errors.name?.message}
+                error={
+                  typeof errors.name?.message === "string"
+                    ? errors.name.message
+                    : undefined
+                }
               />
+
               <Input
                 label="Sobrenome"
                 icon="user"
@@ -74,7 +82,11 @@ export default function SignUpScreen() {
                   control,
                   rules: { required: "Sobrenome é obrigatório" },
                 }}
-                error={errors.lastname?.message}
+                error={
+                  typeof errors.lastname?.message === "string"
+                    ? errors.lastname.message
+                    : undefined
+                }
               />
               <Input
                 label="Email"
@@ -96,7 +108,11 @@ export default function SignUpScreen() {
                     },
                   },
                 }}
-                error={errors.email?.message}
+                error={
+                  typeof errors.email?.message === "string"
+                    ? errors.email.message
+                    : undefined
+                }
               />
               <Input
                 label="Telefone"
@@ -111,7 +127,11 @@ export default function SignUpScreen() {
                   control,
                   rules: { required: "Telefone é obrigatório" },
                 }}
-                error={errors.phone?.message}
+                error={
+                  typeof errors.phone?.message === "string"
+                    ? errors.phone.message
+                    : undefined
+                }
               />
               <Input
                 label="Senha"
@@ -132,7 +152,11 @@ export default function SignUpScreen() {
                     },
                   },
                 }}
-                error={errors.password?.message}
+                error={
+                  typeof errors.password?.message === "string"
+                    ? errors.password.message
+                    : undefined
+                }
               />
 
               <View style={{ marginTop: 16 }}>
@@ -141,9 +165,7 @@ export default function SignUpScreen() {
                   onPress={handleSubmit(onSubmit)}
                   loading={false}
                   disabled={false}
-                >
-                  Enviar dados
-                </Button>
+                />
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
