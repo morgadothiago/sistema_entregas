@@ -32,18 +32,19 @@ model User {
 }
 
 model Address {
-  id         Int       @id @default(autoincrement())
-  street     String
-  number     String
-  city       String
-  state      String
-  zipCode    String
-  country    String
-  complement String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  Company    Company[]
-  Client     Client[]
+  id          Int           @id @default(autoincrement())
+  street      String
+  number      String
+  city        String
+  state       String
+  zipCode     String
+  country     String
+  complement  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  Company     Company[]
+  Client      Client[]
+  DeliveryMan DeliveryMan[]
 
   @@map("addresses")
 }
@@ -66,18 +67,20 @@ model Company {
 enum UserStatus {
   ACTIVE
   INACTIVE
+  NO_DOCUMENTS
   BLOCKED
 }
 
 model VehicleType {
-  id                Int      @id @default(autoincrement())
-  type              String   @unique
-  tarifaBase        Decimal  @map("tarifa_base") @db.Decimal(5, 2)
-  valorKMAdicional  Decimal  @map("valor_km_adicional") @db.Decimal(5, 2)
-  paradaAdicional   Decimal  @map("parada_adicional") @db.Decimal(5, 2)
-  ajudanteAdicional Decimal  @map("ajudante_adicional") @db.Decimal(5, 2)
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+  id                Int       @id @default(autoincrement())
+  type              String    @unique
+  tarifaBase        Decimal   @map("tarifa_base") @db.Decimal(5, 2)
+  valorKMAdicional  Decimal   @map("valor_km_adicional") @db.Decimal(5, 2)
+  paradaAdicional   Decimal   @map("parada_adicional") @db.Decimal(5, 2)
+  ajudanteAdicional Decimal   @map("ajudante_adicional") @db.Decimal(5, 2)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+  vehicle           Vehicle[]
 
   @@map("vehicle_types")
 }
@@ -129,16 +132,36 @@ enum Role {
 model DeliveryMan {
   id        Int        @id @default(autoincrement())
   name      String
-  email     String     @unique
+  cpf       String
+  dob       DateTime   @db.Date @map("date_of_birth")
   phone     String
-  address   String
+  Address   Address    @relation(fields: [addressId], references: [id])
+  Vehicle   Vehicle?   @relation(fields: [vehicleId], references: [id])
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt DateTime   @default(now()) @updatedAt
   User      User       @relation(fields: [userId], references: [id])
   userId    Int        @unique
   Delivery  Delivery[]
+  addressId Int        @unique
+  vehicleId Int        @unique
 
   @@map("deliverymen")
+}
+
+model Vehicle {
+  id            Int          @id @default(autoincrement())
+  licensePlate  String       @unique @map("license_plate") @db.VarChar(8) // "placa"
+  brand         String       @db.Char(30) // "marca"
+  model         String       @db.Char(50) // "modelo"
+  year          String       @db.Char(4) // "ano" (manufacturing year)
+  color         String       @db.Char(20) // "cor"
+  Type          VehicleType  @relation(fields: [vehicleTypeId], references: [id])
+  vehicleTypeId Int          @map("vehicle_type_id")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at")
+  DeliveryMan   DeliveryMan?
+
+  @@map("vehicles")
 }
 
 enum DeliveryStatus {
