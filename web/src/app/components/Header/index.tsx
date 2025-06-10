@@ -14,8 +14,8 @@ export default function Header() {
   const { user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm">
-      <div className="container flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-md">
+      <div className="container flex h-16 items-center justify-between px-2 sm:px-4">
         <div className="flex items-center gap-4">
           <SidebarTrigger
             className="lg:hidden hover:bg-gray-100 transition-colors"
@@ -33,17 +33,19 @@ export default function Header() {
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Bem-vindo,</span>
-              <span className="font-semibold text-lg text-gray-800">
+            <div className="flex flex-col hidden md:flex">
+              <span className="text-sm text-gray-500 hidden md:flex">
+                Bem-vindo,
+              </span>
+              <span className="font-bold text-lg text-gray-800">
                 {user?.Company?.name || "Empresa"}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-full border border-primary/10">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-primary/10">
             <span className="text-sm font-medium text-gray-600">Debitos:</span>
             <span className="font-bold text-primary">
               R${" "}
@@ -56,14 +58,14 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
+              <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
                 3
               </span>
             </Button>
 
             <Button variant="ghost" size="icon" className="relative">
               <MessageCircle className="h-5 w-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
+              <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
                 3
               </span>
             </Button>
