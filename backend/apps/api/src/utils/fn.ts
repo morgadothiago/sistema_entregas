@@ -47,3 +47,15 @@ export const paginateResponse = <T>(
     totalPage,
   };
 };
+
+// Em um controller ou middleware
+export function isMobileDevice(agent: string | undefined): boolean {
+  console.log(agent);
+  const userAgent = agent || "";
+
+  // Regex para detectar dispositivos móveis comuns
+  const mobileRegex =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+
+  return mobileRegex.test(userAgent);
+}
