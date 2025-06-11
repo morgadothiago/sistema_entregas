@@ -35,19 +35,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const message = response.data.message;
 
       if (token && userFromApi) {
-        // Cria novo objeto user incluindo o token
-        const userData = {
-          ...userFromApi,
-          token,
-        };
-
-        // Armazena token e user (com token) no AsyncStorage
+        // Armazena token e user no AsyncStorage antes de atualizar o estado
         await AsyncStorage.setItem("@auth:token", token);
-        await AsyncStorage.setItem("@auth:user", JSON.stringify(userData));
+        await AsyncStorage.setItem("@auth:user", JSON.stringify(userFromApi));
 
         // Atualiza estado React
         setIsAuthenticated(true);
-        setUser(userData);
+        setUser({ ...userFromApi, token });
 
         // Mostra toast de sucesso
         showAppToast({
@@ -65,6 +59,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
     }
   };
+
+  // Carrega estado de autenticação ao iniciar o app
+  useEffect(() => {
+    const loadAuthData = async () => {
+      const token = await AsyncStorage.getItem("@auth:token");
+      const userJson = await AsyncStorage.getItem("@auth:user");
+      if (token && userJson) {
+        setIsAuthenticated(true);
+        setUser({ ...JSON.parse(userJson), token });
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    };
+    loadAuthData();
+  }, []);
 
   const logout = async (): Promise<void> => {
     await AsyncStorage.removeItem("@auth:token");
