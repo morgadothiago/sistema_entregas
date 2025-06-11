@@ -42,7 +42,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     res.setHeader("X-RateLimit-Limit", 10);
     res.setHeader("X-RateLimit-Remaining", 10 - (requests + 1));
-    await this.cache.setCache(`rate-limit:${key}`, `${requests + 1}`, 10);
+    await this.cache.setCache(`rate-limit:${key}`, `${requests + 1}`, 1);
 
     next();
   }
