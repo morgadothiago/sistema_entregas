@@ -86,32 +86,6 @@ export default function SignInScreen() {
   const emailRef = useRef<TextInput>(null);
 
   const handleLogin = async (data: any) => {
-    const validation = await SigninSchema.validate(data).catch((err: any) => {
-      if (err instanceof ValidationError) {
-        setError(
-          err.path as string,
-          {
-            message: err.message,
-            type: "validate",
-          },
-          {
-            shouldFocus: true,
-          }
-        );
-      }
-    });
-
-    if (!validation) return;
-
-    // if (!data.email || !data.password) {
-    //   setLoading(false);
-    //   setButtonDisabled(false);
-
-    //   console.warn("Preencha o email e a senha.");
-    //   showErrorToast("Preencha o email e a senha.");
-    //   return;
-    // }
-
     setLoading(true);
     setButtonDisabled(true);
 
@@ -150,6 +124,7 @@ export default function SignInScreen() {
                   placeholderTextColor: "#FFF",
                   onSubmitEditing: () => emailRef.current?.focus(),
                   returnKeyType: "next",
+                  autoCapitalize: "none",
                 }}
                 icon="user"
               />
@@ -170,6 +145,7 @@ export default function SignInScreen() {
                   placeholderTextColor: "#FFF",
                   onSubmitEditing: handleSubmit(handleLogin),
                   secureTextEntry: true,
+                  autoCapitalize: "none",
                 }}
                 icon="lock"
               />

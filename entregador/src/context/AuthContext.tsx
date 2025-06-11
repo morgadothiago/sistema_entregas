@@ -27,8 +27,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (data: SignInFormData): Promise<void> => {
     try {
+      console.log("Dados antes da requicição ", data);
       const response = await api.post("/auth/login", data);
       console.log("📦 response.data:", response.data);
+
+      if (response.status === 401) {
+        console.log("Batendo na api");
+      }
 
       const token = response.data.token;
       const userFromApi = response.data.user;
@@ -49,7 +54,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAuthenticated(true);
         setUser(userData);
 
-        // Mostra toast de sucesso
         showAppToast({
           message: message ?? "Login realizado com sucesso!",
           type: "success",
@@ -62,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         err?.response?.data?.message || "Erro de conexão ou login inválido.";
       showErrorToast(message);
       setIsAuthenticated(false);
+
       setUser(null);
     }
   };

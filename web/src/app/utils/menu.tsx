@@ -47,7 +47,7 @@ export const itemAdm = [
   {
     title: "add-new-delivery",
     subTile: "Cadastro de Entregador",
-    url: "/admin/delivery",
+    url: "/delivery",
     icon: Car,
   },
   {
@@ -55,12 +55,6 @@ export const itemAdm = [
     subTile: "Repasse de valores",
     url: "/admin/repassar-valores",
     icon: DollarSign,
-  },
-  {
-    title: "acess-user",
-    subTile: "Solicitação de acesso",
-    url: "/admin/solicitacao-acesso",
-    icon: User,
   },
   {
     title: "/admin/listuser",

@@ -104,7 +104,7 @@ export default function SignIn() {
           <div className="flex items-center justify-between w-[95%] mt-10 ">
             <Link
               href="/reset-password"
-              className="text-[#5dade2] hover:text-[#024db9] font-bold"
+              className="text-[#5dade2] hover:text-[#ff0000] font-bold"
             >
               Esqueceu a senha
             </Link>
