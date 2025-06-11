@@ -238,7 +238,7 @@ export class AuthService {
         throw new UnauthorizedException("Credenciais inválidas");
       }
 
-      if (user.role === Role.DELIVERY && isMobile) {
+      if (user.role === Role.DELIVERY && !isMobile) {
         throw new UnauthorizedException(
           "Apenas dispositivos móveis podem acessar a rota de entregadores",
         );
