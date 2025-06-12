@@ -13,7 +13,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Logger } from "@nestjs/common";
 import { User } from "@prisma/client";
 
-@WebSocketGateway(8085, {
+@WebSocketGateway(2000, {
   namespace: "gps",
   transports: ["websocket"],
   pingTimeout: 10000,

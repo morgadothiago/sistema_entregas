@@ -6,8 +6,8 @@ import {
 } from "@nestjs/common";
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { Localization } from "@prisma/client";
-import { ILocation, ReverseResponse } from "../typing/location";
-import { CacheService } from "cache/cache.service";
+import { ILocation, IRoute, ReverseResponse } from "../typing/location";
+import { CacheService } from "../cache/cache.service";
 
 @Injectable()
 export class LocationService implements OnModuleInit {
@@ -40,7 +40,7 @@ export class LocationService implements OnModuleInit {
     zipCode: string,
   ): Promise<{ latitude: number; longitude: number }> {
     const query = `${number} ${address}, ${city}, ${state}, ${zipCode}`;
-    const data = await this.cache.getValue(query);
+    const data = await this.cache.getValue(`reverse:${query}`);
 
     if (data)
       return JSON.parse(data) as { latitude: number; longitude: number };
@@ -70,12 +70,7 @@ export class LocationService implements OnModuleInit {
   async findDistance(
     origin: Localization,
     destination: Localization,
-  ): Promise<
-    Array<{
-      distance: number;
-      duration: number;
-    }>
-  > {
+  ): Promise<IRoute> {
     const coordenates = encodeURIComponent(
       `${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
     );
@@ -89,11 +84,10 @@ export class LocationService implements OnModuleInit {
         throw new NotFoundException("Erro ao calcular a rota");
       });
 
-    return location.routes.map((route) => {
-      return {
-        distance: route.distance,
-        duration: route.duration,
-      };
-    });
+    return {
+      distance: +location.routes[0].distance / 1000,
+      duration: Math.floor(location.routes[0].duration / 60), // Convert to minutes
+      geometry: location.routes[0].geometry,
+    };
   }
 }

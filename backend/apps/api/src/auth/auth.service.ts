@@ -123,6 +123,14 @@ export class AuthService {
 
       if (existingCpf) throw new ConflictException("CPF já cadastrado");
 
+      const localization = await this.locationService.reverse(
+        deliveryman.city,
+        deliveryman.state,
+        deliveryman.address,
+        deliveryman.number,
+        deliveryman.zipCode,
+      );
+
       await tx.user.create({
         data: {
           email: deliveryman.email,
@@ -148,6 +156,12 @@ export class AuthService {
                   zipCode: deliveryman.zipCode,
                   complement: deliveryman.complement,
                   country: "Brasil",
+                  Localization: {
+                    create: {
+                      latitude: localization.latitude,
+                      longitude: localization.longitude,
+                    },
+                  },
                 },
               },
               Vehicle: {
@@ -173,16 +187,11 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto, isMobile: boolean) {
-    const whereClause: {
-      email: string;
-      role?: Role;
-    } = {
-      email: loginDto.email,
-    };
-
     return this.prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
-        where: whereClause,
+        where: {
+          email: loginDto.email,
+        },
         include: {
           Balance: {
             omit: {
@@ -250,24 +259,20 @@ export class AuthService {
         },
       });
 
-      if (!user) {
-        throw new UnauthorizedException("Credenciais inválidas");
-      }
+      if (!user) throw new UnauthorizedException("Credenciais inválidas");
 
-      if (user.role === Role.DELIVERY && !isMobile) {
+      if (user.role === Role.DELIVERY && !isMobile)
         throw new UnauthorizedException(
           "Apenas dispositivos móveis podem acessar a rota de entregadores",
         );
-      }
 
       const isPasswordValid = await bcrypt.compare(
         loginDto.password,
         user.password,
       );
 
-      if (!isPasswordValid) {
+      if (!isPasswordValid)
         throw new UnauthorizedException("Credenciais inválidas");
-      }
 
       const payload = { id: user.id };
 

@@ -3,8 +3,7 @@ import { DeliveryController } from "./delivery.controller";
 import { DeliveryService } from "./delivery.service";
 import { LocationService } from "../location/location.service";
 import { VehicleTypeService } from "../vehicle-type/vehicle-type.service";
-import { ProfitService } from "../profit/profit.service";
-import { CacheService } from "cache/cache.service";
+import { CacheService } from "../cache/cache.service";
 
 @Module({
   controllers: [DeliveryController],
@@ -13,7 +12,6 @@ import { CacheService } from "cache/cache.service";
     DeliveryService,
     LocationService,
     VehicleTypeService,
-    ProfitService,
   ],
 })
 export class DeliveryModule {}

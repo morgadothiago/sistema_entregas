@@ -1,3 +1,9 @@
+export interface IRoute {
+  distance: number;
+  duration: number;
+  geometry: string;
+}
+
 export interface ILocation {
   code: string;
   routes: Route[];
@@ -78,4 +84,10 @@ export interface ReverseResponse {
   class: string;
   type: string;
   importance: number;
+}
+
+export interface IRoute {
+  distance: number;
+  duration: number;
+  geometry: string;
 }

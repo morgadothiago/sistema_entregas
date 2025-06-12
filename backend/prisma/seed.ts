@@ -76,27 +76,6 @@ async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
   logger.log("Vehicle types seeded successfully!");
 }
 
-async function seedProfit(prisma: PrismaClient, logger: Logger) {
-  logger.log(`Seeding Profit`);
-
-  try {
-    const percentage = 0.1;
-
-    await prisma.profitMargin?.upsert({
-      where: { id: 1 },
-      update: {},
-      create: {
-        id: 1,
-        percentage,
-      },
-    });
-
-    logger.log(`Seeded Profit: ${percentage * 100}%`);
-  } catch (err) {
-    logger.error(`Profit ${err}`);
-  }
-}
-
 async function createAdminUser(prisma: PrismaClient, logger: Logger) {
   logger.log(`Creating admin user`);
   const salt = await bcrypt.genSalt(12);
@@ -119,7 +98,7 @@ async function createAdminUser(prisma: PrismaClient, logger: Logger) {
 
   try {
     await prisma.user?.upsert({
-      where: { id: 1 },
+      where: { email: user.email },
       update: {},
       create: {
         email: user.email as string,
@@ -147,7 +126,6 @@ async function main() {
 
   const logger = new Logger("SEED");
 
-  await seedProfit(prisma, logger);
   await seedvehicleTypes(prisma, logger);
   await createAdminUser(prisma, logger);
 }

@@ -9,6 +9,7 @@ import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto";
 import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto";
 import { IPaginateResponse, paginateResponse } from "../utils/fn";
 import { Decimal } from "@prisma/client/runtime/library";
+import { IRoute } from "../typing/location";
 
 @Injectable()
 export class VehicleTypeService {
@@ -43,6 +44,21 @@ export class VehicleTypeService {
         id: vehicleType.id,
       },
     });
+  }
+
+  calculatePrice(vehicleType: VehicleType, geoInfo: IRoute): number {
+    const distanceKM = geoInfo.distance;
+
+    const precoBasePrimeiros5KM =
+      vehicleType.tarifaBase.toNumber() * Math.min(distanceKM, 5);
+
+    const kmAdicionais = Math.max(0, distanceKM - 5);
+    const precoKMAdicionais =
+      kmAdicionais * vehicleType.valorKMAdicional.toNumber();
+
+    const precoTotal = precoBasePrimeiros5KM + precoKMAdicionais;
+
+    return Math.round(precoTotal * 100) / 100;
   }
 
   async update(

@@ -3,9 +3,9 @@ import { DeliveryCreateDto } from "./dto/delivery-create.dto";
 import { DeliverySimulateDto } from "./dto/delivery-simulate.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { VehicleTypeService } from "../vehicle-type/vehicle-type.service";
-import { DeliveryUpdateDto } from "./dto/delivery-update.dto";
 import { LocationService } from "../location/location.service";
 import { Localization, VehicleType } from "@prisma/client";
+import { IRoute } from "../typing/location";
 
 @Injectable()
 export class DeliveryService {
@@ -15,40 +15,42 @@ export class DeliveryService {
     private locationService: LocationService,
   ) {}
 
-  updateDelivery(code: string, body: DeliveryUpdateDto) {
-    throw new Error("Method not implemented.");
-  }
-
-  async simulateDelivery(body: DeliverySimulateDto, idUser: number) {
-    const vehicleTypes: VehicleType = await this.vehicleType.findOne(
+  async simulateDelivery(
+    body: DeliverySimulateDto,
+    idUser: number,
+  ): Promise<{
+    location: IRoute;
+    price: number;
+  }> {
+    const vehicleType: VehicleType = await this.vehicleType.findOne(
       body.vehicleType,
     );
 
-    if (!vehicleTypes) {
+    if (!vehicleType) {
       throw new NotFoundException(
         `Tipo de veiculo '${body.vehicleType}' nao foi encontrado`,
       );
     }
 
-    const user = await this.prismaService.user.findUnique({
-      where: { id: idUser },
-      include: {
-        Company: {
-          include: {
-            Address: {
-              include: {
-                Localization: {
-                  select: {
-                    longitude: true,
-                    latitude: true,
-                  },
+    const companyLocalization = await this.prismaService.localization.findFirst(
+      {
+        where: {
+          Address: {
+            some: {
+              Company: {
+                some: {
+                  idUser,
                 },
               },
             },
           },
         },
+        select: {
+          longitude: true,
+          latitude: true,
+        },
       },
-    });
+    );
 
     const location = await this.locationService.reverse(
       body.city,
@@ -58,38 +60,17 @@ export class DeliveryService {
       body.zipCode,
     );
 
-    const distances = await this.locationService.findDistance(
-      client.Address?.Localization as Localization,
-      user.Company?.Address?.Localization as Localization,
+    const geoInfo = await this.locationService.findDistance(
+      location as Localization,
+      companyLocalization as Localization,
     );
 
-    const prices = vehicleTypes.reduce(
-      (acc, vehicleType, index) => {
-        const prices = distances.map(({ distance, duration }) => {
-          return {
-            price: +(
-              (distance / 1000) *
-              (vehicleType.pricePerKm || 0) *
-              (1 + (profit.percentage?.toNumber() || 0))
-            ).toFixed(2),
+    const price = this.vehicleType.calculatePrice(vehicleType, geoInfo);
 
-            duration: duration / 3600,
-            distance: distance / 1000,
-          };
-        });
-        const key: string = vehicleType.type || `vehicleType${index}`;
-
-        acc[key] = prices;
-
-        return acc;
-      },
-      {} as Record<
-        string,
-        { price: number; duration: number; distance: number }[]
-      >,
-    );
-
-    return prices;
+    return {
+      location: geoInfo,
+      price,
+    };
   }
 
   createDelivery(body: DeliveryCreateDto) {
