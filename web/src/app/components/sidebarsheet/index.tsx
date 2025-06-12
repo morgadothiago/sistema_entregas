@@ -9,7 +9,11 @@ import {
 import { Bell, BellDot } from "lucide-react";
 import React from "react";
 
-export default function SideBarSheet({ isNotification }: any) {
+interface SideBarSheetProps {
+  isNotification: boolean;
+}
+
+export default function SideBarSheet({ isNotification }: SideBarSheetProps) {
   return (
     <Sheet>
       <SheetTrigger>{isNotification ? <BellDot /> : <Bell />}</SheetTrigger>

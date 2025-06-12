@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -11,10 +10,10 @@ import {
 import { Server, Socket } from "socket.io";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "@prisma/client";
 import { Logger } from "@nestjs/common";
+import { User } from "@prisma/client";
 
-@WebSocketGateway(2000, {
+@WebSocketGateway(8085, {
   namespace: "gps",
   transports: ["websocket"],
   pingTimeout: 10000,

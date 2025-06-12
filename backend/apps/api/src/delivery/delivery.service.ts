@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { DeliveryCreateDto } from "./dto/delivery-create.dto";
 import { DeliverySimulateDto } from "./dto/delivery-simulate.dto";
 import { PrismaService } from "../prisma/prisma.service";
-import { ProfitService } from "../profit/profit.service";
 import { VehicleTypeService } from "../vehicle-type/vehicle-type.service";
 import { DeliveryUpdateDto } from "./dto/delivery-update.dto";
 import { LocationService } from "../location/location.service";
@@ -12,9 +11,8 @@ import { Localization, VehicleType } from "@prisma/client";
 export class DeliveryService {
   constructor(
     private prismaService: PrismaService,
-    private profit: ProfitService,
     private vehicleType: VehicleTypeService,
-    private location: LocationService,
+    private locationService: LocationService,
   ) {}
 
   updateDelivery(code: string, body: DeliveryUpdateDto) {
@@ -22,39 +20,17 @@ export class DeliveryService {
   }
 
   async simulateDelivery(body: DeliverySimulateDto, idUser: number) {
-    const profit = await this.profit.findOne();
-    let vehicleTypes: Partial<VehicleType>[];
+    const vehicleTypes: VehicleType = await this.vehicleType.findOne(
+      body.vehicleType,
+    );
 
-    if (body.vehicleType) {
-      const data = await this.vehicleType.findOne(body.vehicleType);
-      vehicleTypes = data ? [data] : await this.vehicleType.findAll();
-    } else {
-      vehicleTypes = await this.vehicleType.findAll();
+    if (!vehicleTypes) {
+      throw new NotFoundException(
+        `Tipo de veiculo '${body.vehicleType}' nao foi encontrado`,
+      );
     }
 
-    const client = await this.prismaService.client
-      .findFirstOrThrow({
-        where: { code: body.codeClient },
-        include: {
-          Address: {
-            include: {
-              Localization: {
-                select: {
-                  longitude: true,
-                  latitude: true,
-                },
-              },
-            },
-          },
-        },
-      })
-      .catch(() => {
-        throw new NotFoundException(
-          `Cliente com codigo '${body.codeClient}' não encontrado`,
-        );
-      });
-
-    const user = await this.prismaService.user.findFirstOrThrow({
+    const user = await this.prismaService.user.findUnique({
       where: { id: idUser },
       include: {
         Company: {
@@ -74,7 +50,15 @@ export class DeliveryService {
       },
     });
 
-    const distances = await this.location.findDistance(
+    const location = await this.locationService.reverse(
+      body.city,
+      body.state,
+      body.address,
+      body.number,
+      body.zipCode,
+    );
+
+    const distances = await this.locationService.findDistance(
       client.Address?.Localization as Localization,
       user.Company?.Address?.Localization as Localization,
     );

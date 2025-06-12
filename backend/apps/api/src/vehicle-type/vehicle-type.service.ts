@@ -7,37 +7,22 @@ import { PrismaService } from "../prisma/prisma.service";
 import { VehicleType } from "@prisma/client";
 import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto";
 import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto";
-import { CacheService } from "cache/cache.service";
+import { IPaginateResponse, paginateResponse } from "../utils/fn";
+import { Decimal } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class VehicleTypeService {
-  constructor(
-    private prisma: PrismaService,
-    private cache: CacheService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async findOne(type: string): Promise<Partial<VehicleType> | undefined> {
-    const data = await this.cache.getValue(
-      `${VehicleTypeService.name}:${type}`,
-    );
-
-    if (data) return JSON.parse(data) as VehicleType;
-
+  async findOne(type: string): Promise<VehicleType> {
     const vehicleType = await this.prisma.vehicleType.findUnique({
       where: { type },
-      select: { id: true, pricePerKm: true, type: true },
     });
 
     if (!vehicleType)
       throw new NotFoundException(
         `Tipo de veiculo '${type}' nao foi encontrado`,
       );
-
-    await this.cache.setCache(
-      `${VehicleTypeService.name}:type`,
-      JSON.stringify(vehicleType),
-      60 * 60 * 24, // 24h
-    );
 
     return vehicleType;
   }
@@ -55,7 +40,7 @@ export class VehicleTypeService {
 
     await this.prisma.vehicleType.delete({
       where: {
-        type: type,
+        id: vehicleType.id,
       },
     });
   }
@@ -89,7 +74,13 @@ export class VehicleTypeService {
     }
 
     const vehicleTypeDto = {
-      pricePerKm: updateVehicleTypeDto.pricePerKm,
+      tarifaBase: updateVehicleTypeDto.tarifaBase as unknown as Decimal,
+      valorKMAdicional:
+        updateVehicleTypeDto.valorKMAdicional as unknown as Decimal,
+      ParadaAdicional:
+        updateVehicleTypeDto.ParadaAdicional as unknown as Decimal,
+      AjudanteAdicional:
+        updateVehicleTypeDto.AjudanteAdicional as unknown as Decimal,
       type: updateVehicleTypeDto.type,
     };
 
@@ -97,9 +88,6 @@ export class VehicleTypeService {
       where: { id: vehicleType.id },
       data: vehicleTypeDto,
     });
-
-    await this.cache.delete(`${VehicleTypeService.name}:type`);
-    await this.cache.delete(VehicleTypeService.name);
   }
 
   async create(body: CreateVehicleTypeDto): Promise<void> {
@@ -113,42 +101,37 @@ export class VehicleTypeService {
       throw new ConflictException(`Tipo de veiculo '${body.type}' já existe`);
 
     const vehicleTypeDto = {
-      pricePerKm: body.pricePerKm,
       type: body.type,
+      tarifaBase: new Decimal(body.tarifaBase),
+      valorKMAdicional: new Decimal(body.valorKMAdicional),
+      paradaAdicional: new Decimal(body.ParadaAdicional),
+      ajudanteAdicional: new Decimal(body.AjudanteAdicional),
     };
 
     await this.prisma.vehicleType.create({
       data: vehicleTypeDto,
     });
-
-    await this.cache.setCache(
-      `${VehicleTypeService.name}:type`,
-      JSON.stringify(vehicleTypeDto),
-    );
-
-    await this.cache.delete(VehicleTypeService.name);
   }
 
-  async findAll(): Promise<Partial<VehicleType>[]> {
-    const data = await this.cache.getValue(VehicleTypeService.name);
+  async findAll(
+    page: number,
+    registers: number,
+  ): Promise<IPaginateResponse<Partial<VehicleType>>> {
+    const where = {};
 
-    if (data) return JSON.parse(data) as VehicleType[];
+    const [data, total] = await Promise.all([
+      this.prisma.vehicleType.findMany({
+        where,
+        omit: { createdAt: true, updatedAt: true },
+        skip: (page - 1) * registers,
+        take: registers,
+      }),
 
-    const vehicleTypes = await this.prisma.vehicleType.findMany({
-      where: {},
-      select: {
-        id: true,
-        type: true,
-        pricePerKm: true,
-      },
-    });
+      this.prisma.vehicleType.count({
+        where,
+      }),
+    ]);
 
-    await this.cache.setCache(
-      VehicleTypeService.name,
-      JSON.stringify(vehicleTypes),
-      60 * 60 * 24, // 24h
-    );
-
-    return vehicleTypes;
+    return paginateResponse(data, page, registers, total);
   }
 }

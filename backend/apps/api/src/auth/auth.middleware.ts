@@ -20,9 +20,7 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: Request, res: any, next: () => void) {
     const token = req.headers["authorization"]?.split(" ")[1];
 
-    if (!token) {
-      throw new UnauthorizedException("No token provided");
-    }
+    if (!token) throw new UnauthorizedException("No token provided");
 
     try {
       const { id } = this.jwtService.verify<{ id: number }>(token, {

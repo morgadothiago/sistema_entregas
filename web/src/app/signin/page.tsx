@@ -1,61 +1,78 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Loader } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import type { SignInFormData } from "../types/SingInType";
 import { TextInput } from "../components/TextInput";
-import { signIn } from "next-auth/react";
+import { ActionState, loginRequester } from "../actions/login";
+import { redirect, RedirectType } from "next/navigation";
+import { loginValidation } from "../schema/login.schema";
 
 export default function SignInPage() {
-  const routes = useRouter();
+  const [actionState, action, isPending] = useActionState<ActionState, FormData>(loginRequester, {
+    message: "",
+    error: "",
+    success: false,
+  })
 
   const {
     register,
-    handleSubmit,
+    setError,
+    setFocus,
     formState: { errors },
   } = useForm<SignInFormData>();
 
-  const onSubmit: SubmitHandler<SignInFormData> = async (data) => {
-    try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email: data.email,
-        password: data.password
-      });
   
-      if (result?.error) {
-        return toast.error("Credenciais invalidas", {
-              description: "E-mail ou senha inválidos",
-              duration: 3000,
-              position: "top-right",
-              richColors: true,
-            });         
-      }
+  React.useEffect(() => {
+    Object.keys(loginValidation.fields).forEach((key) => {
+        setError(key as keyof SignInFormData, {
+          type: "manual",
+          message: '',
+        });
+    });
 
-        toast.success("Login realizado com sucesso!", {
-          description: "Você está sendo redirecionado para a página inicial",
+    if (actionState.error) {
+        let message = "Erro ao realizar login!";
+        
+        if (typeof actionState.error !== 'string') {
+          message = actionState.error.message;
+          const name = actionState.error.path as keyof SignInFormData
+         
+          setError(name, {
+            type: "manual",
+            message: actionState.error.message,
+          })
+
+          setFocus(name, { shouldSelect: true });
+        }
+
+        toast.error("Credenciais invalidas", {
+          description: message,
           duration: 3000,
           position: "top-right",
           richColors: true,
-        });
+        });  
 
-        routes.push("/dashboard");
-  
-    } catch (error) {
-      toast.error("Erro ao realizar login!", {
-        description: (error as Error)?.message || "Por favor, tente novamente.",
+        return;      
+      }
+
+    if (actionState.success){
+      toast.success("Login realizado com sucesso!", {
+        description: "Você está sendo redirecionado para a página inicial",
         duration: 3000,
         position: "top-right",
         richColors: true,
       });
 
+      redirect("/dashboard", RedirectType.replace);
     }
-  };
+        
+  }, [actionState]); 
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -79,31 +96,27 @@ export default function SignInPage() {
       <div className="flex items-center justify-center w-full h-screen p-4">
         <form
           className="flex flex-col items-center justify-center w-full max-w-md gap-1"
-          onSubmit={handleSubmit(onSubmit)}
+          action={action}
         >
           <TextInput
             className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
             labelName="Email"
+            error={errors.email}
             placeholder="Digite seu email"
-            {...register("email", { required: true })}
+            defaultValue={actionState.payload?.get?.("email") as string}
+            {...register("email")}
           />
-          {errors.email && (
-            <span className="text-red-500 text-sm text-left w-full">
-              Este campo é obrigatório
-            </span>
-          )}
+
           <TextInput
             className="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
             labelName="Senha"
+            error={errors.password}
             placeholder="Digite sua senha"
             type="password"
-            {...register("password", { required: true })}
+            defaultValue={actionState.payload?.get?.("password") as string}
+            {...register("password")}
           />
-          {errors.password && (
-            <span className="text-red-500 text-sm text-left w-full">
-              Este campo é obrigatório
-            </span>
-          )}
+          
           <div className="flex flex-col items-start w-full">
             <Link
               href="/reset-password"
@@ -115,12 +128,8 @@ export default function SignInPage() {
               <Button
                 className="w-full bg-gradient-to-r h-12 from-[#024db9] to-[#5DADE2] hover:bg-[#5DADE2] hover:text-black transition duration-300 ease-in-out px-6 py-3 rounded-md text-white font-semibold shadow-md transform hover:scale-105"
                 type="submit"
-                onClick={(e) => {
-                  e.preventDefault(); // Prevent default to ensure form submission
-                  handleSubmit(onSubmit)(); // Call the submit handler
-                }}
               >
-                Login
+                {!isPending ? "Login" : <Loader className="animate-spin" />}
               </Button>
             </div>
           </div>

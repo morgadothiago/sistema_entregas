@@ -6,10 +6,11 @@ import { GpsModule } from "./gps/gps.module";
 import { AuthMiddleware } from "./auth/auth.middleware";
 import { JwtModule } from "@nestjs/jwt";
 import { VehicleTypeModule } from "./vehicle-type/vehicle-type.module";
-import { ProfitModule } from "./profit/profit.module";
 import { DeliveryModule } from "./delivery/delivery.module";
 import { LocationService } from "./location/location.service";
-import { CacheService } from "cache/cache.service";
+import { UserModule } from "./user/user.module";
+import { CacheService } from "./cache/cache.service";
+import { RateLimitMiddleware } from "./rate-limit/rate-limit.middleware";
 
 @Module({
   imports: [
@@ -23,8 +24,8 @@ import { CacheService } from "cache/cache.service";
       }),
     }),
     VehicleTypeModule,
-    ProfitModule,
     DeliveryModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService, CacheService, LocationService],
@@ -33,7 +34,12 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .exclude({ path: "/auth/*path", method: RequestMethod.ALL })
+      .exclude(
+        { path: "/auth/*path", method: RequestMethod.ALL },
+        { path: "/", method: RequestMethod.GET },
+      )
       .forRoutes("*");
+
+    consumer.apply(RateLimitMiddleware).forRoutes("*");
   }
 }

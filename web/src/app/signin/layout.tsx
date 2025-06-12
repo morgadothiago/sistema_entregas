@@ -1,6 +1,6 @@
 import React from 'react';
-import { auth } from '../api/auth/[...nextauth]/route';
 import { redirect, RedirectType } from 'next/navigation';
+import { auth } from '../util/auth';
 
 // import { Container } from './styles';
 

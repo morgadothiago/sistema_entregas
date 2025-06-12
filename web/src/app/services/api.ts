@@ -5,7 +5,14 @@ import Axios, {
   type AxiosError,
 } from "axios";
 import type { ILoginResponse } from "../types/SingInType";
-import type { ICreateUser } from "../types/User";
+import type {
+  ICreateUser,
+  IFilterUser,
+  IUserPaginate,
+  User,
+} from "../types/User";
+import { IPaginateResponse } from "../types/Paginate";
+import { signOut } from "next-auth/react";
 
 interface IErrorResponse {
   message: string;
@@ -15,42 +22,26 @@ interface IErrorResponse {
 class ApiService {
   private api: AxiosInstance;
   static instance: ApiService;
-  private token: string = '';
+  static token: string = "";
 
   constructor() {
     this.api = Axios.create({
-      baseURL: process.env.API_HOST,
+      baseURL: process.env.NEXT_PUBLIC_NEXTAUTH_API_HOST || "",
     });
-
-    this.setupIntercepters();
-  }
-
-  setupIntercepters() {
-    this.api.interceptors.request.use(
-      (config) => {
-        
-        config.headers.Authorization ??= this.token;
-        
-        return config;
-      },
-
-      // se der algum erro na request rejeita a promessa
-      (error) => Promise.reject(error)
-    );
   }
 
   setToken(token: string) {
-    this.token = `Bearer ${token}`;
+    if (token) ApiService.token = `Bearer ${token}`;
   }
 
   cleanToken() {
-    this.token = "";
+    ApiService.token = "";
   }
 
   async getInfo() {
     this.api.get("");
   }
-  
+
   async login(email: string, password: string) {
     return this.api
       .post("/auth/login", { email, password })
@@ -58,11 +49,10 @@ class ApiService {
       .catch(this.getError);
   }
 
-  async newUser(data: ICreateUser) {
-
+  async newUser(data: ICreateUser): Promise<void | IErrorResponse> {
     const response = await this.api
       .post("/auth/signup/company", data)
-      .then(this.getResponse)
+      .then(this.getResponse<void>)
       .catch(this.getError);
 
     return response;
@@ -71,18 +61,61 @@ class ApiService {
   private getResponse<T>(response: AxiosResponse): T {
     return response.data;
   }
-  private getError(error: AxiosError<any>): IErrorResponse {
+  private async getError(error: AxiosError<any>): Promise<IErrorResponse> {
     if (error.status === 422) {
       return {
         message: error.response?.data?.message,
         status: error.status,
       };
     }
+    if (error.status === 409) {
+      return {
+        message: error.response?.data?.message,
+        status: error.status,
+      };
+    }
+
+    if (error.status === 401) {
+      try {
+        await signOut({ redirect: true, redirectTo: "/signin" });
+      } catch (e) {
+        console.error("Erro ao fazer removidossignOut:", e);
+        // Retornar erro 401 mesmo se o signOut falhar
+        return {
+          message: error.response?.data?.message || "Não autorizado",
+          status: 401,
+        };
+      }
+    }
 
     return {
       message: error.response?.data?.message,
       status: error.status || 500, // Default to 500 if status is undefined
     };
+  }
+
+  async getUsers(filters: IFilterUser, token: string) {
+    console.log("token pre", token);
+    return this.api
+      .get("/users", {
+        params: filters,
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .then(this.getResponse<IPaginateResponse<IUserPaginate>>)
+      .catch(this.getError);
+  }
+
+  async getUser(id: string, token: string) {
+    return this.api
+      .get(`/users/${id}`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .then(this.getResponse<User>)
+      .catch(this.getError);
   }
 
   static getInstance() {

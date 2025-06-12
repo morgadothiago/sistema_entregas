@@ -26,10 +26,13 @@ export class GpsService implements OnModuleInit {
   }
 
   async getLocation(code: string, socket: SocketDto) {
-    const client = this.gpsWebsocket.getClient(socket.socketId);
+    const client = this.gpsWebsocket.getClient(socket.socketId || "");
 
     if (!client) {
-      throw new NotFoundException(
+      /*  throw new NotFoundException(
+        `Cliente com socketId '${socket.socketId}' não foi encontrado`,
+      ); */
+      console.warn(
         `Cliente com socketId '${socket.socketId}' não foi encontrado`,
       );
     }
@@ -41,7 +44,6 @@ export class GpsService implements OnModuleInit {
           select: {
             id: true,
             name: true,
-            email: true,
             phone: true,
           },
         },
@@ -62,7 +64,7 @@ export class GpsService implements OnModuleInit {
         `Entrega com codigo '${code}' não foi encontrada`,
       );
 
-    await this.gpsWebsocket.handleJoinRoom(client, code);
+    if (client) await this.gpsWebsocket.handleJoinRoom(client, code);
 
     return delivery;
   }
