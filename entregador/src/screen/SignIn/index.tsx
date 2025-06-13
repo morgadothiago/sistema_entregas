@@ -103,15 +103,6 @@ export default function SignInScreen() {
 
     if (!validation) return;
 
-    // if (!data.email || !data.password) {
-    //   setLoading(false);
-    //   setButtonDisabled(false);
-
-    //   console.warn("Preencha o email e a senha.");
-    //   showErrorToast("Preencha o email e a senha.");
-    //   return;
-    // }
-
     setLoading(true);
     setButtonDisabled(true);
 

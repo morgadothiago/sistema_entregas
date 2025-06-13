@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../context/AuthContext";
 
 export default function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   console.log(isAuthenticated);
 
@@ -19,7 +19,15 @@ export default function AppRoutes() {
   return (
     <ToastProvider>
       <NavigationContainer>
-        {isAuthenticated ? <MainStack /> : <AuthRoutes />}
+        {isAuthenticated ? (
+          user?.role === "DELIVERY" ? (
+            <MainStack />
+          ) : (
+            <AuthRoutes />
+          )
+        ) : (
+          <AuthRoutes />
+        )}
       </NavigationContainer>
     </ToastProvider>
   );

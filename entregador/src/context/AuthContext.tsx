@@ -7,13 +7,13 @@ import React, {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { api } from "../services/api";
-
 import { showAppToast, showErrorToast } from "../util/Toast";
 import type { User } from "../types/SignIn";
 import type { SignInFormData } from "../types/SignInForm";
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isLoading: boolean;
   user: User | null;
   login: (data: SignInFormData) => Promise<void>;
   logout: () => Promise<void>;
@@ -23,27 +23,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (data: SignInFormData): Promise<void> => {
     try {
       const response = await api.post("/auth/login", data);
-      console.log("📦 response.data:", response.data);
-
       const token = response.data.token;
       const userFromApi = response.data.user;
       const message = response.data.message;
 
       if (token && userFromApi) {
-        // Armazena token e user no AsyncStorage antes de atualizar o estado
+        // 🔒 Verifica se a role é DELIVERY
+        if (userFromApi.role !== "DELIVERY") {
+          showErrorToast("Acesso permitido apenas para entregadores.");
+          return;
+        }
+
         await AsyncStorage.setItem("@auth:token", token);
         await AsyncStorage.setItem("@auth:user", JSON.stringify(userFromApi));
 
-        // Atualiza estado React
         setIsAuthenticated(true);
         setUser({ ...userFromApi, token });
 
-        // Mostra toast de sucesso
         showAppToast({
           message: message ?? "Login realizado com sucesso!",
           type: "success",
@@ -60,19 +62,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Carrega estado de autenticação ao iniciar o app
-  useEffect(() => {
-    const loadAuthData = async () => {
+  const loadAuthData = async () => {
+    setIsLoading(true);
+    try {
       const token = await AsyncStorage.getItem("@auth:token");
       const userJson = await AsyncStorage.getItem("@auth:user");
+
       if (token && userJson) {
-        setIsAuthenticated(true);
-        setUser({ ...JSON.parse(userJson), token });
+        const savedUser = JSON.parse(userJson);
+
+        // 🔒 Valida a role ao carregar
+        if (savedUser.role === "DELIVERY") {
+          setUser({ ...savedUser, token });
+          setIsAuthenticated(true);
+        } else {
+          // Se a role for inválida, limpa tudo e impede acesso
+          await AsyncStorage.clear();
+          setIsAuthenticated(false);
+          setUser(null);
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
       }
-    };
+    } catch (e) {
+      console.error("Erro ao carregar dados de autenticação:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadAuthData();
   }, []);
 
@@ -87,6 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        isLoading,
         user,
         login,
         logout,
