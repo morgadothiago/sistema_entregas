@@ -25,6 +25,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
+  // Restaurar sessão do AsyncStorage e validar role na inicialização
+  useEffect(() => {
+    const loadStoredAuth = async () => {
+      const storedUser = await AsyncStorage.getItem("@auth:user");
+      const storedToken = await AsyncStorage.getItem("@auth:token");
+
+      if (storedUser && storedToken) {
+        try {
+          const userData: User = JSON.parse(storedUser);
+
+          // Valida se a role é delivery
+          if (userData.role === "delivery") {
+            setUser({ ...userData, token: storedToken });
+            setIsAuthenticated(true);
+          } else {
+            // Se não for delivery, limpa o storage
+            await AsyncStorage.removeItem("@auth:user");
+            await AsyncStorage.removeItem("@auth:token");
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        } catch {
+          // Se deu erro no parse, limpa tudo
+          await AsyncStorage.removeItem("@auth:user");
+          await AsyncStorage.removeItem("@auth:token");
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      }
+    };
+
+    loadStoredAuth();
+  }, []);
+
   const login = async (data: SignInFormData): Promise<void> => {
     try {
       const response = await api.post("/auth/login", data);
@@ -35,21 +69,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const message = response.data.message;
 
       if (token && userFromApi) {
-        // Cria novo objeto user incluindo o token
+        // Verifica role do usuário
+        if (userFromApi.role !== "delivery") {
+          showErrorToast(
+            "Acesso negado: usuário não possui permissão delivery."
+          );
+          setIsAuthenticated(false);
+          setUser(null);
+          return;
+        }
+
         const userData = {
           ...userFromApi,
           token,
         };
 
-        // Armazena token e user (com token) no AsyncStorage
         await AsyncStorage.setItem("@auth:token", token);
         await AsyncStorage.setItem("@auth:user", JSON.stringify(userData));
 
-        // Atualiza estado React
         setIsAuthenticated(true);
         setUser(userData);
 
-        // Mostra toast de sucesso
         showAppToast({
           message: message ?? "Login realizado com sucesso!",
           type: "success",
