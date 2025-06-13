@@ -17,8 +17,11 @@ export default function AuthRoutes() {
       initialRouteName={isAuthenticated ? "Home" : "SignIn"}
     >
       <Stack.Screen name="SignIn" component={SignInScreen} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+
+      {/* Steps Accounts */}
+
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
     </Stack.Navigator>
   );
 }
