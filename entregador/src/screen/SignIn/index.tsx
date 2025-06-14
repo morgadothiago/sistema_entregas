@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-
 import {
   Keyboard,
   Platform,
@@ -7,17 +6,12 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
 } from "react-native";
-
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-
 import { useAuth } from "../../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
-import { AntDesign } from "@expo/vector-icons";
-
 import type { RootStackParamList } from "../../types/RootParamsList";
 import type { StackNavigationProp } from "@react-navigation/stack";
-
 import { Input } from "../../components/Input";
 import { Button } from "../../components/Button";
 import {
@@ -26,43 +20,27 @@ import {
   Image,
   FormArea,
   Footer,
-  SocialLoginArea,
-  SocialButton,
-  SocialButtons,
 } from "./styles";
-
 import Logo from "../../../assets/ios-light.png";
-
 import { LinkButton } from "../../components/Link";
-import { theme } from "../../global/theme";
-
 import { SigninSchema } from "../../util/schemasValidations";
 import { ValidationError } from "yup";
 
 export default function SignInScreen() {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    setError,
-  } = useForm();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
-
   const [loading, setLoading] = useState(false);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
 
   useEffect(() => {
-    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
-      setKeyboardVisible(true);
-    });
-    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardVisible(false);
-    });
-
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardVisible(true)
+    );
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardVisible(false)
+    );
     return () => {
       showSubscription.remove();
       hideSubscription.remove();
@@ -76,50 +54,11 @@ export default function SignInScreen() {
     const hideSub = Keyboard.addListener("keyboardDidHide", () =>
       setKeyboardOpen(false)
     );
-
     return () => {
       showSub.remove();
       hideSub.remove();
     };
   }, []);
-
-  const emailRef = useRef<TextInput>(null);
-
-  const handleLogin = async (data: any) => {
-    const validation = await SigninSchema.validate(data).catch((err: any) => {
-      if (err instanceof ValidationError) {
-        setError(
-          err.path as string,
-          {
-            message: err.message,
-            type: "validate",
-          },
-          {
-            shouldFocus: true,
-          }
-        );
-      }
-    });
-
-    if (!validation) return;
-
-    // if (!data.email || !data.password) {
-    //   setLoading(false);
-    //   setButtonDisabled(false);
-
-    //   console.warn("Preencha o email e a senha.");
-    //   showErrorToast("Preencha o email e a senha.");
-    //   return;
-    // }
-
-    setLoading(true);
-    setButtonDisabled(true);
-
-    await login(data);
-
-    setLoading(false);
-    setButtonDisabled(false);
-  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -134,73 +73,8 @@ export default function SignInScreen() {
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            <FormArea keyboardOpen={keyboardOpen}>
-              <Input
-                label="E-mail"
-                error={errors.email?.message}
-                formProps={{
-                  name: "email",
-                  control,
-                  rules: {
-                    required: "Email e obrigatorio",
-                  },
-                }}
-                inputProps={{
-                  placeholder: "Email",
-                  placeholderTextColor: "#FFF",
-                  onSubmitEditing: () => emailRef.current?.focus(),
-                  returnKeyType: "next",
-                }}
-                icon="user"
-              />
-
-              <Input
-                label="Senha"
-                error={errors.password?.message}
-                ref={emailRef}
-                formProps={{
-                  name: "password",
-                  control,
-                  rules: {
-                    required: "Senha e obrigatorio",
-                  },
-                }}
-                inputProps={{
-                  placeholder: "Password",
-                  placeholderTextColor: "#FFF",
-                  onSubmitEditing: handleSubmit(handleLogin),
-                  secureTextEntry: true,
-                }}
-                icon="lock"
-              />
-
-              <Button
-                onPress={handleSubmit(handleLogin)}
-                disabled={loading}
-                loading={loading}
-                label="Entrar"
-              />
-            </FormArea>
+            <FormArea keyboardOpen={keyboardOpen}></FormArea>
           </KeyboardAvoidingView>
-
-          <SocialLoginArea>
-            <SocialButtons>
-              <SocialButton>
-                <AntDesign
-                  name="apple1"
-                  size={24}
-                  color={theme.colors.buttonText}
-                />
-              </SocialButton>
-              <SocialButton>
-                <AntDesign
-                  name="google"
-                  size={24}
-                  color={theme.colors.buttonText}
-                />
-              </SocialButton>
-            </SocialButtons>
-          </SocialLoginArea>
 
           <Footer>
             <LinkButton
