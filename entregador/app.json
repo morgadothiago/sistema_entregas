@@ -11,11 +11,7 @@
       "backgroundColor": "#00439A"
     },
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/adaptive-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#00439A"
-    },
+    "splash": {},
     "ios": {
       "supportsTablet": true,
       "icon": "./assets/ios-light.png"

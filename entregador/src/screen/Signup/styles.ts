@@ -8,4 +8,7 @@ export const styles = StyleSheet.create({
   backgroudImg: {
     flex: 1,
   },
+  form: {
+    padding: 24,
+  },
 });

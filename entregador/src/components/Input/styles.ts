@@ -1,67 +1,22 @@
-import styled from "styled-components/native";
-import { Dimensions, Platform } from "react-native";
+import { StyleSheet } from "react-native";
 import { theme } from "../../global/theme";
 
-const { width, height } = Dimensions.get("window");
-
-type InputProps = {
-  $hasError?: boolean;
-};
-
-export const Container = styled.View`
-  width: 100%;
-  padding: ${height * 0.02}px ${width * 0.03}px;
-  margin-bottom: -20px;
-`;
-
-export const FormArea = styled.View<InputProps>`
-  width: 100%;
-  height: 56px;
-  background-color: ${theme.colors.buttonText};
-
-  flex-direction: row;
-  align-items: center;
-  border-radius: 12px;
-  overflow: hidden;
-`;
-
-export const Icon = styled.View`
-  width: ${width * 0.14}px;
-  height: 100%;
-
-  align-items: center;
-  justify-content: center;
-`;
-export const IconBox = styled.View`
-  width: 56px;
-  height: 56px;
-
-  align-items: center;
-  justify-content: center;
-`;
-
-export const Inputs = styled.TextInput`
-  flex: 1;
-  padding-left: 10px;
-  height: 56px;
-  color: ${theme.colors.text};
-  font-size: ${width * 0.035}px;
-`;
-
-export const Label = styled.Text`
-  color: ${theme.colors.button};
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 5px;
-
-  margin-left: 5px;
-`;
-
-export const ErrorTitle = styled.Text`
-  font-size: 14px;
-  color: #dc1637;
-  margin-top: 7px;
-  font-weight: bold;
-  margin-left: 5px;
-  margin-top: 2px;
-`;
+export const styles = StyleSheet.create({
+  containerInput: {
+    padding: 5,
+    gap: 5,
+  },
+  labelInput: {
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    color: theme.colors.button,
+  },
+  input: {
+    backgroundColor: theme.colors.buttonText,
+    width: "100%",
+    height: 56,
+    borderRadius: 10,
+    paddingLeft: 16,
+  },
+});
