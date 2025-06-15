@@ -32,7 +32,9 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <StatusBar barStyle={"light-content"} backgroundColor={"transparent"} />
+      <StatusBar
+        barStyle="light-content" // ou "dark-content" dependendo do fundo
+      />
 
       <AppRoutes />
     </AuthProvider>

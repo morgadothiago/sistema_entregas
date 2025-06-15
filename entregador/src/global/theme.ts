@@ -8,6 +8,6 @@ export const theme = {
     start: "#FFD700",
     button: "#00FFB3",
     buttonText: "#2C3E50",
-    Error: "#dc1637",
+    error: "#dc1637",
   },
 };
