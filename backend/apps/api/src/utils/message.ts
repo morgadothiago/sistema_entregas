@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+ 
 import { ValidationArguments } from "class-validator";
 
 const message = {

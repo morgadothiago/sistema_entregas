@@ -4,7 +4,7 @@ import { DeliverySimulateDto } from "./dto/delivery-simulate.dto";
 import { PrismaService } from "../prisma/prisma.service";
 import { VehicleTypeService } from "../vehicle-type/vehicle-type.service";
 import { LocationService } from "../location/location.service";
-import { Localization, VehicleType } from "@prisma/client";
+import { VehicleType } from "@prisma/client";
 import { IRoute } from "../typing/location";
 
 @Injectable()
@@ -32,24 +32,17 @@ export class DeliveryService {
       );
     }
 
-    const companyLocalization = await this.prismaService.localization.findFirst(
-      {
-        where: {
-          Address: {
-            some: {
-              Company: {
-                some: {
-                  idUser,
-                },
-              },
-            },
-          },
-        },
-        select: {
-          longitude: true,
-          latitude: true,
-        },
-      },
+    const [companyLocalization] = await this.prismaService.$queryRawUnsafe<
+      { localization: any }[]
+    >(
+      `
+        SELECT a.localization 
+        FROM "addresses" a
+        INNER JOIN "companies" c ON c."idAddress" = a.id
+        WHERE c."idUser" = $1
+        LIMIT 1
+      `,
+      idUser,
     );
 
     const location = await this.locationService.reverse(
@@ -61,8 +54,8 @@ export class DeliveryService {
     );
 
     const geoInfo = await this.locationService.findDistance(
-      location as Localization,
-      companyLocalization as Localization,
+      location,
+      companyLocalization.localization,
     );
 
     const price = this.vehicleType.calculatePrice(vehicleType, geoInfo);

@@ -29,7 +29,7 @@ export class AuthService {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: company.email },
     });
-
+    
     if (existingUser) throw new ConflictException("Email já cadastrado");
 
     const existingCnpj = await this.prisma.user.findFirst({
@@ -45,6 +45,25 @@ export class AuthService {
       company.number,
       company.zipCode,
     );
+    
+    const [address] = await this.prisma.$queryRawUnsafe<
+      { id: number; localization: string }[]
+    >(
+      `
+      INSERT INTO "addresses" (city, state, street, number, "zipCode", localization)
+      VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326))
+      RETURNING id
+      `,
+      company.city,
+      company.state,
+      company.address,
+      company.number,
+      company.zipCode,
+      localization.longitude,
+      localization.latitude,
+    );
+
+    const addressId = address?.id;
 
     await this.prisma.user.create({
       data: {
@@ -58,23 +77,7 @@ export class AuthService {
             name: company.name,
             cnpj: company.cnpj,
             phone: company.phone,
-            Address: {
-              create: {
-                city: company.city,
-                state: company.state,
-                street: company.address,
-                number: company.number,
-                zipCode: company.zipCode,
-                complement: company.complement,
-                country: "Brasil",
-                Localization: {
-                  create: {
-                    latitude: localization.latitude,
-                    longitude: localization.longitude,
-                  },
-                },
-              },
-            },
+            idAddress: addressId
           },
         },
         Balance: {
@@ -131,6 +134,39 @@ export class AuthService {
         deliveryman.zipCode,
       );
 
+      const [address] = await tx.$queryRawUnsafe<
+      { id: number; localization: string }[]
+    >(
+      `
+      INSERT INTO "addresses" (city, state, street, number, "zipCode", localization)
+      VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326))
+      RETURNING id
+      `,
+      deliveryman.city,
+      deliveryman.state,
+      deliveryman.address,
+      deliveryman.number,
+      deliveryman.zipCode,
+      localization.longitude,
+      localization.latitude,
+    );
+
+    const addressId = address?.id;
+
+    const {id: vehicleId} = await tx.vehicle.create({
+      data: {
+        brand: deliveryman.brand,
+        color: deliveryman.color,
+        licensePlate: deliveryman.licensePlate,
+        model: deliveryman.model,
+        vehicleTypeId,
+        year: deliveryman.year,
+      },
+      select: {
+        id: true
+      }
+    })
+
       await tx.user.create({
         data: {
           email: deliveryman.email,
@@ -147,33 +183,8 @@ export class AuthService {
               name: deliveryman.name,
               cpf: deliveryman.cpf,
               phone: deliveryman.phone,
-              Address: {
-                create: {
-                  city: deliveryman.city,
-                  state: deliveryman.state,
-                  street: deliveryman.address,
-                  number: deliveryman.number,
-                  zipCode: deliveryman.zipCode,
-                  complement: deliveryman.complement,
-                  country: "Brasil",
-                  Localization: {
-                    create: {
-                      latitude: localization.latitude,
-                      longitude: localization.longitude,
-                    },
-                  },
-                },
-              },
-              Vehicle: {
-                create: {
-                  brand: deliveryman.brand,
-                  color: deliveryman.color,
-                  licensePlate: deliveryman.licensePlate,
-                  model: deliveryman.model,
-                  vehicleTypeId,
-                  year: deliveryman.year,
-                },
-              },
+              addressId,
+              vehicleId,
             },
           },
           Balance: {
@@ -183,7 +194,7 @@ export class AuthService {
           },
         },
       });
-    });
+    }); 
   }
 
   async login(loginDto: LoginDto, isMobile: boolean) {

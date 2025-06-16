@@ -5,7 +5,6 @@ import {
   OnModuleInit,
 } from "@nestjs/common";
 import axios, { AxiosError, AxiosInstance } from "axios";
-import { Localization } from "@prisma/client";
 import { ILocation, IRoute, ReverseResponse } from "../typing/location";
 import { CacheService } from "../cache/cache.service";
 
@@ -68,8 +67,8 @@ export class LocationService implements OnModuleInit {
   }
 
   async findDistance(
-    origin: Localization,
-    destination: Localization,
+    origin: { latitude: number; longitude: number },
+    destination: any,
   ): Promise<IRoute> {
     const coordenates = encodeURIComponent(
       `${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,

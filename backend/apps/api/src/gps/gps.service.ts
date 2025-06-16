@@ -47,15 +47,6 @@ export class GpsService implements OnModuleInit {
             phone: true,
           },
         },
-        Localization: {
-          select: {
-            latitude: true,
-            longitude: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
       },
     });
 
@@ -92,13 +83,23 @@ export class GpsService implements OnModuleInit {
         `Entrega com codigo '${code}' não está em andamento`,
       );
 
-    await this.prisma.localization.create({
-      data: {
-        latitude,
-        longitude,
-        deliveryId: delivery.id,
-      },
-    });
+       const [address] = await this.prisma.$queryRawUnsafe<
+      { id: number }[]
+    >(
+      `
+      INSERT INTO "Address" (city, state, street, number, "zipCode", localization, deliveryId)
+      VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326), $8)
+      RETURNING id
+      `,
+      'city',
+      'state',
+      'address',
+      'number',
+      'zipCode',
+      longitude,
+      latitude,
+      delivery.id,
+    );
 
     this.gpsWebsocket.emitRoom(code, "update-location", {
       latitude,

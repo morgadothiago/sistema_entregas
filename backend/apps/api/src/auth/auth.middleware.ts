@@ -4,7 +4,7 @@ import {
   NestMiddleware,
   UnauthorizedException,
 } from "@nestjs/common";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { PrismaService } from "../prisma/prisma.service";
 import { JsonWebTokenError, JwtService } from "@nestjs/jwt";
 import { Role, User } from "@prisma/client";
@@ -17,7 +17,7 @@ export class AuthMiddleware implements NestMiddleware {
     private prismaService: PrismaService,
     private jwtService: JwtService,
   ) {}
-  async use(req: Request, res: any, next: () => void) {
+  async use(req: Request, res: Response, next: () => void) {
     const token = req.headers["authorization"]?.split(" ")[1];
 
     if (!token) throw new UnauthorizedException("No token provided");
