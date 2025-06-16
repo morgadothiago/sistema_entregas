@@ -8,7 +8,7 @@ import {
 import { ApiProperty } from "@nestjs/swagger";
 
 export class DeliverySimulateDto {
-  @ApiProperty({
+  /* @ApiProperty({
     description: "altura do pacote em metros",
     minimum: 0,
     example: 50,
@@ -46,7 +46,7 @@ export class DeliverySimulateDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  weight: number;
+  weight: number; */
 
   @ApiProperty({
     description: "cidade do endereço de entrega",
