@@ -1,16 +1,13 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  
+  extensions = [postgis]
 }
 
 model User {
@@ -32,22 +29,23 @@ model User {
 }
 
 model Address {
-  id             Int           @id @default(autoincrement())
-  street         String
-  number         String
-  city           String
-  state          String
-  zipCode        String
-  country        String
-  complement     String        @default("")
-  Localization   Localization? @relation(fields: [localizationId], references: [id])
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
-  Delivery       Delivery[]
-  localizationId Int?
-  Company        Company[]
-  DeliveryMan    DeliveryMan[]
+  id         Int      @id @default(autoincrement())
+  street     String
+  number     String
+  city       String
+  state      String
+  zipCode    String
+  country    String   @default("Brasil")
+  complement String?  @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
 
+  localization Unsupported("geography(Point, 4326)")
+  Company      Company?
+  DeliveryMan  DeliveryMan?
+  Delivery     Delivery?
+
+  @@index([localization], name: "location_idx", type: Gist)
   @@map("addresses")
 }
 
@@ -56,7 +54,7 @@ model Company {
   name      String
   phone     String
   cnpj      String   @unique
-  idAddress Int
+  idAddress Int      @unique
   Address   Address  @relation(fields: [idAddress], references: [id])
   idUser    Int      @unique
   User      User     @relation(fields: [idUser], references: [id])
@@ -163,19 +161,6 @@ enum DeliveryStatus {
   CANCELED
 }
 
-model Localization {
-  id         Int       @id @default(autoincrement())
-  latitude   Float
-  longitude  Float
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @default(now()) @updatedAt
-  Delivery   Delivery? @relation(fields: [deliveryId], references: [id])
-  deliveryId Int?
-  Address    Address[]
-
-  @@map("localizations")
-}
-
 model Delivery {
   id            Int            @id @default(autoincrement())
   code          String         @unique
@@ -191,10 +176,10 @@ model Delivery {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  DeliveryMan   DeliveryMan?   @relation(fields: [deliveryManId], references: [id])
+  DeliveryMan   DeliveryMan? @relation(fields: [deliveryManId], references: [id])
   deliveryManId Int?
-  Localization  Localization[]
-  addressId     Int
+
+  addressId Int @unique
 
   @@map("deliveries")
 }

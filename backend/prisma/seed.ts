@@ -68,8 +68,8 @@ async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
       });
 
       logger.log(`Seeded vehicle type: ${vehicleType.type}`);
-    } catch {
-      logger.error(`${vehicleType.type}`);
+    } catch(error){
+      logger.error(`${vehicleType.type}: ${error.message}`);
     }
   }
 
@@ -117,7 +117,7 @@ async function createAdminUser(prisma: PrismaClient, logger: Logger) {
     logger.log(`Admin user created successfully`);
   } catch (error) {
     logger.error(
-      `Failed to create admin user: ${(error as Record<string, any>).message}`,
+      `Failed to create admin user: ${(error as Record<string, string>).message}`,
     );
   }
 }
