@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { IUserQueryParams } from "./dto/filter";
 import { PrismaService } from "../prisma/prisma.service";
 import { paginateResponse } from "../utils/fn";
+import { LocationService } from "../location/location.service";
 
 @Injectable()
 export class UserService {
@@ -57,7 +58,7 @@ export class UserService {
             createdAt: true,
             updatedAt: true,
             userId: true,
-            addressId: true,
+            idAddress: true,
             vehicleId: true,
           },
           include: {
@@ -88,23 +89,11 @@ export class UserService {
       },
     });
 
-    if (!user) throw new NotFoundException(`usuario não encontrado`);
+    if (!user) throw new NotFoundException(`usuario com codigo '${id}' não encontrado`);
 
-    const idAddres = user.Company ? user.Company.Address.id : user.DeliveryMan?.Address.id;
+    const coordinates = await LocationService.getAddressLocalization(this.prisma, user.Company ? user.Company.Address.id : user.DeliveryMan?.Address.id as number);
 
-    const coordinates = await this.prisma.$queryRaw<{longitude: number, latitude: number}[]>`
-      SELECT 
-        ST_X(localization::geometry) as longitude,
-        ST_Y(localization::geometry) as latitude
-      FROM "addresses"
-      WHERE id = ${idAddres}
-      LIMIT 1
-    `;
-
-      ((user.Company?.Address || user.DeliveryMan?.Address) as any).localization = coordinates[0];
-        
-      
-  
+    ((user.Company?.Address || user.DeliveryMan?.Address) as any).localization = coordinates;
 
     return user;
   }

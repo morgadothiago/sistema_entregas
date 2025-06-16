@@ -49,8 +49,7 @@ export class VehicleTypeService {
   calculatePrice(vehicleType: VehicleType, geoInfo: IRoute): number {
     const distanceKM = geoInfo.distance;
 
-    const precoBasePrimeiros5KM =
-      vehicleType.tarifaBase.toNumber() * Math.min(distanceKM, 5);
+    const precoBasePrimeiros5KM = vehicleType.tarifaBase.toNumber()
 
     const kmAdicionais = Math.max(0, distanceKM - 5);
     const precoKMAdicionais =

@@ -63,7 +63,7 @@ export class AuthService {
       localization.latitude,
     );
 
-    const addressId = address?.id;
+    const idAddress = address?.id;
 
     await this.prisma.user.create({
       data: {
@@ -77,7 +77,7 @@ export class AuthService {
             name: company.name,
             cnpj: company.cnpj,
             phone: company.phone,
-            idAddress: addressId
+            idAddress: idAddress
           },
         },
         Balance: {
@@ -151,7 +151,7 @@ export class AuthService {
       localization.latitude,
     );
 
-    const addressId = address?.id;
+    const idAddress = address?.id;
 
     const {id: vehicleId} = await tx.vehicle.create({
       data: {
@@ -183,7 +183,7 @@ export class AuthService {
               name: deliveryman.name,
               cpf: deliveryman.cpf,
               phone: deliveryman.phone,
-              addressId,
+              idAddress,
               vehicleId,
             },
           },
@@ -242,7 +242,7 @@ export class AuthService {
               updatedAt: true,
               id: true,
               userId: true,
-              addressId: true,
+              idAddress: true,
               vehicleId: true,
             },
             include: {

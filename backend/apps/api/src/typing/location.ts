@@ -10,6 +10,8 @@ export interface ILocation {
   waypoints: Waypoint[];
 }
 
+export interface ILocalization { latitude: number; longitude: number }
+
 export interface Route {
   geometry: string;
   legs: Leg[];

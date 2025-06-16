@@ -32,18 +32,9 @@ export class DeliveryService {
       );
     }
 
-    const [companyLocalization] = await this.prismaService.$queryRawUnsafe<
-      { localization: any }[]
-    >(
-      `
-        SELECT a.localization 
-        FROM "addresses" a
-        INNER JOIN "companies" c ON c."idAddress" = a.id
-        WHERE c."idUser" = $1
-        LIMIT 1
-      `,
-      idUser,
-    );
+    const companyLocalization = await LocationService.getAddressLocalizationByUser(
+      this.prismaService, idUser, 'companies'
+    )
 
     const location = await this.locationService.reverse(
       body.city,
@@ -55,7 +46,7 @@ export class DeliveryService {
 
     const geoInfo = await this.locationService.findDistance(
       location,
-      companyLocalization.localization,
+      companyLocalization,
     );
 
     const price = this.vehicleType.calculatePrice(vehicleType, geoInfo);
