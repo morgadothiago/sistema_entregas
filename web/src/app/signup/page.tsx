@@ -68,8 +68,8 @@ export default function SignUpPage() {
             richColors: true,
           });
         }
-      } else {
-        console.log("O que esta acontecendo aqui?");
+
+        return;
       }
 
       toast.success("Cadastro realizado com sucesso!", {
@@ -90,69 +90,160 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto w-full">
-      <div className="relative mb-6">
-        <div className="flex justify-between p-4 bg-[#5DADE2] rounded-lg shadow-lg gap-4 border border-gray-200">
-          {["Dados Empresariais", "Endereço", "Dados de Acesso"].map(
-            (label, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ${
-                    step === index + 1
-                      ? "bg-[#00E676] scale-110"
-                      : "bg-gray-300"
-                  }`}
-                >
-                  <span className="text-white text-xl font-bold">
-                    {index + 1}
-                  </span>
-                </div>
-                <span className="text-gray-800 font-semibold mt-2 text-sm">
-                  {label}
-                </span>
-              </div>
-            )
-          )}
-        </div>
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1 bg-[#00E676] transition-all duration-300"
-          style={{ width: `${(step / 3) * 100}%` }}
-        />
-      </div>
-
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">
-          {step === 1 && <BusinessDataStep />}
-          {step === 2 && <AddressStep />}
-          {step === 3 && <AccessDataStep />}
-
-          <div className="flex justify-between mt-4">
-            {step > 1 && (
-              <Button
-                type="button"
-                className="bg-gray-500 hover:bg-gray-700 text-white px-6 py-2 rounded-md transition duration-200"
-                onClick={handleBack}
-                disabled={isLoading}
-              >
-                Voltar
-              </Button>
-            )}
-            <Button
-              type="submit"
-              className={`bg-[#00E676] hover:bg-[#00c853] text-white px-6 py-2 rounded-md transition duration-200 ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={isLoading}
-            >
-              {isLoading
-                ? "Carregando..."
-                : step === 3
-                ? "Finalizar"
-                : "Próximo →"}
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center py-6 px-4 sm:py-8 sm:px-6 lg:px-8">
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-100">
+          <div className="text-center mb-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+              Cadastro de Empresa
+            </h1>
+            <p className="text-sm text-gray-600">
+              Preencha os dados abaixo para criar sua conta
+            </p>
           </div>
-        </form>
-      </FormProvider>
+
+          <div className="relative mb-6">
+            <div className="flex justify-between p-3 sm:p-4 bg-gradient-to-r from-[#5DADE2] to-[#003873] rounded-xl shadow-lg gap-2">
+              {["Dados Empresariais", "Endereço", "Dados de Acesso"].map(
+                (label, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center flex-1"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                        step === index + 1
+                          ? "bg-[#00E676] scale-110 shadow-lg"
+                          : step > index + 1
+                          ? "bg-[#00E676]/80"
+                          : "bg-white/20"
+                      }`}
+                    >
+                      <span
+                        className={`text-lg font-bold ${
+                          step === index + 1 || step > index + 1
+                            ? "text-white"
+                            : "text-white/80"
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                    </div>
+                    <span className="text-white font-medium mt-2 text-xs text-center">
+                      {label}
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+            <div
+              className="absolute bottom-0 left-0 right-0 h-1 bg-[#00E676] transition-all duration-300 rounded-full"
+              style={{ width: `${(step / 3) * 100}%` }}
+            />
+          </div>
+
+          <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(onSubmit)} className="w-full">
+              <div className="space-y-6">
+                {step === 1 && <BusinessDataStep />}
+                {step === 2 && <AddressStep />}
+                {step === 3 && <AccessDataStep />}
+              </div>
+
+              <div className="flex justify-between mt-6 pt-4 border-t border-gray-100">
+                {step > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="bg-white hover:bg-gray-50 text-gray-700 border-gray-200 px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm"
+                    onClick={handleBack}
+                    disabled={isLoading}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Voltar
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  className={`bg-[#00E676] hover:bg-[#00c853] text-white px-6 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm ${
+                    isLoading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Carregando...
+                    </>
+                  ) : step === 3 ? (
+                    <>
+                      Finalizar
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </>
+                  ) : (
+                    <>
+                      Próximo
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </FormProvider>
+        </div>
+      </div>
     </div>
   );
 }
