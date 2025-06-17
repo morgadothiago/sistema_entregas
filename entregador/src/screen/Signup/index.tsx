@@ -120,6 +120,8 @@ export default function Signup() {
         type: "success",
         title: "Cadastro Concluído! 🎉",
       });
+
+      navigation.navigate("SignIn");
     } catch (err: any) {
       console.log(
         "Erro completo:",
@@ -401,7 +403,7 @@ export default function Signup() {
                     <Input
                       label="Complemento"
                       placeholder="Apto, Bloco, etc. (Opcional)"
-                      value={value}
+                      value={value ?? ""}
                       onChangeText={onChange}
                       placeholderTextColor={theme.colors.button}
                       error={errors.address?.complement?.message}

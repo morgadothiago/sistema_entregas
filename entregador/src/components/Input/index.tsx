@@ -7,15 +7,17 @@ import { theme } from "../../global/theme";
 type Props = TextInputProps & {
   label: string;
   error?: string;
+  value?: string;
 };
 
-export function Input({ label, error, ...rest }: Props) {
+export function Input({ label, error, value, ...rest }: Props) {
   return (
     <View style={styles.containerInput}>
       <Text style={styles.labelInput}>{label}</Text>
       <TextInput
         style={styles.input}
         placeholderTextColor={theme.colors.error}
+        value={value ?? ""}
         {...rest}
       />
       {error && <Text style={{ color: "red" }}>{error}</Text>}
