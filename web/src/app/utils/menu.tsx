@@ -12,12 +12,14 @@ import { FaWhatsapp } from "react-icons/fa";
 export const items = [
   {
     title: "Home",
+    subTile: "Home",
     url: "/",
     icon: Home,
   },
   {
     title: "simulate",
     subTile: "Simulação de entrega",
+
     url: "/simulate",
     icon: RefreshCcw,
   },

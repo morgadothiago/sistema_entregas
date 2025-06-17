@@ -36,6 +36,7 @@ export class AppModule {
       .apply(AuthMiddleware)
       .exclude(
         { path: "/auth/*path", method: RequestMethod.ALL },
+        { path: "/vehicle-types", method: RequestMethod.GET },
         { path: "/", method: RequestMethod.GET },
       )
       .forRoutes("*");
