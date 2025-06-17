@@ -43,7 +43,6 @@ export const Title = styled.Text`
   font-weight: 700;
   color: ${theme.colors.secondary};
   letter-spacing: 1px;
-  font-family: ${theme.fonts.title700};
 `;
 
 export const Subtitle = styled.Text`

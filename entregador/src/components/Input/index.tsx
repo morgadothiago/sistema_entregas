@@ -18,7 +18,7 @@ export function Input({ label, error, ...rest }: Props) {
         placeholderTextColor={theme.colors.error}
         {...rest}
       />
-      {error && <Text>{error}</Text>}
+      {error && <Text style={{ color: "red" }}>{error}</Text>}
     </View>
   );
 }

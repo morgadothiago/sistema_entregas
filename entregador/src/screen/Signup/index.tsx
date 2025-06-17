@@ -66,6 +66,17 @@ export default function Signup() {
 
   const onSubmit: SubmitHandler<SignUpFormData> = async (data) => {
     try {
+      // Verifica se as senhas são iguais
+      if (data.password !== data.confirmPassword) {
+        showAppToast({
+          message:
+            "As senhas não coincidem. Por favor, verifique e tente novamente.",
+          type: "warning",
+          title: "Atenção ⚠️",
+        });
+        return;
+      }
+
       // Formata a data para ISO 8601
       const [day, month, year] = data.dob.split("-");
       const isoDate = `${year}-${month}-${day}T00:00:00.000Z`;
@@ -104,6 +115,7 @@ export default function Signup() {
 
       showAppToast({
         message:
+          response.data.message ||
           "Parabéns! Seu cadastro foi realizado com sucesso. Agora você pode fazer login e começar a trabalhar!",
         type: "success",
         title: "Cadastro Concluído! 🎉",
@@ -178,7 +190,8 @@ export default function Signup() {
       } else if (err.response?.status === 409) {
         showAppToast({
           message:
-            "Este email já está cadastrado em nossa plataforma. Por favor, faça login ou use outro email para se cadastrar.",
+            err.response?.data?.message ||
+            "Este email já está cadastrado em nossa plataforma",
           type: "warning",
           title: "Email já cadastrado 📧",
         });
@@ -219,46 +232,45 @@ export default function Signup() {
                     placeholder="Digite seu nome"
                     value={value}
                     onChangeText={onChange}
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.name?.message}
                   />
                 )}
               />
             </View>
 
-            <View style={styles.row}>
-              <View style={styles.rowItem}>
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="Email"
-                      placeholder="Digite seu email"
-                      value={value}
-                      onChangeText={onChange}
-                      placeholderTextColor={theme.colors.gray[500]}
-                      error={errors.email?.message}
-                    />
-                  )}
-                />
-              </View>
-              <View style={styles.rowItem}>
-                <Controller
-                  control={control}
-                  name="phone"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="Telefone"
-                      placeholder="(XX) XXXXX-XXXX"
-                      value={value}
-                      onChangeText={onChange}
-                      placeholderTextColor={theme.colors.gray[500]}
-                      error={errors.phone?.message}
-                    />
-                  )}
-                />
-              </View>
+            <View style={styles.inputGroup}>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Email"
+                    placeholder="Digite seu email"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholderTextColor={theme.colors.button}
+                    error={errors.email?.message}
+                  />
+                )}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Controller
+                control={control}
+                name="phone"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Telefone"
+                    placeholder="(XX) XXXXX-XXXX"
+                    value={value}
+                    onChangeText={onChange}
+                    placeholderTextColor={theme.colors.button}
+                    error={errors.phone?.message}
+                  />
+                )}
+              />
             </View>
 
             <View style={styles.row}>
@@ -285,7 +297,7 @@ export default function Signup() {
                         }
                         onChange(formatted);
                       }}
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.dob?.message}
                     />
                   )}
@@ -301,7 +313,7 @@ export default function Signup() {
                       placeholder="Digite seu CPF"
                       value={value}
                       onChangeText={onChange}
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.cpf?.message}
                     />
                   )}
@@ -320,7 +332,7 @@ export default function Signup() {
                     value={value}
                     onChangeText={onChange}
                     secureTextEntry
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.password?.message}
                   />
                 )}
@@ -338,7 +350,7 @@ export default function Signup() {
                     value={value}
                     onChangeText={onChange}
                     secureTextEntry
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.confirmPassword?.message}
                   />
                 )}
@@ -356,7 +368,7 @@ export default function Signup() {
                     placeholder="Digite o nome da rua"
                     value={value}
                     onChangeText={onChange}
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.address?.street?.message}
                   />
                 )}
@@ -375,7 +387,7 @@ export default function Signup() {
                       value={value}
                       onChangeText={onChange}
                       keyboardType="numeric"
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.address?.number?.message}
                     />
                   )}
@@ -391,7 +403,7 @@ export default function Signup() {
                       placeholder="Apto, Bloco, etc. (Opcional)"
                       value={value}
                       onChangeText={onChange}
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.address?.complement?.message}
                     />
                   )}
@@ -409,7 +421,7 @@ export default function Signup() {
                     placeholder="Digite o bairro"
                     value={value}
                     onChangeText={onChange}
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.address?.neighborhood?.message}
                   />
                 )}
@@ -427,7 +439,7 @@ export default function Signup() {
                       placeholder="Digite a cidade"
                       value={value}
                       onChangeText={onChange}
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.address?.city?.message}
                     />
                   )}
@@ -443,7 +455,7 @@ export default function Signup() {
                       placeholder="Digite o estado"
                       value={value}
                       onChangeText={onChange}
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.address?.state?.message}
                     />
                   )}
@@ -462,7 +474,7 @@ export default function Signup() {
                     value={value}
                     onChangeText={onChange}
                     keyboardType="numeric"
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.address?.zipCode?.message}
                   />
                 )}
@@ -481,7 +493,7 @@ export default function Signup() {
                     placeholder="Ex: ABC-1234"
                     value={value}
                     onChangeText={onChange}
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.vehicle?.licensePlate?.message}
                   />
                 )}
@@ -498,7 +510,7 @@ export default function Signup() {
                     placeholder="Ex: Honda"
                     value={value}
                     onChangeText={onChange}
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.vehicle?.brand?.message}
                   />
                 )}
@@ -515,7 +527,7 @@ export default function Signup() {
                     placeholder="Ex: CG 160"
                     value={value}
                     onChangeText={onChange}
-                    placeholderTextColor={theme.colors.gray[500]}
+                    placeholderTextColor={theme.colors.button}
                     error={errors.vehicle?.model?.message}
                   />
                 )}
@@ -534,7 +546,7 @@ export default function Signup() {
                       value={value}
                       onChangeText={onChange}
                       keyboardType="numeric"
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.vehicle?.year?.message}
                     />
                   )}
@@ -550,7 +562,7 @@ export default function Signup() {
                       placeholder="Ex: Preta"
                       value={value}
                       onChangeText={onChange}
-                      placeholderTextColor={theme.colors.gray[500]}
+                      placeholderTextColor={theme.colors.button}
                       error={errors.vehicle?.color?.message}
                     />
                   )}
