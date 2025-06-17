@@ -8,9 +8,16 @@ const getPaddingTop = () =>
 
 export const Container = styled.SafeAreaView`
   padding-top: ${getPaddingTop()};
-
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.04);
-  elevation: 3;
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 15px;
+  background-color: ${theme.colors.primary};
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  elevation: 8;
 `;
 
 export const HeaderContainer = styled.View`
@@ -23,22 +30,20 @@ export const HeaderContainer = styled.View`
 export const Icon = styled.View`
   height: 48px;
   width: 48px;
-  background-color: #4f8cff;
+  background-color: ${theme.colors.tertiary};
   border-radius: 24px;
   align-items: center;
   justify-content: center;
-  shadow-color: #4f8cff;
-  shadow-opacity: 0.18;
-  shadow-radius: 12px;
-  elevation: 6;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  elevation: 3;
 `;
 
 export const Title = styled.Text`
   font-size: 26px;
   font-weight: 700;
-  color: ${theme.colors.text};
+  color: ${theme.colors.secondary};
   letter-spacing: 1px;
-  font-family: "System";
+  font-family: ${theme.fonts.title700};
 `;
 
 export const Subtitle = styled.Text`

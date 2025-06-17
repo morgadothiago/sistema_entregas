@@ -13,6 +13,6 @@ export const styles = StyleSheet.create({
   btnTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: theme.colors.buttonText,
+    color: theme.colors.primary,
   },
 });

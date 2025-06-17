@@ -8,19 +8,26 @@ export const styles = StyleSheet.create({
   labelInput: {
     fontSize: 16,
     marginBottom: 4,
-    color: theme.colors.button,
+    color: theme.colors.gray[700],
   },
   input: {
     height: 48,
     borderWidth: 1,
-    color: "#fff",
-    borderRadius: 6,
+    borderColor: theme.colors.gray[300],
+    color: theme.colors.button,
+    borderRadius: 8,
     paddingHorizontal: 12,
-    backgroundColor: theme.colors.buttonText,
+    backgroundColor: theme.colors.primary,
+
+    shadowColor: theme.colors.gray[900],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   errorText: {
     marginTop: 4,
-    color: "red",
+    color: theme.colors.error,
     fontSize: 12,
   },
 });
