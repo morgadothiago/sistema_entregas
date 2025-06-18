@@ -46,9 +46,9 @@ export const items = [
 
 export const itemAdm = [
   {
-    title: "add-new-delivery",
+    title: "/admin/delivery",
     subTile: "Configuração de entregas",
-    url: "/admin/delivery",
+    url: "/delivery",
     icon: Settings,
   },
   {
