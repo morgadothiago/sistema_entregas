@@ -20,6 +20,9 @@ import Logo from "../../../assets/ios-light.png";
 import backImg from "../../../assets/SplashScreen.png";
 import { theme } from "../../global/theme";
 import { styles } from "./styles";
+import { api } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
 // Schema de validação
 const schema = yup.object({
@@ -34,7 +37,8 @@ export default function SignIn() {
   const senhaRef = useRef<TextInput>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
+  const { login } = useAuth();
+  const navigation = useNavigation();
   const {
     control,
     handleSubmit,
@@ -46,10 +50,16 @@ export default function SignIn() {
 
   const onSubmit = async (data: { email: string; password: string }) => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await login(data);
+
+      console.log(data);
+    } catch (error) {
+      console.error("Erro no login:", error);
+      alert("Erro ao fazer login. Tente novamente.");
+    } finally {
       setLoading(false);
-      alert(`Login:\n${JSON.stringify(data, null, 2)}`);
-    }, 1200);
+    }
   };
 
   return (
@@ -71,41 +81,38 @@ export default function SignIn() {
                 control={control}
                 name="email"
                 render={({
-                  field: { onChange, onBlur, value },
+                  field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <>
-                    <View
-                      style={[
-                        styles.inputWrapper,
-                        error && styles.inputWrapperError,
-                      ]}
-                    >
-                      <Ionicons
-                        name="mail-outline"
-                        size={22}
-                        color={error ? "#f44336" : "#A9CCE3"}
-                        style={styles.inputIcon}
-                      />
-                      <TextInput
-                        style={styles.input}
-                        placeholder="E-mail"
-                        placeholderTextColor="#A9CCE3"
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        returnKeyType="next"
-                        onSubmitEditing={() => senhaRef.current?.focus()}
-                        editable={!loading}
-                        autoFocus
-                      />
-                    </View>
+                  <View
+                    style={[
+                      styles.inputWrapper,
+                      error && styles.inputWrapperError,
+                    ]}
+                  >
+                    <Ionicons
+                      name="mail-outline"
+                      size={22}
+                      color={error ? "#f44336" : "#A9CCE3"}
+                      style={styles.inputIcon}
+                    />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="E-mail"
+                      placeholderTextColor="#A9CCE3"
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      value={value}
+                      onChangeText={onChange}
+                      returnKeyType="next"
+                      onSubmitEditing={() => senhaRef.current?.focus()}
+                      editable={!loading}
+                      autoFocus
+                    />
                     {error && (
                       <Text style={styles.errorText}>{error.message}</Text>
                     )}
-                  </>
+                  </View>
                 )}
               />
 
@@ -194,7 +201,11 @@ export default function SignIn() {
               <TouchableOpacity style={styles.linkButton} activeOpacity={0.7}>
                 <Text style={styles.linkText}>Esqueceu a senha?</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.linkButton} activeOpacity={0.7}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("SignUp")}
+                style={styles.linkButton}
+                activeOpacity={0.7}
+              >
                 <Text style={styles.linkText}>Criar conta</Text>
               </TouchableOpacity>
             </View>

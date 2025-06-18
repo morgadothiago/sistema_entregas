@@ -40,6 +40,8 @@ export function VehicleTypeSelect({
     async function loadVehicleTypes() {
       try {
         const response = await api.get("/vehicle-types");
+
+        console.log(response);
         let types: VehicleType[] = [];
         if (Array.isArray(response.data)) {
           types = response.data;
