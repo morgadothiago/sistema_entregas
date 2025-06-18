@@ -9,6 +9,12 @@ import {
   AvatarFallback /* , AvatarImage */,
 } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { signOut } from "next-auth/react";
 import api from "@/app/services/api";
@@ -73,20 +79,30 @@ export default function Header() {
                 3
               </span>
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleLogOut}
-              className="flex items-center flex-1"
-            >
-              <LogOutIcon className="mr-2" />
-            </Button>
-
-            <Button
-              onClick={handleLogOut}
-              className="flex items-center rounded-full bg-[#5DADE2] hover:bg-[#003B73] flex-shrink-0"
-            >
-              <User2 />
-            </Button>
+            {/* User Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="flex items-center rounded-full bg-[#5DADE2] hover:bg-[#003B73] flex-shrink-0 p-0 w-10 h-10 justify-center">
+                  <User2 className="w-6 h-6 text-white" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-44 mt-2 rounded-xl shadow-xl border bg-white animate-fade-in"
+              >
+                <DropdownMenuItem className="flex items-center gap-2 px-3 py-2 hover:bg-primary/10 cursor-pointer">
+                  <User2 className="w-4 h-4 text-primary" />
+                  <span>Perfil</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-red-600 cursor-pointer"
+                  onClick={handleLogOut}
+                >
+                  <LogOutIcon className="w-4 h-4" />
+                  <span>Sair</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
