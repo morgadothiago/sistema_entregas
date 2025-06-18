@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useAuth } from "@/app/context";
-import { Bell, Menu } from "lucide-react";
+import { Bell, LogOutIcon, Menu, User2 } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Avatar,
@@ -10,8 +10,19 @@ import {
 } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
+import { signOut } from "next-auth/react";
+import api from "@/app/services/api";
+import { useRouter } from "next/navigation";
+
 export default function Header() {
   const { user } = useAuth();
+  const router = useRouter();
+
+  const handleLogOut = async () => {
+    await signOut({ redirect: false });
+    api.cleanToken();
+    router.push("/signin");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-md">
@@ -61,6 +72,20 @@ export default function Header() {
               <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
                 3
               </span>
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleLogOut}
+              className="flex items-center flex-1"
+            >
+              <LogOutIcon className="mr-2" />
+            </Button>
+
+            <Button
+              onClick={handleLogOut}
+              className="flex items-center rounded-full bg-[#5DADE2] hover:bg-[#003B73] flex-shrink-0"
+            >
+              <User2 />
             </Button>
           </div>
         </div>
