@@ -49,3 +49,8 @@ export const signUpSchema = yup.object({
 
 // 🔥 Tipagem automática com base no schema
 export type SignUpFormData = InferType<typeof signUpSchema>;
+
+export const signInSchema = yup.object({
+  email: yup.string().email("Email inválido").required("Email é obrigatório"),
+  password: yup.string().required("Senha é obrigatória"),
+});

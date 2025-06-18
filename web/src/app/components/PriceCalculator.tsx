@@ -27,7 +27,7 @@ interface DeliveryConfig {
   estimatedTime: number;
   vehicleType: string;
   isActive: boolean;
-  zones: any[];
+  zones: unknown[];
 }
 
 function calculatePrice(
