@@ -51,8 +51,7 @@ export default function SignIn() {
   const onSubmit = async (data: { email: string; password: string }) => {
     setLoading(true);
     try {
-      await login(data);
-
+      await login(data, navigation);
       console.log(data);
     } catch (error) {
       console.error("Erro no login:", error);
