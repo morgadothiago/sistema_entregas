@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
+import { IsEmail, IsMobilePhone, IsNotEmpty, IsNumber, IsPhoneNumber, IsString, Min } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { DeliverySimulateDto } from "./delivery-simulate.dto";
 
@@ -34,6 +34,37 @@ export class DeliveryCreateDto extends DeliverySimulateDto{
   length: number;
 
   @ApiProperty({
+    description: "informações adicionais",
+    example: "produtos frageis | pesados",
+  })
+  @IsNotEmpty()
+  @IsString()
+  information: string;      
+
+  @ApiProperty(
+    {
+      description: "Email do cliente",
+      example: "email@email.com",
+    }
+  )
+
+  @IsNotEmpty()
+  @IsString()
+  @IsEmail()
+  email: string;
+
+  @ApiProperty(
+    {
+      description: "Nome do cliente",
+      example: "João da Silva",
+    }
+  )
+  @IsNotEmpty()
+  @IsString()
+  @IsMobilePhone('pt-BR')
+  telefone: string;
+
+  @ApiProperty({
     description: "Weight of the delivery package in kilograms",
     minimum: 0,
     example: 5.5,
@@ -41,8 +72,5 @@ export class DeliveryCreateDto extends DeliverySimulateDto{
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  weight: number;
-
-  
-  
+  weight: number;  
 }

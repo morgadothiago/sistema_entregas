@@ -7,10 +7,12 @@ import {
   IsString,
   Min,
   ValidateIf,
+  ValidateNested,
 } from "class-validator";
+import { Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 
-class AddressDto {
+export class AddressDto {
 
   @ApiProperty({
     description: "cidade do endereço de entrega",
@@ -29,12 +31,12 @@ class AddressDto {
   state: string;
 
   @ApiProperty({
-    description: "endereço de entrega",
+    description: "rua do endereço",
     example: "Rua Exemplo",
   })
   @IsNotEmpty()
   @IsString()
-  address: string;
+  street: string;
 
   @ApiProperty({
     description: "número do endereço de entrega",
@@ -60,7 +62,8 @@ export class DeliverySimulateDto {
     type: AddressDto
   })
   @IsNotEmpty()
-  @IsObject()
+  @ValidateNested()
+  @Type(() => AddressDto)
   clientAddress: AddressDto;
 
   @ApiProperty({
@@ -70,7 +73,8 @@ export class DeliverySimulateDto {
   })
   @ValidateIf((o) => !o.useAddressCompany)
   @IsNotEmpty()
-  @IsObject()
+  @ValidateNested()
+  @Type(() => AddressDto)
   address: AddressDto;
 
   @IsBoolean()
