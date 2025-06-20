@@ -4,6 +4,17 @@ import {
 } from "@nestjs/common";
 import { ValidationError } from "class-validator";
 
+export const createCode = (size = 4, prefix: string, characters = 'abcdefghjklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'): string => {
+  let code: string = ''
+
+  for(const _ of Array(size)) {
+    const random = Math.floor(Math.random() * characters.length)
+    code += characters[random]
+  }
+
+  return prefix.concat(code);
+};
+
 export const exceptionFactory = (validationErrors: ValidationError[]) => {
   const errors = validationErrors.map((error) => {
     const constraints = Object.values(error.constraints || {});
@@ -50,7 +61,6 @@ export const paginateResponse = <T>(
 
 // Em um controller ou middleware
 export function isMobileDevice(agent: string | undefined): boolean {
-  console.log(agent);
   const userAgent = agent || "";
 
   // Regex para detectar dispositivos móveis comuns
