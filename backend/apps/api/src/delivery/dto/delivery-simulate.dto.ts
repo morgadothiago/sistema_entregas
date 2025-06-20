@@ -51,8 +51,8 @@ class AddressDto {
   @IsNotEmpty()
   @IsString()
   zipCode: string;
-
 }
+
 export class DeliverySimulateDto {
   @ApiProperty({
     required: true,

@@ -117,7 +117,7 @@ export class LocationService implements OnModuleInit {
     return result
   }
 
-  static async getAddressLocalization(prisma: PrismaService, idAddress: number): Promise<ILocalization> {
+  async getAddressLocalization(prisma: PrismaService, idAddress: number): Promise<ILocalization> {
     const coordinates = await prisma.$queryRaw<{longitude: number, latitude: number}[]>`
       SELECT
         ST_X(localization::geometry) as longitude,
@@ -134,7 +134,7 @@ export class LocationService implements OnModuleInit {
     return coordinates[0]
   }
 
-  static async getAddressLocalizationByUser(prisma: PrismaService, idUser: number, type: 'companies' | 'deliverymen'): Promise<ILocalization> {
+  async getAddressLocalizationByUser(prisma: PrismaService, idUser: number, type: 'companies' | 'deliverymen'): Promise<ILocalization> {
     if (type !== 'companies' && type !== 'deliverymen') {
       throw new Error('Tipo inválido');
     }

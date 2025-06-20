@@ -6,7 +6,7 @@ import { LocationService } from "../location/location.service";
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private locationService: LocationService) {}
 
   async paginate(filters: IUserQueryParams, page: number, registers: number) {
     const where = {
@@ -91,7 +91,7 @@ export class UserService {
 
     if (!user) throw new NotFoundException(`usuario com codigo '${id}' não encontrado`);
 
-    const coordinates = await LocationService.getAddressLocalization(this.prisma, user.Company ? user.Company.Address.id : user.DeliveryMan?.Address.id as number);
+    const coordinates = await this.locationService.getAddressLocalization(this.prisma, user.Company ? user.Company.Address.id : user.DeliveryMan?.Address.id as number);
 
     ((user.Company?.Address || user.DeliveryMan?.Address) as any).localization = coordinates;
 

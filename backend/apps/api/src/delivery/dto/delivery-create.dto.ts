@@ -1,7 +1,8 @@
 import { IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { DeliverySimulateDto } from "./delivery-simulate.dto";
 
-export class DeliveryCreateDto {
+export class DeliveryCreateDto extends DeliverySimulateDto{
   @ApiProperty({
     description: "Height of the delivery package in centimeters",
     minimum: 0,
@@ -42,21 +43,6 @@ export class DeliveryCreateDto {
   @Min(0)
   weight: number;
 
-  @ApiProperty({
-    description: "Price of the delivery in the smallest currency unit",
-    minimum: 0,
-    example: 99.9,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  price: number;
-
-  @ApiProperty({
-    description: "Unique identifier code for the client",
-    example: "CLI123456",
-  })
-  @IsNotEmpty()
-  @IsString()
-  codigoClient: string;
+  
+  
 }
