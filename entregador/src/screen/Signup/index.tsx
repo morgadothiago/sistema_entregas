@@ -207,393 +207,393 @@ export default function Signup() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <Header
-            title="Cadastre-se"
-            icon="arrow-left"
-            onPress={() => navigation.goBack()}
-          />
-          <ScrollView
-            style={styles.form}
-            contentContainerStyle={{ paddingBottom: 10 }}
-            showsVerticalScrollIndicator={false}
-          >
-            <Text style={styles.sectionTitle}>Dados Pessoais</Text>
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Nome"
-                    placeholder="Digite seu nome"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.name?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Email"
-                    placeholder="Digite seu email"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.email?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="phone"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Telefone"
-                    placeholder="(XX) XXXXX-XXXX"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.phone?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.rowItem}>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.container}>
+            <Header
+              title="Cadastre-se"
+              icon="arrow-left"
+              onPress={() => navigation.goBack()}
+            />
+            <ScrollView
+              style={styles.form}
+              contentContainerStyle={{ paddingBottom: 10 }}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={styles.sectionTitle}>Dados Pessoais</Text>
+              <View style={styles.inputGroup}>
                 <Controller
                   control={control}
-                  name="dob"
+                  name="name"
                   render={({ field: { onChange, value } }) => (
                     <Input
-                      label="Data de Nascimento"
-                      placeholder="DD-MM-AAAA"
+                      label="Nome"
+                      placeholder="Digite seu nome"
                       value={value}
-                      onChangeText={(text) => {
-                        const numbers = text.replace(/\D/g, "");
-                        let formatted = numbers;
-                        if (numbers.length > 2) {
-                          formatted = `${numbers.slice(0, 2)}-${numbers.slice(
-                            2,
-                            4
-                          )}`;
-                          if (numbers.length > 4) {
-                            formatted += `-${numbers.slice(4, 8)}`;
+                      onChangeText={onChange}
+                      placeholderTextColor={theme.colors.button}
+                      error={errors.name?.message}
+                    />
+                  )}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="Email"
+                      placeholder="Digite seu email"
+                      value={value}
+                      onChangeText={onChange}
+                      placeholderTextColor={theme.colors.button}
+                      error={errors.email?.message}
+                    />
+                  )}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="Telefone"
+                      placeholder="(XX) XXXXX-XXXX"
+                      value={value}
+                      onChangeText={onChange}
+                      placeholderTextColor={theme.colors.button}
+                      error={errors.phone?.message}
+                    />
+                  )}
+                />
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="dob"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Data de Nascimento"
+                        placeholder="DD-MM-AAAA"
+                        value={value}
+                        onChangeText={(text) => {
+                          const numbers = text.replace(/\D/g, "");
+                          let formatted = numbers;
+                          if (numbers.length > 2) {
+                            formatted = `${numbers.slice(0, 2)}-${numbers.slice(
+                              2,
+                              4
+                            )}`;
+                            if (numbers.length > 4) {
+                              formatted += `-${numbers.slice(4, 8)}`;
+                            }
                           }
-                        }
-                        onChange(formatted);
-                      }}
+                          onChange(formatted);
+                        }}
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.dob?.message}
+                      />
+                    )}
+                  />
+                </View>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="cpf"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="CPF"
+                        placeholder="Digite seu CPF"
+                        value={value}
+                        onChangeText={onChange}
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.cpf?.message}
+                      />
+                    )}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="Senha"
+                      placeholder="Digite sua senha"
+                      value={value}
+                      onChangeText={onChange}
+                      secureTextEntry
                       placeholderTextColor={theme.colors.button}
-                      error={errors.dob?.message}
+                      error={errors.password?.message}
                     />
                   )}
                 />
               </View>
-              <View style={styles.rowItem}>
+
+              <View style={styles.inputGroup}>
                 <Controller
                   control={control}
-                  name="cpf"
+                  name="confirmPassword"
                   render={({ field: { onChange, value } }) => (
                     <Input
-                      label="CPF"
-                      placeholder="Digite seu CPF"
+                      label="Confirmar Senha"
+                      placeholder="Confirme sua senha"
+                      value={value}
+                      onChangeText={onChange}
+                      secureTextEntry
+                      placeholderTextColor={theme.colors.button}
+                      error={errors.confirmPassword?.message}
+                    />
+                  )}
+                />
+              </View>
+
+              <Text style={styles.sectionTitle}>Dados de Endereço</Text>
+              <View style={styles.inputGroup}>
+                <Controller
+                  control={control}
+                  name="address.street"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="Rua"
+                      placeholder="Digite o nome da rua"
                       value={value}
                       onChangeText={onChange}
                       placeholderTextColor={theme.colors.button}
-                      error={errors.cpf?.message}
+                      error={errors.address?.street?.message}
                     />
                   )}
                 />
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Senha"
-                    placeholder="Digite sua senha"
-                    value={value}
-                    onChangeText={onChange}
-                    secureTextEntry
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.password?.message}
+              <View style={styles.row}>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="address.number"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Número"
+                        placeholder="123"
+                        value={value}
+                        onChangeText={onChange}
+                        keyboardType="numeric"
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.address?.number?.message}
+                      />
+                    )}
                   />
-                )}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="confirmPassword"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Confirmar Senha"
-                    placeholder="Confirme sua senha"
-                    value={value}
-                    onChangeText={onChange}
-                    secureTextEntry
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.confirmPassword?.message}
+                </View>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="address.complement"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Complemento"
+                        placeholder="Apto, Bloco, etc. (Opcional)"
+                        value={value ?? ""}
+                        onChangeText={onChange}
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.address?.complement?.message}
+                      />
+                    )}
                   />
-                )}
-              />
-            </View>
-
-            <Text style={styles.sectionTitle}>Dados de Endereço</Text>
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="address.street"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Rua"
-                    placeholder="Digite o nome da rua"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.address?.street?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.rowItem}>
-                <Controller
-                  control={control}
-                  name="address.number"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="Número"
-                      placeholder="123"
-                      value={value}
-                      onChangeText={onChange}
-                      keyboardType="numeric"
-                      placeholderTextColor={theme.colors.button}
-                      error={errors.address?.number?.message}
-                    />
-                  )}
-                />
+                </View>
               </View>
-              <View style={styles.rowItem}>
+
+              <View style={styles.inputGroup}>
                 <Controller
                   control={control}
-                  name="address.complement"
+                  name="address.neighborhood"
                   render={({ field: { onChange, value } }) => (
                     <Input
-                      label="Complemento"
-                      placeholder="Apto, Bloco, etc. (Opcional)"
-                      value={value ?? ""}
-                      onChangeText={onChange}
-                      placeholderTextColor={theme.colors.button}
-                      error={errors.address?.complement?.message}
-                    />
-                  )}
-                />
-              </View>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="address.neighborhood"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Bairro"
-                    placeholder="Digite o bairro"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.address?.neighborhood?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.rowItem}>
-                <Controller
-                  control={control}
-                  name="address.city"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="Cidade"
-                      placeholder="Digite a cidade"
+                      label="Bairro"
+                      placeholder="Digite o bairro"
                       value={value}
                       onChangeText={onChange}
                       placeholderTextColor={theme.colors.button}
-                      error={errors.address?.city?.message}
+                      error={errors.address?.neighborhood?.message}
                     />
                   )}
                 />
               </View>
-              <View style={styles.rowItem}>
-                <Controller
-                  control={control}
-                  name="address.state"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="Estado"
-                      placeholder="Digite o estado"
-                      value={value}
-                      onChangeText={onChange}
-                      placeholderTextColor={theme.colors.button}
-                      error={errors.address?.state?.message}
-                    />
-                  )}
-                />
+
+              <View style={styles.row}>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="address.city"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Cidade"
+                        placeholder="Digite a cidade"
+                        value={value}
+                        onChangeText={onChange}
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.address?.city?.message}
+                      />
+                    )}
+                  />
+                </View>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="address.state"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Estado"
+                        placeholder="Digite o estado"
+                        value={value}
+                        onChangeText={onChange}
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.address?.state?.message}
+                      />
+                    )}
+                  />
+                </View>
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="address.zipCode"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="CEP"
-                    placeholder="Digite o CEP"
-                    value={value}
-                    onChangeText={onChange}
-                    keyboardType="numeric"
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.address?.zipCode?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <Text style={styles.sectionTitle}>Dados do Veículo</Text>
-
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="vehicle.licensePlate"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Placa do Veículo"
-                    placeholder="Ex: ABC-1234"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.vehicle?.licensePlate?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="vehicle.brand"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Marca"
-                    placeholder="Ex: Honda"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.vehicle?.brand?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="vehicle.model"
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Modelo"
-                    placeholder="Ex: CG 160"
-                    value={value}
-                    onChangeText={onChange}
-                    placeholderTextColor={theme.colors.button}
-                    error={errors.vehicle?.model?.message}
-                  />
-                )}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <View style={styles.rowItem}>
+              <View style={styles.inputGroup}>
                 <Controller
                   control={control}
-                  name="vehicle.year"
+                  name="address.zipCode"
                   render={({ field: { onChange, value } }) => (
                     <Input
-                      label="Ano"
-                      placeholder="Ex: 2020"
+                      label="CEP"
+                      placeholder="Digite o CEP"
                       value={value}
                       onChangeText={onChange}
                       keyboardType="numeric"
                       placeholderTextColor={theme.colors.button}
-                      error={errors.vehicle?.year?.message}
+                      error={errors.address?.zipCode?.message}
                     />
                   )}
                 />
               </View>
-              <View style={styles.rowItem}>
+
+              <Text style={styles.sectionTitle}>Dados do Veículo</Text>
+
+              <View style={styles.inputGroup}>
                 <Controller
                   control={control}
-                  name="vehicle.color"
+                  name="vehicle.licensePlate"
                   render={({ field: { onChange, value } }) => (
                     <Input
-                      label="Cor"
-                      placeholder="Ex: Preta"
+                      label="Placa do Veículo"
+                      placeholder="Ex: ABC-1234"
                       value={value}
                       onChangeText={onChange}
                       placeholderTextColor={theme.colors.button}
-                      error={errors.vehicle?.color?.message}
+                      error={errors.vehicle?.licensePlate?.message}
                     />
                   )}
                 />
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Controller
-                control={control}
-                name="vehicle.vehicleType"
-                render={({ field: { onChange, value } }) => (
-                  <VehicleTypeSelect
-                    value={value}
-                    onChange={onChange}
-                    error={errors.vehicle?.vehicleType?.message}
+              <View style={styles.inputGroup}>
+                <Controller
+                  control={control}
+                  name="vehicle.brand"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="Marca"
+                      placeholder="Ex: Honda"
+                      value={value}
+                      onChangeText={onChange}
+                      placeholderTextColor={theme.colors.button}
+                      error={errors.vehicle?.brand?.message}
+                    />
+                  )}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Controller
+                  control={control}
+                  name="vehicle.model"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="Modelo"
+                      placeholder="Ex: CG 160"
+                      value={value}
+                      onChangeText={onChange}
+                      placeholderTextColor={theme.colors.button}
+                      error={errors.vehicle?.model?.message}
+                    />
+                  )}
+                />
+              </View>
+
+              <View style={styles.row}>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="vehicle.year"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Ano"
+                        placeholder="Ex: 2020"
+                        value={value}
+                        onChangeText={onChange}
+                        keyboardType="numeric"
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.vehicle?.year?.message}
+                      />
+                    )}
                   />
-                )}
-              />
-            </View>
-          </ScrollView>
+                </View>
+                <View style={styles.rowItem}>
+                  <Controller
+                    control={control}
+                    name="vehicle.color"
+                    render={({ field: { onChange, value } }) => (
+                      <Input
+                        label="Cor"
+                        placeholder="Ex: Preta"
+                        value={value}
+                        onChangeText={onChange}
+                        placeholderTextColor={theme.colors.button}
+                        error={errors.vehicle?.color?.message}
+                      />
+                    )}
+                  />
+                </View>
+              </View>
 
-          <View style={styles.footer}>
+              <View style={styles.inputGroup}>
+                <Controller
+                  control={control}
+                  name="vehicle.vehicleType"
+                  render={({ field: { onChange, value } }) => (
+                    <VehicleTypeSelect
+                      value={value}
+                      onChange={onChange}
+                      error={errors.vehicle?.vehicleType?.message}
+                    />
+                  )}
+                />
+              </View>
+            </ScrollView>
+
             <View style={styles.buttonContainer}>
               <Button title="Cadastrar" onPress={handleSubmit(onSubmit)} />
             </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }

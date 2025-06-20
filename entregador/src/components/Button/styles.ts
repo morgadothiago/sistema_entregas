@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
+    width: "100%",
   },
   btnTitle: {
     fontSize: 18,

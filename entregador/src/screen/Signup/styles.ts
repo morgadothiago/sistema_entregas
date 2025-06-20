@@ -80,6 +80,7 @@ export const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     alignItems: "center",
+    padding: 10,
   },
   primaryButton: {
     width: "100%",
