@@ -34,9 +34,12 @@ export class DeliveryController {
     return this.deliveryService.simulateDelivery(body, user.id);
   }
 
-  @Post(":code")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  createDelivery(@Body() body: DeliveryCreateDto) {
-    return this.deliveryService.createDelivery(body);
+  @Post("")
+  @HttpCode(HttpStatus.CREATED)
+  createDelivery(@Body() body: DeliveryCreateDto, @Req() req: Request & { user: User },
+  ) {
+    const user = req.user;
+    
+    return this.deliveryService.createDelivery(body, user.id);
   }
 }

@@ -6,6 +6,9 @@ import { VehicleTypeService } from "../vehicle-type/vehicle-type.service";
 import { LocationService } from "../location/location.service";
 import { VehicleType } from "@prisma/client";
 import { IRoute } from "../typing/location";
+import { createCode } from "../utils/fn";
+import { CacheService } from "../cache/cache.service";
+
 
 @Injectable()
 export class DeliveryService {
@@ -13,6 +16,7 @@ export class DeliveryService {
     private prismaService: PrismaService,
     private vehicleType: VehicleTypeService,
     private locationService: LocationService,
+    private cacheService: CacheService
   ) {}
 
   async simulateDelivery(
@@ -22,6 +26,25 @@ export class DeliveryService {
     location: IRoute;
     price: number;
   }> {
+    const companyLocalization = body.useAddressCompany 
+    ? await this.locationService.getAddressLocalizationByUser(
+        this.prismaService, idUser, 'companies'
+      )
+    : await this.locationService.reverse(
+        body.address.city,
+        body.address.state,
+        body.address.street,
+        body.address.number,
+        body.address.zipCode,
+    );
+
+    const key = `simulate:${body.vehicleType}:${companyLocalization.longitude}:${companyLocalization.latitude}:${body.clientAddress.city}:${body.clientAddress.state}:${body.clientAddress.street}:${body.clientAddress.number}:${body.clientAddress.zipCode}`
+    const cache = await this.cacheService.getValue(key)
+
+    if(cache) {
+      return JSON.parse(cache)
+    }
+
     const vehicleType: VehicleType = await this.vehicleType.findOne(
       body.vehicleType,
     );
@@ -32,22 +55,10 @@ export class DeliveryService {
       );
     }
 
-    const companyLocalization = body.useAddressCompany 
-    ? await this.locationService.getAddressLocalizationByUser(
-        this.prismaService, idUser, 'companies'
-      ) 
-    : await this.locationService.reverse(
-        body.address.city,
-        body.address.state,
-        body.address.address,
-        body.address.number,
-        body.address.zipCode,
-    );
-
     const location = await this.locationService.reverse(
       body.clientAddress.city,
       body.clientAddress.state,
-      body.clientAddress.address,
+      body.clientAddress.street,
       body.clientAddress.number,
       body.clientAddress.zipCode,
     );
@@ -59,13 +70,91 @@ export class DeliveryService {
 
     const price = this.vehicleType.calculatePrice(vehicleType, geoInfo);
 
-    return {
+    const result =  {
       location: geoInfo,
       price,
     };
+
+    await this.cacheService.setCache(key, JSON.stringify(result), 60 * 60)
+
+    return result
+  }
+  
+  async createCode(prefix = 'BR') {
+    let code = createCode(4, prefix);
+
+    while (true) {
+      const delivery = await this.prismaService.delivery.findFirst({
+        where: {
+          code,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!delivery)
+        break;
+
+      code = createCode(4, prefix);
+    }
+
+    return code;
   }
 
-  createDelivery(body: DeliveryCreateDto) {
-    throw new Error("Method not implemented.");
+  async createDelivery(body: DeliveryCreateDto, idUser: number) {
+    return this.prismaService.$transaction(async (prisma) => {
+
+    const code = await this.createCode(body.clientAddress.state.toLocaleUpperCase())
+
+    const { price } = await this.simulateDelivery(body, idUser)
+  
+    const clientAddress = await this.locationService.createAddress(prisma as PrismaService, body.clientAddress)
+    
+    if(body.useAddressCompany)
+      body.address = await this.locationService.getAddressByUser(prisma as PrismaService, idUser, "companies")
+    
+    const originAddress = await this.locationService.createAddress(prisma as PrismaService, body.address)
+    
+    if (!clientAddress || !originAddress) {
+      throw new Error('Failed to create addresses');
+    }
+    
+    const vehicleType = await this.vehicleType.findOne(body.vehicleType)
+      
+    if(!vehicleType)
+        throw new NotFoundException(`Tipo de veiculo '${body.vehicleType}' não foi encontrado`)
+      
+      return prisma.delivery.create({
+        data: {
+          code,
+          height: body.height,
+          width: body.width,
+          length: body.length,
+          weight: body.weight,
+          information: body.information.trim(),
+          price,
+          email: body.email.trim(),
+          telefone: body.telefone.trim(),
+          Company: {
+            connect: {
+              idUser,
+            },
+          },
+          ClientAddress: {
+            connect: {
+              id: clientAddress.id,
+            },
+          },
+          OriginAddress: {
+            connect: {
+              id: originAddress.id,
+            },
+          },
+        }
+      })
+    })
+    
+   
   }
 }
