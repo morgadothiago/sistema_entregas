@@ -1,52 +1,16 @@
 import {
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Min,
+  ValidateIf,
 } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class DeliverySimulateDto {
-  /* @ApiProperty({
-    description: "altura do pacote em metros",
-    minimum: 0,
-    example: 50,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  height: number;
-
-  @ApiProperty({
-    description: "largura do pacote em metros",
-    minimum: 0,
-    example: 30,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  width: number;
-
-  @ApiProperty({
-    description: "comprimento do pacote em metros",
-    minimum: 0,
-    example: 40,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  length: number;
-
-  @ApiProperty({
-    description: "peso do pacote em KG",
-    minimum: 0,
-    example: 5.5,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  weight: number; */
+class AddressDto {
 
   @ApiProperty({
     description: "cidade do endereço de entrega",
@@ -87,6 +51,36 @@ export class DeliverySimulateDto {
   @IsNotEmpty()
   @IsString()
   zipCode: string;
+
+}
+export class DeliverySimulateDto {
+  @ApiProperty({
+    required: true,
+    description: 'endereço para onde sera entregue',
+    type: AddressDto
+  })
+  @IsNotEmpty()
+  @IsObject()
+  clientAddress: AddressDto;
+
+  @ApiProperty({
+    required: false,
+    description: 'endereço de onde a entrega sera buscada',
+    type: AddressDto
+  })
+  @ValidateIf((o) => !o.useAddressCompany)
+  @IsNotEmpty()
+  @IsObject()
+  address: AddressDto;
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty({
+    description: "se true, utilizar endereço da empresa",
+    required: false,
+    default: false,
+  })
+  useAddressCompany?: boolean;
 
   @ApiProperty({
     description: "tipo de veiculo",

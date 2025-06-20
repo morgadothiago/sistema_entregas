@@ -32,16 +32,22 @@ export class DeliveryService {
       );
     }
 
-    const companyLocalization = await LocationService.getAddressLocalizationByUser(
+    const companyLocalization = body.useAddressCompany ? await LocationService.getAddressLocalizationByUser(
       this.prismaService, idUser, 'companies'
-    )
+    ) : await this.locationService.reverse(
+        body.address.city,
+        body.address.state,
+        body.address.address,
+        body.address.number,
+        body.address.zipCode,
+    );
 
     const location = await this.locationService.reverse(
-      body.city,
-      body.state,
-      body.address,
-      body.number,
-      body.zipCode,
+      body.clientAddress.city,
+      body.clientAddress.state,
+      body.clientAddress.address,
+      body.clientAddress.number,
+      body.clientAddress.zipCode,
     );
 
     const geoInfo = await this.locationService.findDistance(
