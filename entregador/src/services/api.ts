@@ -1,9 +1,13 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import { showErrorToast } from "../util/Toast";
 
 export const api = axios.create({
-  baseURL: "http://192.168.100.96:8080/",
+  baseURL:
+    Platform.OS === "ios"
+      ? "http://localhost:8080/"
+      : "http://192.168.100.96:8080/",
 });
 
 // Função para definir o token de autorização
@@ -55,9 +59,12 @@ api.interceptors.response.use(
         await AsyncStorage.removeItem("@auth:token");
         await AsyncStorage.removeItem("@auth:user");
         setAuthToken(null);
+        showErrorToast("Usuário ou senha inválidos.");
       } catch (storageError) {
         console.error("Erro ao limpar dados de autenticação:", storageError);
       }
+    } else {
+      showErrorToast("Erro ao fazer login. Tente novamente mais tarde.");
     }
     return Promise.reject(error);
   }
