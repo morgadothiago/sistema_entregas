@@ -143,10 +143,10 @@ model DeliveryMan {
 model Vehicle {
   id            Int          @id @default(autoincrement())
   licensePlate  String       @unique @map("license_plate") @db.VarChar(8) // "placa"
-  brand         String       @db.Char(30) // "marca"
-  model         String       @db.Char(50) // "modelo"
-  year          String       @db.Char(4) // "ano" (manufacturing year)
-  color         String       @db.Char(20) // "cor"
+  brand         String       @db.VarChar(30) // "marca"
+  model         String       @db.VarChar(50) // "modelo"
+  year          String       @db.VarChar(4) // "ano" (manufacturing year)
+  color         String       @db.VarChar(20) // "cor"
   Type          VehicleType  @relation(fields: [vehicleTypeId], references: [id])
   vehicleTypeId Int          @map("vehicle_type_id")
   createdAt     DateTime     @default(now()) @map("created_at")
@@ -186,8 +186,8 @@ model Delivery {
   price           Float
   companyId       Int
   Company         Company        @relation(fields: [companyId], references: [id])
-  email           String         @db.Char(250)
-  telefone        String         @db.Char(30)
+  email           String         @db.VarChar(250)
+  telefone        String         @db.VarChar(30)
   ClientAddress   Address        @relation("ClientAddress", fields: [idClientAddress], references: [id])
   OriginAddress   Address        @relation("OriginAddress", fields: [idOriginAddress], references: [id])
   status          DeliveryStatus @default(PENDING)
