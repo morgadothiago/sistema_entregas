@@ -1,7 +1,7 @@
 
-cd backend
+cd backend/DOCKER
 
-docker compose up -d
+docker-compose up -d
 
 yarn
 
