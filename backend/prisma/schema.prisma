@@ -40,26 +40,28 @@ model Address {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 
-  localization Unsupported("geography(Point, 4326)")
-  Company      Company?
-  DeliveryMan  DeliveryMan?
-  Delivery     Delivery?
+  localization   Unsupported("geography(Point, 4326)")
+  Company        Company?
+  DeliveryMan    DeliveryMan?
+  ClientDelivery Delivery[]                            @relation("ClientAddress")
+  OriginDelivery Delivery[]                            @relation("OriginAddress")
 
   @@index([localization], name: "location_idx", type: Gist)
   @@map("addresses")
 }
 
 model Company {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   name      String
   phone     String
-  cnpj      String   @unique
-  idAddress Int      @unique
-  Address   Address  @relation(fields: [idAddress], references: [id])
-  idUser    Int      @unique @map("id_user")
-  User      User     @relation(fields: [idUser], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  cnpj      String     @unique
+  idAddress Int        @unique
+  Address   Address    @relation(fields: [idAddress], references: [id])
+  idUser    Int        @unique @map("id_user")
+  User      User       @relation(fields: [idUser], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  Delivery  Delivery[]
 
   @@map("companies")
 }
@@ -122,11 +124,11 @@ enum Role {
 model DeliveryMan {
   id        Int        @id @default(autoincrement())
   name      String
-  cpf       String
+  cpf       String     @unique
   dob       DateTime   @map("date_of_birth") @db.Date
   phone     String
   Address   Address    @relation(fields: [idAddress], references: [id])
-  Vehicle   Vehicle?   @relation(fields: [vehicleId], references: [id])
+  Vehicle   Vehicle    @relation(fields: [vehicleId], references: [id])
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now()) @updatedAt
   User      User       @relation(fields: [userId], references: [id])
@@ -161,25 +163,41 @@ enum DeliveryStatus {
   CANCELED
 }
 
+model Router {
+  id         Int                                   @id @default(autoincrement())
+  coord      Unsupported("geography(Point, 4326)")
+  createdAt  DateTime                              @default(now())
+  updatedAt  DateTime                              @default(now()) @updatedAt
+  Delivery   Delivery?                             @relation(fields: [deliveryId], references: [id])
+  deliveryId Int?
+
+  @@map("routes")
+}
+
 model Delivery {
-  id            Int            @id @default(autoincrement())
-  code          String         @unique
-  height        Float
-  width         Float
-  length        Float
-  weight        Float
-  price         Float
-  info          String[]
-  clientAddress Address        @relation(fields: [addressId], references: [id])
-  status        DeliveryStatus
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  DeliveryMan   DeliveryMan? @relation(fields: [deliveryManId], references: [id])
-  deliveryManId Int?
-
-  addressId Int @unique
+  id              Int            @id @default(autoincrement())
+  code            String         @unique
+  height          Float?
+  width           Float?
+  length          Float?
+  weight          Float?
+  information     String
+  isFragile       Boolean        @default(false)
+  price           Float
+  companyId       Int
+  Company         Company        @relation(fields: [companyId], references: [id])
+  email           String         @db.Char(250)
+  telefone        String         @db.Char(30)
+  ClientAddress   Address        @relation("ClientAddress", fields: [idClientAddress], references: [id])
+  OriginAddress   Address        @relation("OriginAddress", fields: [idOriginAddress], references: [id])
+  status          DeliveryStatus @default(PENDING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @default(now()) @updatedAt
+  Routes          Router[]
+  DeliveryMan     DeliveryMan?   @relation(fields: [deliveryManId], references: [id])
+  deliveryManId   Int?
+  idClientAddress Int            @map("id_client_address")
+  idOriginAddress Int            @map("id_origin_address")
 
   @@map("deliveries")
 }
