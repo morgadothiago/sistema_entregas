@@ -184,13 +184,13 @@ export default function SignIn() {
                   activeOpacity={0.85}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color={theme.colors.primary} />
                   ) : (
                     <>
                       <Ionicons
                         name="log-in-outline"
                         size={22}
-                        color="#fff"
+                        color={theme.colors.primary}
                         style={{ marginRight: 8 }}
                       />
                       <Text style={styles.buttonText}>Entrar</Text>

@@ -139,7 +139,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   buttonText: {
-    color: theme.colors.buttonText,
+    color: theme.colors.primary,
     fontWeight: "bold",
     fontSize: 19,
     letterSpacing: 0.5,
