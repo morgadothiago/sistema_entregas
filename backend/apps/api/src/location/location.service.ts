@@ -8,6 +8,8 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import { ILocation, ILocalization, IRoute, ReverseResponse } from "../typing/location";
 import { CacheService } from "../cache/cache.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { AddressDto } from "../delivery/dto/delivery-simulate.dto";
+import { Address } from "@prisma/client";
 
 @Injectable()
 export class LocationService implements OnModuleInit {
@@ -61,7 +63,6 @@ export class LocationService implements OnModuleInit {
       })
       .then((res) => res.data)
       .catch((e: AxiosError) => {
-        console.log(e.message)
         this.logger.error(e?.response?.data || e.message);
         throw new NotFoundException("Erro ao buscar localização");
       });
@@ -71,9 +72,7 @@ export class LocationService implements OnModuleInit {
       longitude: +response[0].lon,
     };
 
-    await this.cache.setCache(key, JSON.stringify(geoCode)).catch((e) => {
-      console.log(e)
-    });
+    await this.cache.setCache(key, JSON.stringify(geoCode))
 
     return geoCode;
   }
@@ -134,7 +133,38 @@ export class LocationService implements OnModuleInit {
     return coordinates[0]
   }
 
-  async getAddressLocalizationByUser(prisma: PrismaService, idUser: number, type: 'companies' | 'deliverymen'): Promise<ILocalization> {
+  async createAddress(prisma: PrismaService, body: AddressDto): Promise<{id: number}> {
+    const localization = await this.reverse(
+      body.city,
+      body.state,
+      body.street,
+      body.number,
+      body.zipCode || '',
+    );
+
+     const [address] = await prisma.$queryRawUnsafe<
+      { id: number }[]
+    >(
+      `
+      INSERT INTO "addresses" (city, state, street, number, "zipCode", country, complement, localization)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, ST_SetSRID(ST_MakePoint($8, $9), 4326))
+      RETURNING id
+      `,
+      body.city || '',
+      body.state || '',
+      body.street || '',
+      body.number || '',
+      body.zipCode || '',
+      'Brasil',
+      '',
+      localization.longitude,
+      localization.latitude,
+    );
+
+    return address;
+  }
+
+   async getAddressLocalizationByUser(prisma: PrismaService, idUser: number, type: 'companies' | 'deliverymen'): Promise<ILocalization> {
     if (type !== 'companies' && type !== 'deliverymen') {
       throw new Error('Tipo inválido');
     }
@@ -156,5 +186,28 @@ export class LocationService implements OnModuleInit {
         throw new NotFoundException(`Localization para o endereço do usuario '${idUser}' não foi encontrado`);
       
       return coordinates[0]
+  }
+
+  async getAddressByUser(prisma: PrismaService, idUser: number, type: 'companies' | 'deliverymen'): Promise<Address> {
+    if (type !== 'companies' && type !== 'deliverymen') {
+      throw new Error('Tipo inválido');
+    }
+
+    const query = `
+      SELECT
+        city, state, street, number, "zipCode", country, complement
+      FROM "addresses" a
+        INNER JOIN "${type}" c ON c."idAddress" = a.id
+      WHERE c."id_user" = $1
+      LIMIT 1
+    `;
+
+    const address = await prisma.$queryRawUnsafe<Address[]>(query, idUser);
+
+
+      if(!address || address.length === 0)
+        throw new NotFoundException(`O endereço do usuario '${idUser}' não foi encontrado`);
+      
+      return address[0]
   }
 }
