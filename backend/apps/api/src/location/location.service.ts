@@ -139,7 +139,7 @@ export class LocationService implements OnModuleInit {
       body.state,
       body.street,
       body.number,
-      body.zipCode || '',
+      body.zipCode,
     );
 
      const [address] = await prisma.$queryRawUnsafe<
@@ -150,11 +150,11 @@ export class LocationService implements OnModuleInit {
       VALUES ($1, $2, $3, $4, $5, $6, $7, ST_SetSRID(ST_MakePoint($8, $9), 4326))
       RETURNING id
       `,
-      body.city || '',
-      body.state || '',
-      body.street || '',
-      body.number || '',
-      body.zipCode || '',
+      body.city,
+      body.state,
+      body.street,
+      body.number,
+      body.zipCode,
       'Brasil',
       '',
       localization.longitude,
