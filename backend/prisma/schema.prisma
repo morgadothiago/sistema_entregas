@@ -196,6 +196,7 @@ model Delivery {
   Routes          Router[]
   DeliveryMan     DeliveryMan?   @relation(fields: [deliveryManId], references: [id])
   deliveryManId   Int?
+  vehicleType     String
   idClientAddress Int            @map("id_client_address")
   idOriginAddress Int            @map("id_origin_address")
 
