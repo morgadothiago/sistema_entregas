@@ -1,10 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -14,12 +12,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LogOutIcon, User2 } from "lucide-react";
+
 import { itemAdm, items, itemSupport } from "@/app/utils/menu";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
-import api from "@/app/services/api";
+
 import { useAuth } from "@/app/context";
 import Image from "next/image";
 
@@ -30,12 +27,6 @@ export function SideBar() {
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
-
-  const handleLogOut = async () => {
-    await signOut({ redirect: false });
-    api.cleanToken();
-    router.push("/signin");
-  };
 
   function handleNextPage(itemTitle: string) {
     setSelectedItem(itemTitle);
@@ -115,7 +106,7 @@ export function SideBar() {
                         >
                           <item.icon className="mr-2 flex-shrink-0" />
                           <span className="text-sm md:text-sm truncate">
-                            {item.title}
+                            {item.subTile}
                           </span>
                         </a>
                       </SidebarMenuButton>
@@ -157,25 +148,6 @@ export function SideBar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="mt-auto">
-          <div className="flex justify-between gap-2">
-            <Button
-              variant="destructive"
-              onClick={handleLogOut}
-              className="flex items-center flex-1"
-            >
-              <LogOutIcon className="mr-2" />
-              <span className="truncate">Sair</span>
-            </Button>
-
-            <Button
-              onClick={handleLogOut}
-              className="flex items-center rounded-full bg-[#5DADE2] hover:bg-[#003B73] flex-shrink-0"
-            >
-              <User2 />
-            </Button>
-          </div>
-        </SidebarFooter>
       </div>
     </Sidebar>
   );

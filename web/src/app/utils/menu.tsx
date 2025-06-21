@@ -6,6 +6,7 @@ import {
   RefreshCcw,
   Bell,
   Mail,
+  Settings,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -45,22 +46,10 @@ export const items = [
 
 export const itemAdm = [
   {
-    title: "add-new-delivery",
-    subTile: "Cadastro de Entregador",
-    url: "/admin/delivery",
-    icon: Car,
-  },
-  {
-    title: "payments",
-    subTile: "Repasse de valores",
-    url: "/admin/repassar-valores",
-    icon: DollarSign,
-  },
-  {
-    title: "acess-user",
-    subTile: "Solicitação de acesso",
-    url: "/admin/solicitacao-acesso",
-    icon: User,
+    title: "/admin/delivery",
+    subTile: "Configuração de entregas",
+    url: "/delivery",
+    icon: Settings,
   },
   {
     title: "/admin/listuser",

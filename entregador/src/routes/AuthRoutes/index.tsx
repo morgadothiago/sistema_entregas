@@ -1,5 +1,4 @@
 import React from "react";
-
 import { createStackNavigator } from "@react-navigation/stack";
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -9,6 +8,7 @@ import SignInScreen from "../../screen/SignIn";
 import ResetPasswordScreen from "../../screen/reset-password";
 import type { RootStackParamList } from "../../types/RootParamsList";
 import { useAuth } from "../../context/AuthContext";
+import Home from "../../screen/Home";
 
 export default function AuthRoutes() {
   const { isAuthenticated } = useAuth();
@@ -18,8 +18,12 @@ export default function AuthRoutes() {
       initialRouteName={isAuthenticated ? "Home" : "SignIn"}
     >
       <Stack.Screen name="SignIn" component={SignInScreen} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+      <Stack.Screen name="Home" component={Home} />
+
+      {/* Steps Accounts */}
+
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
     </Stack.Navigator>
   );
 }

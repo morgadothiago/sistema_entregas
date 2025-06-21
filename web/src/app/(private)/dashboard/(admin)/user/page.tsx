@@ -34,6 +34,7 @@ import {
   ArrowRight,
   Users,
   Mail,
+  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +44,7 @@ import { toast } from "sonner";
 const User: React.FC = () => {
   const limit = 10;
 
-  const [users, setUsers] = useState<IUserPaginate[]>({} as IUserPaginate[]);
+  const [users, setUsers] = useState<IUserPaginate[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(1);
@@ -53,12 +54,12 @@ const User: React.FC = () => {
     email?: string;
   }>({});
   const [lastPage, setLastPage] = useState(1);
-  const { token } = useAuth();
+  const { token, user: currentUser } = useAuth();
   const router = useRouter();
 
   function nextPage() {
     setPage((currentPage) =>
-      currentPage < lastPage ? currentPage + 1 : lastPage
+      currentPage < lastPage ? currentPage + 1 : currentPage
     );
   }
 
@@ -103,10 +104,8 @@ const User: React.FC = () => {
           "status" in response &&
           response.status === 401
         ) {
-          console.log("Erro de autenticação:", response);
           toast.error("Sessão expirada. Por favor, faça login novamente.");
         } else {
-          console.error("Resposta inesperada da API:", response);
           toast.error("Erro ao carregar usuários. Resposta inesperada.");
         }
       } catch (error) {
@@ -134,6 +133,60 @@ const User: React.FC = () => {
       ...(role && role !== "" && role !== "ALL" && { role: role as ERole }),
     }));
   }
+
+  const handleDeleteUser = async (userId: number, userName: string) => {
+    if (!token) {
+      toast.error("Token não disponível. Faça login novamente.");
+      return;
+    }
+
+    // Verificar se o usuário está tentando deletar a si mesmo
+    if (currentUser?.id === userId) {
+      toast.error("Você não pode deletar sua própria conta!");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Tem certeza que deseja deletar o usuário "${userName}"?\n\nEsta ação não pode ser desfeita.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const response = await api.deleteUser(userId.toString(), token);
+
+      if (response && typeof response === "object" && "status" in response) {
+        if (response.status === 401) {
+          toast.error("Sessão expirada. Por favor, faça login novamente.");
+        } else {
+          toast.error(response.message || "Erro ao deletar usuário");
+        }
+      } else {
+        toast.success(`Usuário "${userName}" foi deletado com sucesso!`);
+
+        // Recarregar a lista de usuários
+        const currentFilters = { page, ...filter, limit };
+        const updatedResponse = await api.getUsers(currentFilters, token);
+
+        if (
+          updatedResponse &&
+          typeof updatedResponse === "object" &&
+          "data" in updatedResponse &&
+          Array.isArray(updatedResponse.data)
+        ) {
+          setUsers(updatedResponse.data);
+          setTotal(updatedResponse.total);
+          setLastPage(updatedResponse.totalPage);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao deletar usuário:", error);
+      toast.error("Erro ao deletar usuário. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -398,7 +451,7 @@ const User: React.FC = () => {
                       data-label="Ações"
                       className="px-4 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
                     >
-                      <div className="flex items-center justify-end sm:justify-start w-full min-w-0 flex-wrap">
+                      <div className="flex items-center justify-end sm:justify-start w-full min-w-0 flex-wrap gap-2">
                         <Button
                           variant="link"
                           onClick={() => {
@@ -408,6 +461,29 @@ const User: React.FC = () => {
                         >
                           <Eye className="w-4 h-4 mr-1.5" />
                           Ver detalhes
+                        </Button>
+                        <Button
+                          variant="link"
+                          onClick={() =>
+                            handleDeleteUser(
+                              user.id,
+                              user.name || "Usuário sem nome"
+                            )
+                          }
+                          className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                            currentUser?.id === user.id
+                              ? "text-gray-400 cursor-not-allowed opacity-50"
+                              : "text-red-600 hover:bg-red-50 hover:text-red-700"
+                          }`}
+                          disabled={isLoading || currentUser?.id === user.id}
+                          title={
+                            currentUser?.id === user.id
+                              ? "Você não pode deletar sua própria conta"
+                              : "Deletar usuário"
+                          }
+                        >
+                          <Trash2 className="w-4 h-4 mr-1.5" />
+                          Deletar
                         </Button>
                       </div>
                     </TableCell>

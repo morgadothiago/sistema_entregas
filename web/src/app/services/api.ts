@@ -118,6 +118,17 @@ class ApiService {
       .catch(this.getError);
   }
 
+  async deleteUser(id: string, token: string) {
+    return this.api
+      .delete(`/users/${id}`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .then(this.getResponse<void>)
+      .catch(this.getError);
+  }
+
   static getInstance() {
     return (ApiService.instance ??= new ApiService());
   }

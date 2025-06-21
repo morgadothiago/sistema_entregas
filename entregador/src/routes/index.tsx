@@ -7,12 +7,16 @@ import AuthRoutes from "./AuthRoutes";
 import { ToastProvider } from "react-native-toastier";
 
 export default function AppRoutes() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return (
     <ToastProvider>
       <NavigationContainer>
-        {isAuthenticated ? <MainStack /> : <AuthRoutes />}
+        {isAuthenticated && user?.role === "delivery" ? (
+          <MainStack />
+        ) : (
+          <AuthRoutes />
+        )}
       </NavigationContainer>
     </ToastProvider>
   );

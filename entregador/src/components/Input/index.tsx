@@ -1,69 +1,58 @@
-import { Feather } from "@expo/vector-icons";
-import {
-  Controller,
-  type FieldValues,
-  type UseControllerProps,
-} from "react-hook-form";
-import clsx from "clsx";
+// src/components/Input/index.tsx
+import React, { useState } from "react";
+import { View, TextInput, Text, type TextInputProps } from "react-native";
+import { styles } from "./styles";
+import { theme } from "../../global/theme";
 
-import {
-  Container,
-  FormArea,
-  Inputs,
-  IconBox,
-  Label,
-  ErrorTitle,
-} from "./styles";
-import { type TextInput, type TextInputProps } from "react-native";
-import { forwardRef } from "react";
-
-type Props<T extends FieldValues> = {
-  error?: string;
-  icon: keyof typeof Feather.glyphMap;
-  formProps: UseControllerProps<T>; // **Aqui é importante o generic**
-  inputProps?: TextInputProps; // inputProps pode ser opcional
+type Props = TextInputProps & {
   label: string;
+  error?: string;
+  value?: string;
+  inputRef?: React.Ref<any>;
+  containerStyle?: any;
+  inputStyle?: any;
+  labelStyle?: any;
+  errorStyle?: any;
+  children?: React.ReactNode;
 };
 
-export const Input = forwardRef(
-  <T extends FieldValues>(
-    { icon, formProps, inputProps, label }: Props<T>,
-    ref: React.Ref<TextInput>
-  ) => {
-    return (
-      <Controller
-        {...formProps}
-        render={({ field, fieldState }) => (
-          <Container>
-            <Label>{label}</Label>
-            <FormArea>
-              <IconBox>
-                <Feather
-                  name={icon}
-                  size={24}
-                  color={clsx({
-                    ["#dc1637"]: fieldState.error,
-                    ["#fff"]: field.value,
-                    ["#ccc"]: !field.value && !fieldState.error,
-                  })}
-                />
-              </IconBox>
-
-              <Inputs
-                ref={ref}
-                value={field.value}
-                onChangeText={field.onChange}
-                $hasError={!!fieldState.error}
-                {...inputProps}
-              />
-            </FormArea>
-
-            {fieldState.error?.message && (
-              <ErrorTitle>{fieldState.error.message}</ErrorTitle>
-            )}
-          </Container>
-        )}
-      />
-    );
-  }
-);
+export function Input({
+  label,
+  error,
+  value,
+  inputRef,
+  containerStyle,
+  inputStyle,
+  labelStyle,
+  errorStyle,
+  children,
+  ...rest
+}: Props) {
+  const [isFocused, setIsFocused] = useState(false);
+  return (
+    <View style={[styles.containerInput, containerStyle]}>
+      <Text style={[styles.labelInput, labelStyle]}>{label}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        {children}
+        <TextInput
+          ref={inputRef}
+          style={[
+            styles.input,
+            isFocused && styles.inputFocused,
+            error && { borderColor: theme.colors.error },
+            inputStyle,
+          ]}
+          placeholderTextColor={theme.colors.gray[400]}
+          value={value ?? ""}
+          onFocus={() => setIsFocused(true)}
+          onBlur={(e) => {
+            setIsFocused(false);
+            rest.onBlur && rest.onBlur(e);
+          }}
+          {...rest}
+        />
+      </View>
+      {error && <Text style={[styles.errorText, errorStyle]}>{error}</Text>}
+    </View>
+  );
+}
