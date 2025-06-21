@@ -20,6 +20,10 @@ export const TextInput: React.FC<TextInputProps> = ({
   inputBorderColor = "border-blue-500", // Default input border color
   ...rest
 }) => {
+  // Create a new object without classNameInput to pass to Input component
+  const inputProps = { ...rest };
+  delete (inputProps as any).classNameInput;
+
   return (
     <div className={`flex flex-col ${className}`}>
       <Label
@@ -29,7 +33,7 @@ export const TextInput: React.FC<TextInputProps> = ({
       </Label>
       <Input
         className={`w-full ${inputBorderColor} rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out ${classNameInput}`}
-        {...rest}
+        {...inputProps}
       />
     </div>
   );

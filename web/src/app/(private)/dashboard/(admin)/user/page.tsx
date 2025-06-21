@@ -43,7 +43,7 @@ import { toast } from "sonner";
 const User: React.FC = () => {
   const limit = 10;
 
-  const [users, setUsers] = useState<IUserPaginate[]>({} as IUserPaginate[]);
+  const [users, setUsers] = useState<IUserPaginate[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(1);
@@ -58,7 +58,7 @@ const User: React.FC = () => {
 
   function nextPage() {
     setPage((currentPage) =>
-      currentPage < lastPage ? currentPage + 1 : lastPage
+      currentPage < lastPage ? currentPage + 1 : currentPage
     );
   }
 
@@ -69,12 +69,22 @@ const User: React.FC = () => {
   }
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      console.log("❌ Token não disponível");
+      return;
+    }
 
+    console.log("🔑 Token disponível:", token.substring(0, 20) + "...");
     setLoading(true);
 
     const fetchUsers = async () => {
       try {
+        console.log("🔍 Buscando usuários com filtros:", {
+          page,
+          ...filter,
+          limit,
+        });
+
         const response = await api.getUsers(
           {
             page,
@@ -83,6 +93,8 @@ const User: React.FC = () => {
           },
           token
         );
+
+        console.log("📦 Resposta completa da API:", response);
 
         if (
           response &&
@@ -93,6 +105,65 @@ const User: React.FC = () => {
           "totalPage" in response &&
           "total" in response
         ) {
+          console.log("✅ Dados válidos recebidos:", {
+            total: response.total,
+            currentPage: response.currentPage,
+            totalPage: response.totalPage,
+            usersCount: response.data.length,
+          });
+
+          // Log detalhado de todos os usuários
+          console.log("👥 Todos os usuários recebidos:", response.data);
+
+          // Log detalhado dos usuários entregadores
+          const deliveryUsers = response.data.filter(
+            (user) => user.role === "DELIVERY"
+          );
+          console.log(
+            "🚚 Usuários entregadores encontrados:",
+            deliveryUsers.length
+          );
+          deliveryUsers.forEach((user, index) => {
+            console.log(`🚚 Entregador ${index + 1}:`, {
+              id: user.id,
+              email: user.email,
+              status: user.status,
+              role: user.role,
+              name: user.name || "N/A",
+            });
+          });
+
+          // Log detalhado das lojas
+          const companyUsers = response.data.filter(
+            (user) => user.role === "COMPANY"
+          );
+          console.log("🏪 Lojas encontradas:", companyUsers.length);
+          companyUsers.forEach((user, index) => {
+            console.log(`🏪 Loja ${index + 1}:`, {
+              id: user.id,
+              email: user.email,
+              status: user.status,
+              role: user.role,
+              name: user.name || "N/A",
+              information: user.information || "N/A",
+            });
+          });
+
+          // Log detalhado dos administradores
+          const adminUsers = response.data.filter(
+            (user) => user.role === "ADMIN"
+          );
+          console.log("👨‍💼 Administradores encontrados:", adminUsers.length);
+          adminUsers.forEach((user, index) => {
+            console.log(`👨‍💼 Admin ${index + 1}:`, {
+              id: user.id,
+              email: user.email,
+              status: user.status,
+              role: user.role,
+              name: user.name || "N/A",
+            });
+          });
+
           setUsers(response.data);
           setPage(response.currentPage);
           setLastPage(response.totalPage);
@@ -103,14 +174,14 @@ const User: React.FC = () => {
           "status" in response &&
           response.status === 401
         ) {
-          console.log("Erro de autenticação:", response);
+          console.log("❌ Erro de autenticação:", response);
           toast.error("Sessão expirada. Por favor, faça login novamente.");
         } else {
-          console.error("Resposta inesperada da API:", response);
+          console.error("❌ Resposta inesperada da API:", response);
           toast.error("Erro ao carregar usuários. Resposta inesperada.");
         }
       } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
+        console.error("❌ Erro ao buscar usuários:", error);
         toast.error("Erro ao carregar usuários");
       } finally {
         setLoading(false);
@@ -124,6 +195,8 @@ const User: React.FC = () => {
     const email = data.get("mail")?.toString() || "";
     const status = data.get("status")?.toString() || "";
     const role = data.get("role")?.toString() || "";
+
+    console.log("🔍 Aplicando filtros:", { email, status, role });
 
     setPage(1);
     setFilter(() => ({
@@ -292,6 +365,14 @@ const User: React.FC = () => {
         </div>
       ) : users.length ? (
         <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+          {(() => {
+            console.log("🎯 Renderizando tabela com usuários:", users);
+            console.log(
+              "🎯 Quantidade de usuários para renderizar:",
+              users.length
+            );
+            return null;
+          })()}
           <div className="overflow-x-auto">
             <Table className="min-w-full">
               <TableHeader className="hidden sm:table-header-group bg-gray-50">
@@ -419,6 +500,15 @@ const User: React.FC = () => {
         </div>
       ) : (
         <div className="flex justify-center items-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
+          {(() => {
+            console.log("❌ Nenhum usuário encontrado. Estado atual:", {
+              users: users,
+              usersLength: users.length,
+              isLoading: isLoading,
+              filter: filter,
+            });
+            return null;
+          })()}
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
               <UserCog className="w-full h-full" />

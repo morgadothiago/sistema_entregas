@@ -18,8 +18,13 @@ export function TextInput({
   className,
   error,
   icon,
+  classNameInput,
   ...rest
 }: TextInputProps) {
+  // Create a new object without classNameInput to pass to Input component
+  const inputProps = { ...rest };
+  delete (inputProps as any).classNameInput;
+
   return (
     <div className={className}>
       <Label className="mb-3 text-[#003B73] text-base sm:text-lg md:text-xl font-semibold">
@@ -33,15 +38,13 @@ export function TextInput({
         )}
         <Input
           className={`w-full border ${
-            rest.classNameInput ? rest.classNameInput : "border-blue-500"
-          } rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 ease-in-out ${
-            rest.classNameInput
-          } ${
-            rest.classNameInput && rest.classNameInput.includes("error")
+            classNameInput ? classNameInput : "border-blue-500"
+          } rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 ease-in-out ${classNameInput} ${
+            classNameInput && classNameInput.includes("error")
               ? "border-red-500"
               : "border-blue-500"
           } ${icon ? "pl-10" : ""}`}
-          {...rest}
+          {...inputProps}
         />
       </div>
       {error && (
