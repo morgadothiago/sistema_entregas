@@ -74,3 +74,11 @@ export class DeliveryCreateDto extends DeliverySimulateDto{
   @Min(0)
   weight: number;  
 }
+
+export class DeliveryCreateResponse {
+  @ApiProperty({
+    description: "Código da entrega",
+    example: "BA-Y8Us",
+  })
+  code: string;
+}

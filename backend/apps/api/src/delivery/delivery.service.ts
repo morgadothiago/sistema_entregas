@@ -80,7 +80,18 @@ export class DeliveryService {
     return result
   }
   
-  async createCode(prefix = 'BR') {
+  generatePrefix(str: string): string {
+    const words = str.toLocaleUpperCase().split(' ');
+
+    if (words.length >= 2)
+      return (words[0].charAt(0) + words[1].charAt(0)).concat('-');
+    
+    return words[0].substring(0, 2).concat('-')
+  }
+
+  async generateCode(_prefix = 'BR') {
+    const prefix  = this.generatePrefix(_prefix)
+
     let code = createCode(4, prefix);
 
     while (true) {
@@ -105,27 +116,27 @@ export class DeliveryService {
   async createDelivery(body: DeliveryCreateDto, idUser: number) {
     return this.prismaService.$transaction(async (prisma) => {
 
-    const code = await this.createCode(body.clientAddress.state.toLocaleUpperCase())
+      const { price } = await this.simulateDelivery(body, idUser)
+    
+      const clientAddress = await this.locationService.createAddress(prisma as PrismaService, body.clientAddress)
+      
+      if(body.useAddressCompany)
+        body.address = await this.locationService.getAddressByUser(prisma as PrismaService, idUser, "companies")
+      
+      const originAddress = await this.locationService.createAddress(prisma as PrismaService, body.address)
+      
+      if (!clientAddress || !originAddress) {
+        throw new Error('Failed to create addresses');
+      }
+      
+      const vehicleType = await this.vehicleType.findOne(body.vehicleType)
+        
+      if(!vehicleType)
+          throw new NotFoundException(`Tipo de veiculo '${body.vehicleType}' não foi encontrado`)
+      
+      const code = await this.generateCode(body.clientAddress.street)
 
-    const { price } = await this.simulateDelivery(body, idUser)
-  
-    const clientAddress = await this.locationService.createAddress(prisma as PrismaService, body.clientAddress)
-    
-    if(body.useAddressCompany)
-      body.address = await this.locationService.getAddressByUser(prisma as PrismaService, idUser, "companies")
-    
-    const originAddress = await this.locationService.createAddress(prisma as PrismaService, body.address)
-    
-    if (!clientAddress || !originAddress) {
-      throw new Error('Failed to create addresses');
-    }
-    
-    const vehicleType = await this.vehicleType.findOne(body.vehicleType)
-      
-    if(!vehicleType)
-        throw new NotFoundException(`Tipo de veiculo '${body.vehicleType}' não foi encontrado`)
-      
-      return prisma.delivery.create({
+      await prisma.delivery.create({
         data: {
           code,
           height: body.height,
@@ -136,6 +147,7 @@ export class DeliveryService {
           price,
           email: body.email.trim(),
           telefone: body.telefone.trim(),
+          vehicleType: body.vehicleType,
           Company: {
             connect: {
               idUser,
@@ -153,6 +165,10 @@ export class DeliveryService {
           },
         }
       })
+
+      return {
+        code
+      }
     })
     
    

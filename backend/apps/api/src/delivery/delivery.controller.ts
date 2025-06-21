@@ -7,11 +7,11 @@ import {
   Req,
 } from "@nestjs/common";
 import { DeliveryService } from "./delivery.service";
-import { DeliveryCreateDto } from "./dto/delivery-create.dto";
+import { DeliveryCreateDto, DeliveryCreateResponse } from "./dto/delivery-create.dto";
 import { DeliverySimulateDto } from "./dto/delivery-simulate.dto";
 import { Request } from "express";
 import { User } from "@prisma/client";
-import { ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 import { DeliverySimulationResponseDto } from "./dto/delivery-simulation-response.dto";
 
 @Controller("delivery")
@@ -36,6 +36,10 @@ export class DeliveryController {
 
   @Post("")
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create delivery" })
+  @ApiCreatedResponse({
+    type: DeliveryCreateResponse
+  })
   createDelivery(@Body() body: DeliveryCreateDto, @Req() req: Request & { user: User },
   ) {
     const user = req.user;
