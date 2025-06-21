@@ -16,13 +16,24 @@ export const createCode = (size = 4, prefix: string, characters = 'abcdefghjklmn
 };
 
 export const exceptionFactory = (validationErrors: ValidationError[]) => {
-  const errors = validationErrors.map((error) => {
-    const constraints = Object.values(error.constraints || {});
+  function mapErrors(errors: ValidationError[]): any {
+    return errors.map((error) => {
+      const constraints = Object.values(error.constraints || {});
+      let children = undefined;
 
-    return {
-      [error.property]: constraints,
-    };
-  });
+      if (error.children && error.children.length > 0) {
+        children = mapErrors(error.children);
+      }
+
+      return {
+        [error.property]: constraints.length
+          ? constraints
+          : children,
+      };
+    });
+  }
+
+  const errors = mapErrors(validationErrors);
 
   return new UnprocessableEntityException(errors);
 };
