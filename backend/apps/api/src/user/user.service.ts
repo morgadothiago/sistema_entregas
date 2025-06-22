@@ -1,12 +1,15 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { IUserQueryParams } from "./dto/filter";
-import { PrismaService } from "../prisma/prisma.service";
-import { paginateResponse } from "../utils/fn";
-import { LocationService } from "../location/location.service";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { IUserQueryParams } from './dto/filter';
+import { PrismaService } from '../prisma/prisma.service';
+import { paginateResponse } from '../utils/fn';
+import { LocationService } from '../location/location.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService, private locationService: LocationService) {}
+  constructor(
+    private prisma: PrismaService,
+    private locationService: LocationService,
+  ) {}
 
   async paginate(filters: IUserQueryParams, page: number, registers: number) {
     const where = {
@@ -48,8 +51,8 @@ export class UserService {
             Address: {
               omit: {
                 createdAt: true,
-                updatedAt: true
-              }
+                updatedAt: true,
+              },
             },
           },
         },
@@ -73,12 +76,12 @@ export class UserService {
               include: {
                 Type: {
                   select: {
-                    type: true
-                  }
-                }
-              }
+                    type: true,
+                  },
+                },
+              },
             },
-          }
+          },
         },
       },
       omit: {
@@ -89,11 +92,19 @@ export class UserService {
       },
     });
 
-    if (!user) throw new NotFoundException(`usuario com codigo '${id}' não encontrado`);
+    if (!user) {
+      throw new NotFoundException(`usuario com codigo '${id}' não encontrado`);
+    }
 
-    const coordinates = await this.locationService.getAddressLocalization(this.prisma, user.Company ? user.Company.Address.id : user.DeliveryMan?.Address.id as number);
+    const coordinates = await this.locationService.getAddressLocalization(
+      this.prisma,
+      user.Company
+        ? user.Company.Address.id
+        : (user.DeliveryMan?.Address.id as number),
+    );
 
-    ((user.Company?.Address || user.DeliveryMan?.Address) as any).localization = coordinates;
+    ((user.Company?.Address || user.DeliveryMan?.Address) as any).localization =
+      coordinates;
 
     return user;
   }

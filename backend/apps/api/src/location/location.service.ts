@@ -3,13 +3,18 @@ import {
   Logger,
   NotFoundException,
   OnModuleInit,
-} from "@nestjs/common";
-import axios, { AxiosError, AxiosInstance } from "axios";
-import { ILocation, ILocalization, IRoute, ReverseResponse } from "../typing/location";
-import { CacheService } from "../cache/cache.service";
-import { PrismaService } from "../prisma/prisma.service";
-import { AddressDto } from "../delivery/dto/delivery-simulate.dto";
-import { Address } from "@prisma/client";
+} from '@nestjs/common';
+import axios, { AxiosError, AxiosInstance } from 'axios';
+import {
+  ILocalization,
+  ILocation,
+  IRoute,
+  ReverseResponse,
+} from '../typing/location';
+import { CacheService } from '../cache/cache.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { AddressDto } from '../delivery/dto/delivery-simulate.dto';
+import { Address } from '@prisma/client';
 
 @Injectable()
 export class LocationService implements OnModuleInit {
@@ -27,7 +32,7 @@ export class LocationService implements OnModuleInit {
   }
 
   onModuleInit() {
-    ["LOCATION_HOST", "LOCATION_KEY"].forEach((env) => {
+    ['LOCATION_HOST', 'LOCATION_KEY'].forEach((env) => {
       if (!process.env[env]) {
         throw new Error(`Variável de ambiente ${env} não definida`);
       }
@@ -42,29 +47,29 @@ export class LocationService implements OnModuleInit {
     zipCode: string,
   ): Promise<ILocalization> {
     const query = `${number} ${address}, ${city}, ${state}, ${zipCode}`;
-    
+
     this.logger.log(`Buscando localização para ${query}`);
-    
-    const key = `reverse:${query}`
-    
+
+    const key = `reverse:${query}`;
+
     const data = await this.cache.getValue(key);
 
-    if (data){
+    if (data) {
       this.logger.log(`Localização encontrada no cache para ${query}`);
       return JSON.parse(data);
     }
 
     const response = await this.http
-      .get<Array<ReverseResponse>>("/search", {
+      .get<Array<ReverseResponse>>('/search', {
         params: {
           q: query,
-          format: "json",
+          format: 'json',
         },
       })
       .then((res) => res.data)
       .catch((e: AxiosError) => {
         this.logger.error(e?.response?.data || e.message);
-        throw new NotFoundException("Erro ao buscar localização");
+        throw new NotFoundException('Erro ao buscar localização');
       });
 
     const geoCode = {
@@ -72,7 +77,7 @@ export class LocationService implements OnModuleInit {
       longitude: +response[0].lon,
     };
 
-    await this.cache.setCache(key, JSON.stringify(geoCode))
+    await this.cache.setCache(key, JSON.stringify(geoCode));
 
     return geoCode;
   }
@@ -84,40 +89,46 @@ export class LocationService implements OnModuleInit {
     const coordenates = encodeURIComponent(
       `${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`,
     );
-    const key = `distance:${coordenates}`
+    const key = `distance:${coordenates}`;
 
     const data = await this.cache.getValue(key);
-    
-    if (data){
+
+    if (data) {
       this.logger.log(`Rota encontrada no cache para ${coordenates}`);
-      
+
       return JSON.parse(data);
     }
 
     this.logger.log(`Buscando rota para ${coordenates}`);
     const location = await this.http
-      .get<ILocation>(`/directions/driving/` + coordenates)
+      .get<ILocation>('/directions/driving/' + coordenates)
       .then((res) => res.data)
       .catch((e: AxiosError) => {
         this.logger.error(e);
 
-        throw new NotFoundException("Erro ao calcular a rota");
+        throw new NotFoundException('Erro ao calcular a rota');
       });
 
-      const result = {
+    const result = {
       distance: +Number(location.routes[0].distance / 1000).toFixed(3),
       duration: Math.floor(location.routes[0].duration / 60), // Convert to minutes
       geometry: location.routes[0].geometry,
     };
 
-    await this.cache.setCache(key, JSON.stringify(result))
-    .catch((e)=> this.logger.error(e.message));
+    await this.cache
+      .setCache(key, JSON.stringify(result))
+      .catch((e) => this.logger.error(e.message));
 
-    return result
+    return result;
   }
 
-  async getAddressLocalization(prisma: PrismaService, idAddress: number): Promise<ILocalization> {
-    const coordinates = await prisma.$queryRaw<{longitude: number, latitude: number}[]>`
+  async getAddressLocalization(
+    prisma: PrismaService,
+    idAddress: number,
+  ): Promise<ILocalization> {
+    const coordinates = await prisma.$queryRaw<
+      { longitude: number; latitude: number }[]
+    >`
       SELECT
         ST_X(localization::geometry) as longitude,
         ST_Y(localization::geometry) as latitude
@@ -126,14 +137,19 @@ export class LocationService implements OnModuleInit {
       LIMIT 1
     `;
 
-    if (!coordinates || coordinates.length === 0)
-      throw new NotFoundException(`Localization para o endereço '${idAddress}' não foi encontrado`);
-    
+    if (!coordinates || coordinates.length === 0) {
+      throw new NotFoundException(
+        `Localization para o endereço '${idAddress}' não foi encontrado`,
+      );
+    }
 
-    return coordinates[0]
+    return coordinates[0];
   }
 
-  async createAddress(prisma: PrismaService, body: AddressDto): Promise<{id: number}> {
+  async createAddress(
+    prisma: PrismaService,
+    body: AddressDto,
+  ): Promise<{ id: number }> {
     const localization = await this.reverse(
       body.city,
       body.state,
@@ -142,9 +158,7 @@ export class LocationService implements OnModuleInit {
       body.zipCode,
     );
 
-     const [address] = await prisma.$queryRawUnsafe<
-      { id: number }[]
-    >(
+    const [address] = await prisma.$queryRawUnsafe<{ id: number }[]>(
       `
       INSERT INTO "addresses" (city, state, street, number, "zipCode", country, complement, localization)
       VALUES ($1, $2, $3, $4, $5, $6, $7, ST_SetSRID(ST_MakePoint($8, $9), 4326))
@@ -164,7 +178,11 @@ export class LocationService implements OnModuleInit {
     return address;
   }
 
-   async getAddressLocalizationByUser(prisma: PrismaService, idUser: number, type: 'companies' | 'deliverymen'): Promise<ILocalization> {
+  async getAddressLocalizationByUser(
+    prisma: PrismaService,
+    idUser: number,
+    type: 'companies' | 'deliverymen',
+  ): Promise<ILocalization> {
     if (type !== 'companies' && type !== 'deliverymen') {
       throw new Error('Tipo inválido');
     }
@@ -179,16 +197,25 @@ export class LocationService implements OnModuleInit {
       LIMIT 1
     `;
 
-    const coordinates = await prisma.$queryRawUnsafe<ILocalization[]>(query, idUser);
+    const coordinates = await prisma.$queryRawUnsafe<ILocalization[]>(
+      query,
+      idUser,
+    );
 
+    if (!coordinates || coordinates.length === 0) {
+      throw new NotFoundException(
+        `Localization para o endereço do usuario '${idUser}' não foi encontrado`,
+      );
+    }
 
-      if(!coordinates || coordinates.length === 0)
-        throw new NotFoundException(`Localization para o endereço do usuario '${idUser}' não foi encontrado`);
-      
-      return coordinates[0]
+    return coordinates[0];
   }
 
-  async getAddressByUser(prisma: PrismaService, idUser: number, type: 'companies' | 'deliverymen'): Promise<Address> {
+  async getAddressByUser(
+    prisma: PrismaService,
+    idUser: number,
+    type: 'companies' | 'deliverymen',
+  ): Promise<Address> {
     if (type !== 'companies' && type !== 'deliverymen') {
       throw new Error('Tipo inválido');
     }
@@ -204,10 +231,12 @@ export class LocationService implements OnModuleInit {
 
     const address = await prisma.$queryRawUnsafe<Address[]>(query, idUser);
 
+    if (!address || address.length === 0) {
+      throw new NotFoundException(
+        `O endereço do usuario '${idUser}' não foi encontrado`,
+      );
+    }
 
-      if(!address || address.length === 0)
-        throw new NotFoundException(`O endereço do usuario '${idUser}' não foi encontrado`);
-      
-      return address[0]
+    return address[0];
   }
 }

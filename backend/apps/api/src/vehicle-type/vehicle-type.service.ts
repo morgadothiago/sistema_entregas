@@ -2,14 +2,14 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { VehicleType } from "@prisma/client";
-import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto";
-import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto";
-import { IPaginateResponse, paginateResponse } from "../utils/fn";
-import { Decimal } from "@prisma/client/runtime/library";
-import { IRoute } from "../typing/location";
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { VehicleType } from '@prisma/client';
+import { CreateVehicleTypeDto } from './dto/create-vehicle-type.dto';
+import { UpdateVehicleTypeDto } from './dto/update-vehicle-type.dto';
+import { IPaginateResponse, paginateResponse } from '../utils/fn';
+import { Decimal } from '@prisma/client/runtime/library';
+import { IRoute } from '../typing/location';
 
 @Injectable()
 export class VehicleTypeService {
@@ -20,10 +20,11 @@ export class VehicleTypeService {
       where: { type },
     });
 
-    if (!vehicleType)
+    if (!vehicleType) {
       throw new NotFoundException(
-        `Tipo de veiculo '${type}' nao foi encontrado`,
+        `Tipo de veiculo '${type}' não foi encontrado`,
       );
+    }
 
     return vehicleType;
   }
@@ -34,10 +35,11 @@ export class VehicleTypeService {
       select: { id: true },
     });
 
-    if (!vehicleType)
+    if (!vehicleType) {
       throw new NotFoundException(
         `Tipo de veiculo '${type}' nao foi encontrado`,
       );
+    }
 
     await this.prisma.vehicleType.delete({
       where: {
@@ -49,7 +51,7 @@ export class VehicleTypeService {
   calculatePrice(vehicleType: VehicleType, geoInfo: IRoute): number {
     const distanceKM = geoInfo.distance;
 
-    const precoBasePrimeiros5KM = vehicleType.tarifaBase.toNumber()
+    const precoBasePrimeiros5KM = vehicleType.tarifaBase.toNumber();
 
     const kmAdicionais = Math.max(0, distanceKM - 5);
     const precoKMAdicionais =
@@ -69,10 +71,11 @@ export class VehicleTypeService {
       select: { id: true },
     });
 
-    if (!vehicleType)
+    if (!vehicleType) {
       throw new NotFoundException(
         `Tipo de veiculo '${type}' nao foi encontrado`,
       );
+    }
 
     if (updateVehicleTypeDto.type) {
       const conflict = await this.prisma.vehicleType.findFirst({
@@ -84,8 +87,9 @@ export class VehicleTypeService {
         },
       });
 
-      if (conflict)
+      if (conflict) {
         throw new ConflictException(`Tipo de veiculo '${type}' já existe`);
+      }
     }
 
     const vehicleTypeDto = {
@@ -112,8 +116,9 @@ export class VehicleTypeService {
       },
     });
 
-    if (conflict)
+    if (conflict) {
       throw new ConflictException(`Tipo de veiculo '${body.type}' já existe`);
+    }
 
     const vehicleTypeDto = {
       type: body.type,

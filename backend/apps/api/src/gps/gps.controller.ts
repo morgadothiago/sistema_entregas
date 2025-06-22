@@ -7,26 +7,26 @@ import {
   Param,
   Patch,
   Query,
-} from "@nestjs/common";
-import { CurrencyLocationDto } from "./dto/currency-location.dto";
-import { GpsService } from "./gps.service";
-import { SocketDto } from "../websocket/dto/socket.dto";
+} from '@nestjs/common';
+import { CurrencyLocationDto } from './dto/currency-location.dto';
+import { GpsService } from './gps.service';
+import { SocketDto } from '../websocket/dto/socket.dto';
 
-@Controller("gps")
+@Controller('gps')
 export class GpsController {
   constructor(private gpsService: GpsService) {}
 
-  @Get("delivery/:code")
+  @Get('delivery/:code')
   @HttpCode(HttpStatus.OK)
-  async getLocation(@Param("code") code: string, @Query() socket: SocketDto) {
+  async getLocation(@Param('code') code: string, @Query() socket: SocketDto) {
     return this.gpsService.getLocation(code, socket);
   }
 
-  @Patch("delivery/:code")
+  @Patch('delivery/:code')
   @HttpCode(HttpStatus.NO_CONTENT)
   createLocation(
     @Body() body: CurrencyLocationDto,
-    @Param("code") code: string,
+    @Param('code') code: string,
   ) {
     return this.gpsService.createLocation(code, body);
   }

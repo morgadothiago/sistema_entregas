@@ -230,6 +230,7 @@ model Delivery {
   status          DeliveryStatus @default(PENDING)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @default(now()) @updatedAt
+  completedAt     DateTime?
   Routes          Router[]
   DeliveryMan     DeliveryMan?   @relation(fields: [deliveryManId], references: [id])
   deliveryManId   Int?

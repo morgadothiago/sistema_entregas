@@ -6,6 +6,6 @@ import { CacheService } from '../cache/cache.service';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService, LocationService, CacheService]
+  providers: [UserService, LocationService, CacheService],
 })
 export class UserModule {}

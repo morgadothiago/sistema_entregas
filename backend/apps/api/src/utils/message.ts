@@ -1,9 +1,8 @@
- 
-import { ValidationArguments } from "class-validator";
+import { ValidationArguments } from 'class-validator';
 
 const message = {
   isDecimalPlates: (validationArguments: ValidationArguments) => {
-    return `o campo ${validationArguments.property} deve ser um número com até ${validationArguments.constraints[0]["maxDecimalPlaces"]} casas decimais`;
+    return `o campo ${validationArguments.property} deve ser um número com até ${validationArguments.constraints[0]['maxDecimalPlaces']} casas decimais`;
   },
   isNumber: (validationArguments: ValidationArguments) => {
     return `o campo ${validationArguments.property} deve ser um número`;
