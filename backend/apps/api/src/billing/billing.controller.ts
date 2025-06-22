@@ -5,7 +5,6 @@ import {
   HttpStatus,
   Param,
   Patch,
-  Post,
   Req,
 } from '@nestjs/common';
 import { BillingService } from './billing.service';
@@ -16,13 +15,14 @@ import { User } from '@prisma/client';
 export class BillingController {
   constructor(private billingService: BillingService) {}
 
-  @Post(':id')
+  @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  invoiceBilling(
+  async invoiceBilling(
     @Body() body: BillingUpdateDto,
     @Param('id') id: string,
     @Req() req: Request & { user: User },
   ): Promise<void> {
-    return this.billingService.invoiceBilling(body, +id, req.user);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    await this.billingService.invoiceBilling(body, +id, req.user);
   }
 }
