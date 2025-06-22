@@ -1,7 +1,7 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { Cron } from "@nestjs/schedule";
-import { cronCustomExpression } from "../config/cron";
-import { PrismaService } from "../prisma/prisma.service";
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+import { cronCustomExpression } from '../config/cron';
+import { PrismaService } from '../prisma/prisma.service';
 import {
   BillingStatus,
   BillingType,
@@ -9,14 +9,21 @@ import {
   Prisma,
   Role,
   UserStatus,
-} from "@prisma/client";
+} from '@prisma/client';
+import { toZonedTime } from 'date-fns-tz';
 
 @Injectable()
 export class BillingService {
   constructor(private prisma: PrismaService) {}
-  private readonly logger = new Logger("Faturamento");
+  private readonly logger = new Logger('Faturamento');
 
-  @Cron("0 0 * * 1") // Segunda-feira às 00:00
+  getBrazilDate() {
+    const data = new Date();
+    const fusoBrasil = 'America/Sao_Paulo';
+   return toZonedTime(data, fusoBrasil);
+  }
+
+  @Cron(cronCustomExpression.SUNDAY_00H)
   async generateExpenseCompany() {
     return this.prisma.$transaction(
       async (tx) => {
@@ -24,34 +31,43 @@ export class BillingService {
           where: {
             role: Role.COMPANY,
             status: UserStatus.ACTIVE,
+            Company: {
+              id: {
+                not: undefined,
+              },
+            },
           },
           select: {
             id: true,
             Company: {
               select: {
+                id: true,
                 name: true,
               },
             },
           },
         });
-
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - 7);
-        weekStart.setHours(0, 0, 0, 0);
-
-        const weekEnd = new Date();
-        weekEnd.setHours(23, 59, 59, 999);
-
+      
+        const today = this.getBrazilDate(); 
+        
+        const weekEnd = new Date(today);
+        weekEnd.setDate(today.getDate() - 1);
+        weekEnd.setUTCHours(23, 59, 59, 999);
+        
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - 7);
+        weekStart.setUTCHours(0, 0, 0, 0);
+        
+        console.log({today, weekEnd, weekStart});
         for (const user of userCompanies) {
           const deliveries = await tx.delivery.findMany({
             where: {
               status: DeliveryStatus.COMPLETED,
-              companyId: user.id, // Assumindo que existe este campo
-              createdAt: {
+              companyId: user.Company?.id,
+              completedAt: { 
                 gte: weekStart,
-                lt: weekEnd,
+                lte: weekEnd,
               },
-              // Evita entregas já faturadas
               BillingItem: {
                 none: {},
               },
@@ -75,7 +91,7 @@ export class BillingService {
               status: BillingStatus.PENDING,
               type: BillingType.EXPENSE,
               userId: user.id,
-              description: `Fatura da semana ${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`,
+              description: `Fatura semanal - entregas concluídas de ${weekStart.toLocaleDateString()} a ${weekEnd.toLocaleDateString()}`,
             },
             select: {
               id: true,
