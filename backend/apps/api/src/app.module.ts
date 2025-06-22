@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, RequestMethod } from "@nestjs/common";
+import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
@@ -11,6 +11,7 @@ import { LocationService } from "./location/location.service";
 import { UserModule } from "./user/user.module";
 import { CacheService } from "./cache/cache.service";
 import { RateLimitMiddleware } from "./rate-limit/rate-limit.middleware";
+import { BillingModule } from "./billing/billing.module";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { RateLimitMiddleware } from "./rate-limit/rate-limit.middleware";
     VehicleTypeModule,
     DeliveryModule,
     UserModule,
+    BillingModule,
   ],
   controllers: [AppController],
   providers: [AppService, CacheService, LocationService],

@@ -24,6 +24,7 @@ model User {
   balanceId   Int
   DeliveryMan DeliveryMan?
   Company     Company?
+  Billing     Billing[]
 
   @@map("users")
 }
@@ -89,7 +90,7 @@ model VehicleType {
 
 model Balance {
   id        Int      @id @default(autoincrement())
-  amount    Float    @default(0)
+  amount    Decimal  @default(0) @db.Decimal(15, 2)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
@@ -140,6 +141,42 @@ model DeliveryMan {
   @@map("deliverymen")
 }
 
+model Billing {
+  id          Int           @id @default(autoincrement())
+  amount      Float
+  type        BillingType
+  status      BillingStatus
+  description String?       @default("")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  userId      Int?
+  User        User?         @relation(fields: [userId], references: [id])
+  Items       BillingItem[]
+
+  @@map("billings")
+}
+
+model BillingItem {
+  id         Int      @id @default(autoincrement())
+  Delivery   Delivery @relation(fields: [deliveryId], references: [id])
+  Billing    Billing  @relation(fields: [billingId], references: [id])
+  price      Decimal  @db.Decimal(15, 2)
+  deliveryId Int
+  billingId  Int
+}
+
+enum BillingType {
+  INCOME // renda
+  EXPENSE // despesa
+}
+
+enum BillingStatus {
+  PENDING
+  PAID
+  CANCELED
+  FAILED
+}
+
 model Vehicle {
   id            Int          @id @default(autoincrement())
   licensePlate  String       @unique @map("license_plate") @db.VarChar(8) // "placa"
@@ -183,7 +220,7 @@ model Delivery {
   weight          Float?
   information     String
   isFragile       Boolean        @default(false)
-  price           Float
+  price           Decimal        @db.Decimal(15, 2)
   companyId       Int
   Company         Company        @relation(fields: [companyId], references: [id])
   email           String         @db.VarChar(250)
@@ -199,6 +236,7 @@ model Delivery {
   vehicleType     String
   idClientAddress Int            @map("id_client_address")
   idOriginAddress Int            @map("id_origin_address")
+  BillingItem     BillingItem[]
 
   @@map("deliveries")
 }
