@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserQueryParams } from './dto/filter';
 import { PrismaService } from '../prisma/prisma.service';
-import { paginateResponse } from '../utils/fn';
+import { IPaginateResponse, paginateResponse } from '../utils/fn';
 import { LocationService } from '../location/location.service';
+import { ILocalization } from '../typing/location';
+import { Address, User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -11,7 +13,11 @@ export class UserService {
     private locationService: LocationService,
   ) {}
 
-  async paginate(filters: IUserQueryParams, page: number, registers: number) {
+  async paginate(
+    filters: IUserQueryParams,
+    page: number,
+    registers: number,
+  ): Promise<IPaginateResponse<Partial<User>>> {
     const where = {
       email: filters.email,
       status: filters.status,
@@ -39,7 +45,7 @@ export class UserService {
     return paginateResponse(users, page, registers, total);
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: {
         id,
@@ -103,9 +109,12 @@ export class UserService {
         : (user.DeliveryMan?.Address.id as number),
     );
 
-    ((user.Company?.Address || user.DeliveryMan?.Address) as any).localization =
-      coordinates;
+    (
+      (user.Company?.Address ?? user.DeliveryMan?.Address) as Address & {
+        localization: ILocalization;
+      }
+    ).localization = coordinates;
 
-    return user;
+    return user as unknown as User;
   }
 }

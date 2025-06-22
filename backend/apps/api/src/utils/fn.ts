@@ -11,6 +11,7 @@ export const createCode = (
 ): string => {
   let code: string = '';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for (const _ of Array(size)) {
     const random = Math.floor(Math.random() * characters.length);
     code += characters[random];
@@ -19,13 +20,17 @@ export const createCode = (
   return prefix.concat(code);
 };
 
-export const exceptionFactory = (validationErrors: ValidationError[]) => {
+export const exceptionFactory = (
+  validationErrors: ValidationError[],
+): UnprocessableEntityException => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function mapErrors(errors: ValidationError[]): any {
     return errors.map((error) => {
-      const constraints = Object.values(error.constraints || {});
+      const constraints = Object.values(error.constraints ?? {});
       let children = undefined;
 
       if (error.children && error.children.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         children = mapErrors(error.children);
       }
 
@@ -35,6 +40,7 @@ export const exceptionFactory = (validationErrors: ValidationError[]) => {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const errors = mapErrors(validationErrors);
 
   return new UnprocessableEntityException(errors);
@@ -74,7 +80,7 @@ export const paginateResponse = <T>(
 
 // Em um controller ou middleware
 export function isMobileDevice(agent: string | undefined): boolean {
-  const userAgent = agent || '';
+  const userAgent = agent ?? '';
 
   // Regex para detectar dispositivos móveis comuns
   const mobileRegex =

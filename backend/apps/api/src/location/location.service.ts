@@ -31,7 +31,7 @@ export class LocationService implements OnModuleInit {
     });
   }
 
-  onModuleInit() {
+  onModuleInit(): void {
     ['LOCATION_HOST', 'LOCATION_KEY'].forEach((env) => {
       if (!process.env[env]) {
         throw new Error(`Variável de ambiente ${env} não definida`);
@@ -56,7 +56,7 @@ export class LocationService implements OnModuleInit {
 
     if (data) {
       this.logger.log(`Localização encontrada no cache para ${query}`);
-      return JSON.parse(data);
+      return JSON.parse(data) as ILocalization;
     }
 
     const response = await this.http
@@ -68,7 +68,7 @@ export class LocationService implements OnModuleInit {
       })
       .then((res) => res.data)
       .catch((e: AxiosError) => {
-        this.logger.error(e?.response?.data || e.message);
+        this.logger.error(e?.response?.data ?? e.message);
         throw new NotFoundException('Erro ao buscar localização');
       });
 
@@ -96,7 +96,7 @@ export class LocationService implements OnModuleInit {
     if (data) {
       this.logger.log(`Rota encontrada no cache para ${coordenates}`);
 
-      return JSON.parse(data);
+      return JSON.parse(data) as IRoute;
     }
 
     this.logger.log(`Buscando rota para ${coordenates}`);
@@ -117,7 +117,7 @@ export class LocationService implements OnModuleInit {
 
     await this.cache
       .setCache(key, JSON.stringify(result))
-      .catch((e) => this.logger.error(e.message));
+      .catch((e: Error) => this.logger.error(e.message));
 
     return result;
   }
