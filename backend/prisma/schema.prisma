@@ -165,6 +165,7 @@ model File {
   filename  String
   path      String
   mimetype  String
+  publicId  String
   size      Int
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

@@ -12,6 +12,8 @@ import { UserModule } from './user/user.module';
 import { CacheService } from './cache/cache.service';
 import { RateLimitMiddleware } from './rate-limit/rate-limit.middleware';
 import { BillingModule } from './billing/billing.module';
+import { FileStorageModule } from './file-storage/file-storage.module';
+import { FileStorageService } from './file-storage/file-storage.service';
 
 @Module({
   imports: [
@@ -28,9 +30,10 @@ import { BillingModule } from './billing/billing.module';
     DeliveryModule,
     UserModule,
     BillingModule,
+    FileStorageModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CacheService, LocationService],
+  providers: [AppService, CacheService, LocationService, FileStorageService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer): void {

@@ -1,13 +1,19 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { cronCustomExpression } from '../config/cron';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-    $Enums,
+  Billing,
   BillingStatus,
   BillingType,
   DeliveryStatus,
   ExtractType,
+  File,
   Prisma,
   Role,
   User,
@@ -15,21 +21,80 @@ import {
 } from '@prisma/client';
 import { toZonedTime } from 'date-fns-tz';
 import { BillingUpdateDto } from './dto/billing-update.dto';
+import { FileStorageService } from '../file-storage/file-storage.service';
 
 @Injectable()
 export class BillingService {
-
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private fileStorage: FileStorageService,
+  ) {}
   private readonly logger = new Logger('Faturamento');
 
-  getBrazilDate() {
+  getBrazilDate(): Date {
     const data = new Date();
     const fusoBrasil = 'America/Sao_Paulo';
     return toZonedTime(data, fusoBrasil);
   }
 
+  async addReceipt(
+    idBilling: number,
+    user: Pick<User, 'id' | 'role' | 'status'>,
+    file?: Express.Multer.File,
+  ): Promise<void> {
+    if (!file) {
+      throw new BadRequestException('Arquivo não enviado');
+    }
+
+    const billing = await this.findOne(idBilling, user, true);
+
+    if (!billing) {
+      throw new NotFoundException('Fatura não encontrada');
+    }
+
+    await this.fileStorage.upsert(
+      file,
+      [
+        'user',
+        user.id.toString(),
+        'billing',
+        billing.id.toString(),
+        (file as { originalname: string }).originalname,
+      ] as string[],
+      billing.File,
+    );
+  }
+
+  async findOne(
+    id: number,
+    user: Pick<User, 'id' | 'role' | 'status'>,
+    addFile = false,
+  ): Promise<Billing & { File?: File }> {
+    const billing = await this.prisma.billing.findUnique({
+      where: {
+        id,
+        ...(user.role !== Role.ADMIN && { userId: user.id }),
+      },
+      select: {
+        id: true,
+        status: true,
+        amount: true,
+        type: true,
+        userId: true,
+        description: true,
+        File: addFile,
+      },
+    });
+
+    if (!billing) {
+      throw new NotFoundException('Fatura não encontrada');
+    }
+
+    return billing as Billing & { File?: File };
+  }
+
   @Cron(cronCustomExpression.SUNDAY_00H)
-  async generateExpenseCompany() {
+  async generateExpenseCompany(): Promise<void> {
     return this.prisma.$transaction(
       async (tx) => {
         const userCompanies = await tx.user.findMany({
@@ -68,7 +133,6 @@ export class BillingService {
         weekStart.setDate(today.getDate() - 7);
         weekStart.setUTCHours(0, 0, 0, 0);
 
-        console.log({ today, weekEnd, weekStart });
         for (const user of userCompanies) {
           const deliveries = await tx.delivery.findMany({
             where: {
@@ -113,7 +177,7 @@ export class BillingService {
               acc.amount += delivery.price.toNumber();
 
               acc.billingItems.push({
-                amount: delivery.price,
+                price: delivery.price,
                 deliveryId: delivery.id,
                 billingId: billing.id,
               });
@@ -122,14 +186,17 @@ export class BillingService {
             },
             {
               amount: 0,
-              billingItems: [] as any[],
+              billingItems: [] as Array<{
+                price: Prisma.Decimal;
+                deliveryId: number;
+                billingId: number;
+              }>,
             },
           );
 
           await tx.billingItem.createMany({
             data: billingItems,
           });
-
 
           await tx.billing.update({
             where: {
@@ -139,7 +206,6 @@ export class BillingService {
               amount: +amount.toFixed(2),
             },
           });
-
         }
       },
       {
@@ -150,48 +216,68 @@ export class BillingService {
     );
   }
 
-  private async updateUserBalance(userId: number, amount: number, type: 'CREDIT' | 'DEBIT', tx?: any) {
-    const prisma = tx || this.prisma;
+  private async updateUserBalance(
+    userId: number,
+    amount: number,
+    type: 'CREDIT' | 'DEBIT',
+    tx?: PrismaService,
+  ): Promise<void> {
+    const prisma = tx ?? this.prisma;
     const multiplier = type === 'CREDIT' ? 1 : -1;
     const finalAmount = amount * multiplier;
 
-    await prisma.balance.upsert({
-      where: { userId },
-      update: { amount: { increment: finalAmount } },
-      create: { userId, amount: finalAmount },
+    const balance = await prisma.balance.findFirst({
+      where: {
+        User: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await prisma.balance.update({
+      where: {
+        id: balance?.id,
+      },
+      data: {
+        amount: {
+          increment: finalAmount,
+        },
+      },
     });
   }
 
-  private async createExtractEntry(userId: number, amount: number, type: ExtractType, description: string, billingId?: number, tx?: any) {
-    const prisma = tx || this.prisma;
+  private async createExtractEntry(
+    userId: number,
+    amount: number,
+    type: ExtractType,
+    description: string,
+    billingId?: number,
+    tx?: PrismaService,
+  ): Promise<void> {
+    const prisma = tx ?? this.prisma;
     await prisma.extract.create({
-      data: { userId, amount, type, description, billingId },
+      data: { userId, amount, type },
     });
   }
 
-  async invoiceBilling(body: BillingUpdateDto, id: number, user: User): Promise<void> {
+  async invoiceBilling(
+    body: BillingUpdateDto,
+    id: number,
+    user: User,
+  ): Promise<void> {
     return this.prisma.$transaction(async (tx) => {
-      const billing = await tx.billing.findUnique({
-        where: {
-          id, 
-          ...(user.role !== Role.ADMIN && { userId: user.id })
-        },
-        select: {
-          id: true,
-          status: true,
-          amount: true,
-          type: true,
-          userId: true,
-          description: true,
-        },
-      });
+      const billing = await this.findOne(id, user);
 
-      if (!billing)
-        throw new NotFoundException('Fatura não encontrada');
-      
-      if (billing.status === BillingStatus.PAID)
-        throw new BadRequestException('Não é possível alterar status de uma fatura já paga');
-            
+      if (billing.status === BillingStatus.PAID) {
+        throw new BadRequestException(
+          'Não é possível alterar status de uma fatura já paga',
+        );
+      }
       await tx.billing.update({
         where: { id },
         data: { status: body.status, description: body.description },
@@ -199,33 +285,43 @@ export class BillingService {
 
       if (body.status === BillingStatus.PAID) {
         const balance = await tx.balance.findFirst({
-          where: { 
+          where: {
             User: {
-            some: {
-              id: billing.userId as number,
-              }
-            } 
+              some: {
+                id: billing.userId as number,
+              },
+            },
           },
           select: {
-            amount: true
-          }
+            amount: true,
+          },
         });
 
-        if (!balance || balance.amount.toNumber() < billing.amount.toNumber())
+        if (!balance || balance.amount.lessThanOrEqualTo(billing.amount)) {
           throw new BadRequestException('Saldo insuficiente para pagar fatura');
+        }
 
-        await this.updateUserBalance(billing.userId as number, billing.amount.toNumber(), 'DEBIT', tx);
+        const amount: number = +billing.amount;
+
+        await this.updateUserBalance(
+          billing.userId as number,
+          amount,
+          'DEBIT',
+          tx as PrismaService,
+        );
         await this.createExtractEntry(
           billing.userId as number,
-          billing.amount.toNumber(),
-          ExtractType.DEBIT,
-          body.description || billing.description || 'Pagamento de fatura',
+          amount,
+          'DEBIT',
+          body.description ?? billing.description ?? 'Pagamento de fatura',
           billing.id,
-          tx
+          tx as PrismaService,
         );
       }
 
-      this.logger.log(`Fatura ${id} atualizada - Status: ${body.status}, Valor: R$ ${billing.amount}`);
+      this.logger.log(
+        `Fatura ${id} atualizada - Status: ${body.status}, Valor: R$ ${billing.amount}`,
+      );
     });
   }
 }
