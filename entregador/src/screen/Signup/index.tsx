@@ -120,7 +120,7 @@ export default function Signup() {
         type: "success",
       });
 
-      // navigation.navigate("SignIn");
+      navigation.navigate("SignIn");
     } catch (err: any) {
       console.log(
         "Erro completo:",
