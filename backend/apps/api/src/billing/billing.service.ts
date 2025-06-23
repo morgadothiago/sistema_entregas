@@ -22,6 +22,10 @@ import {
 import { toZonedTime } from 'date-fns-tz';
 import { BillingUpdateDto } from './dto/billing-update.dto';
 import { FileStorageService } from '../file-storage/file-storage.service';
+import { BillingQueryParams } from './dto/filters.dto';
+import { IPaginateResponse, paginateResponse } from '../utils/fn';
+import { BillingPaginateResponse } from './dto/billing-paginate-response.dto';
+import { BillingFindOneResponse } from './dto/billing-findOne-response.dto';
 
 @Injectable()
 export class BillingService {
@@ -35,6 +39,53 @@ export class BillingService {
     const data = new Date();
     const fusoBrasil = 'America/Sao_Paulo';
     return toZonedTime(data, fusoBrasil);
+  }
+
+  async paginate(
+    filters: BillingQueryParams,
+    page: number,
+    limit: number,
+  ): Promise<IPaginateResponse<BillingPaginateResponse>> {
+    const where: Prisma.BillingWhereInput = {
+      ...(filters.status && {
+        status: filters.status,
+      }),
+      ...(filters.type && {
+        type: filters.type,
+      }),
+      ...(filters.user?.role !== Role.ADMIN && {
+        userId: filters.user?.id,
+      }),
+      ...(filters.description && {
+        description: {
+          contains: filters.description,
+          mode: 'insensitive',
+        },
+      }),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.billing.findMany({
+        where,
+        select: {
+          id: true,
+          amount: true,
+          description: true,
+          type: true,
+          status: true,
+        },
+      }),
+      this.prisma.billing.count({
+        where,
+      }),
+    ]);
+
+    return paginateResponse(
+      data as unknown as BillingPaginateResponse[],
+      page,
+      limit,
+      total,
+    );
   }
 
   async addReceipt(
@@ -63,6 +114,55 @@ export class BillingService {
       ] as string[],
       billing.File,
     );
+  }
+
+  async _findOne(
+    id: number,
+    user: Pick<User, 'id' | 'role' | 'status'>,
+  ): Promise<BillingFindOneResponse> {
+    const billing = await this.prisma.billing.findUnique({
+      where: {
+        id,
+        ...(user.role !== Role.ADMIN && { userId: user.id }),
+      },
+      select: {
+        id: true,
+        status: true,
+        amount: true,
+        type: true,
+        userId: true,
+        description: true,
+        File: {
+          select: {
+            id: true,
+            filename: true,
+            size: true,
+            path: true,
+            mimetype: true,
+            publicId: true,
+          },
+        },
+        Items: {
+          select: {
+            id: true,
+            price: true,
+            Delivery: {
+              select: {
+                status: true,
+                completedAt: true,
+                code: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!billing) {
+      throw new NotFoundException('Fatura não encontrada');
+    }
+
+    return billing as unknown as BillingFindOneResponse;
   }
 
   async findOne(
