@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import { showErrorToast } from "../util/Toast";
 
 export const api = axios.create({
-  baseURL: "http://192.168.100.96:8080/",
+  baseURL: "http://192.168.100.96:3000/",
 });
 
 // Função para definir o token de autorização
