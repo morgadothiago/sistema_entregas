@@ -1,55 +1,58 @@
-import { Logger } from "@nestjs/common";
-import { Balance, PrismaClient, Role, User, UserStatus } from "@prisma/client";
-import * as bcrypt from "bcrypt";
+import { Logger } from '@nestjs/common';
+import { Balance, PrismaClient, Role, User, UserStatus } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
+async function seedvehicleTypes(
+  prisma: PrismaClient,
+  logger: Logger,
+): Promise<void> {
   const vehicleTypes = [
     {
-      type: "Bike",
+      type: 'Bike',
       tarifaBase: 6,
       valorKMAdicional: 1,
       paradaAdicional: 2,
       ajudanteAdicional: 0,
     },
     {
-      type: "Moto",
+      type: 'Moto',
       tarifaBase: 9,
       valorKMAdicional: 1.5,
       paradaAdicional: 2.5,
       ajudanteAdicional: 30,
     },
     {
-      type: "Carro",
+      type: 'Carro',
       tarifaBase: 12,
       valorKMAdicional: 2,
       paradaAdicional: 3,
       ajudanteAdicional: 30,
     },
     {
-      type: "Carretinha",
+      type: 'Carretinha',
       tarifaBase: 18,
       valorKMAdicional: 2.5,
       paradaAdicional: 3.5,
       ajudanteAdicional: 30,
     },
     {
-      type: "Utilitário Pequeno",
+      type: 'Utilitário Pequeno',
       tarifaBase: 25,
       valorKMAdicional: 3,
       paradaAdicional: 5,
       ajudanteAdicional: 25,
     },
     {
-      type: "Utilitário Médio",
+      type: 'Utilitário Médio',
       tarifaBase: 35,
       valorKMAdicional: 4,
       paradaAdicional: 6,
       ajudanteAdicional: 30,
     },
     {
-      type: "Utilitário Grande",
+      type: 'Utilitário Grande',
       tarifaBase: 45,
       valorKMAdicional: 5,
       paradaAdicional: 8,
@@ -57,7 +60,7 @@ async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
     },
   ];
 
-  logger.log(`Seeding vehicle types`);
+  logger.log('Seeding vehicle types');
 
   for (const vehicleType of vehicleTypes) {
     try {
@@ -68,32 +71,36 @@ async function seedvehicleTypes(prisma: PrismaClient, logger: Logger) {
       });
 
       logger.log(`Seeded vehicle type: ${vehicleType.type}`);
-    } catch(error){
-      logger.error(`${vehicleType.type}: ${error.message}`);
+    } catch (error) {
+      logger.error(
+        `${vehicleType.type}: ${(error as { message: string }).message}`,
+      );
     }
   }
 
-  logger.log("Vehicle types seeded successfully!");
+  logger.log('Vehicle types seeded successfully!');
 }
 
-async function createAdminUser(prisma: PrismaClient, logger: Logger) {
-  logger.log(`Creating admin user`);
+async function createAdminUser(
+  prisma: PrismaClient,
+  logger: Logger,
+): Promise<void> {
+  logger.log('Creating admin user');
   const salt = await bcrypt.genSalt(12);
 
-  const hashedPassword = await bcrypt.hash("secret_admin", salt);
+  const hashedPassword = await bcrypt.hash('secret_admin', salt);
 
   const user: Partial<User> = {
-    email: "admin@admin.com",
+    email: 'admin@admin.com',
     password: hashedPassword,
     role: Role.ADMIN,
     status: UserStatus.ACTIVE,
-    information: "admin criado com seed",
+    information: 'admin criado com seed',
     id: 1,
   };
 
   const balance: Partial<Balance> = {
     id: 1,
-    amount: 0,
   };
 
   try {
@@ -114,17 +121,17 @@ async function createAdminUser(prisma: PrismaClient, logger: Logger) {
       },
     });
 
-    logger.log(`Admin user created successfully`);
+    logger.log('Admin user created successfully');
   } catch (error) {
     logger.error(
       `Failed to create admin user: ${(error as Record<string, string>).message}`,
     );
   }
 }
-async function main() {
+async function main(): Promise<void> {
   await prisma.$connect();
 
-  const logger = new Logger("SEED");
+  const logger = new Logger('SEED');
 
   await seedvehicleTypes(prisma, logger);
   await createAdminUser(prisma, logger);
@@ -135,6 +142,7 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (e) => {
+    // eslint-disable-next-line no-console
     console.error(e);
     await prisma.$disconnect();
     process.exit(1);
