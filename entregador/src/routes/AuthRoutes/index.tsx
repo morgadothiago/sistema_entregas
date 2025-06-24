@@ -12,6 +12,7 @@ import Home from "../../screen/Home";
 
 export default function AuthRoutes() {
   const { isAuthenticated } = useAuth();
+
   return (
     <Stack.Navigator
       screenOptions={{ headerShown: false }}
@@ -19,7 +20,6 @@ export default function AuthRoutes() {
     >
       <Stack.Screen name="SignIn" component={SignInScreen} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-      <Stack.Screen name="Home" component={Home} />
 
       {/* Steps Accounts */}
 

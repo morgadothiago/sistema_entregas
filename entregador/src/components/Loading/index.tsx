@@ -8,9 +8,21 @@ import {
 } from "./styles";
 import { useEffect, useState } from "react";
 
-export function Loading({ onFinish }: { onFinish: () => void }) {
+interface LoadingProps {
+  onFinish: () => void;
+  simple?: boolean;
+}
+
+export function Loading({ onFinish, simple = false }: LoadingProps) {
   const [progress, setProgress] = useState(0);
+
   useEffect(() => {
+    if (simple) {
+      // Para loading simples, chama onFinish imediatamente
+      onFinish();
+      return;
+    }
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -22,13 +34,21 @@ export function Loading({ onFinish }: { onFinish: () => void }) {
     }, 50); // 5 segundos
 
     return () => clearInterval(interval);
-  }, []);
+  }, [simple, onFinish]);
 
   useEffect(() => {
-    if (progress >= 100) {
+    if (!simple && progress >= 100) {
       onFinish(); // Só será chamado uma vez
     }
-  }, [progress]);
+  }, [progress, simple, onFinish]);
+
+  if (simple) {
+    return (
+      <Container>
+        <LoadingIndicator />
+      </Container>
+    );
+  }
 
   return (
     <Container>
