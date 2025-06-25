@@ -11,6 +11,7 @@ import type {
   IUserPaginate,
   User,
 } from "../types/User";
+import type { VehicleType, VehicleTypePaginate } from "../types/VehicleType";
 import { IPaginateResponse } from "../types/Paginate";
 import { signOut } from "next-auth/react";
 
@@ -107,6 +108,14 @@ class ApiService {
       .catch(this.getError);
   }
 
+  async getAllVehicleType(page: number = 1, limit: number = 10) {
+    return this.api("/vehicle-types", {
+      params: { page, limit },
+    })
+      .then(this.getResponse<IPaginateResponse<VehicleType>>)
+      .catch(this.getError);
+  }
+
   async getUser(id: string, token: string) {
     return this.api
       .get(`/users/${id}`, {
@@ -121,6 +130,28 @@ class ApiService {
   async deleteUser(id: string, token: string) {
     return this.api
       .delete(`/users/${id}`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .then(this.getResponse<void>)
+      .catch(this.getError);
+  }
+
+  async deleteVehicleType(type: string, token: string) {
+    return this.api
+      .delete(`/vehicle-types/${type}`, {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      })
+      .then(this.getResponse<void>)
+      .catch(this.getError);
+  }
+
+  async updateVehicleType(type: string, data: any, token: string) {
+    return this.api
+      .patch(`/vehicle-types/${type}`, data, {
         headers: {
           authorization: `Bearer ${token}`,
         },

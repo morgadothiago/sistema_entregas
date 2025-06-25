@@ -46,10 +46,10 @@ export const items = [
 
 export const itemAdm = [
   {
-    title: "/admin/delivery",
-    subTile: "Configuração de entregas",
-    url: "/delivery",
-    icon: Settings,
+    title: "/admin/type-vehicle",
+    subTile: "Tipo de veiculos",
+    url: "/type-vehicle",
+    icon: Car,
   },
   {
     title: "/admin/listuser",
