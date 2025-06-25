@@ -40,7 +40,7 @@ export class UpdateVehicleTypeDto {
   @IsNumber({ allowInfinity: false })
   @IsOptional()
   @IsNotEmpty()
-  ParadaAdicional?: number;
+  paradaAdicional?: number;
 
   @ApiProperty({
     description: 'valor por ajudante adicional',
@@ -50,5 +50,5 @@ export class UpdateVehicleTypeDto {
   @IsNumber({ allowInfinity: false })
   @IsOptional()
   @IsNotEmpty()
-  AjudanteAdicional?: number;
+  ajudanteAdicional?: number;
 }

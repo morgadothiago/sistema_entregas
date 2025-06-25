@@ -29,7 +29,7 @@ export class VehicleTypeService {
     return vehicleType;
   }
 
-  async delete(type: string) {
+  async delete(type: string): Promise<void> {
     const vehicleType = await this.prisma.vehicleType.findUnique({
       where: { type },
       select: { id: true },
@@ -96,10 +96,10 @@ export class VehicleTypeService {
       tarifaBase: updateVehicleTypeDto.tarifaBase as unknown as Decimal,
       valorKMAdicional:
         updateVehicleTypeDto.valorKMAdicional as unknown as Decimal,
-      ParadaAdicional:
-        updateVehicleTypeDto.ParadaAdicional as unknown as Decimal,
-      AjudanteAdicional:
-        updateVehicleTypeDto.AjudanteAdicional as unknown as Decimal,
+      paradaAdicional:
+        updateVehicleTypeDto.paradaAdicional as unknown as Decimal,
+      ajudanteAdicional:
+        updateVehicleTypeDto.ajudanteAdicional as unknown as Decimal,
       type: updateVehicleTypeDto.type,
     };
 
@@ -124,8 +124,8 @@ export class VehicleTypeService {
       type: body.type,
       tarifaBase: new Decimal(body.tarifaBase),
       valorKMAdicional: new Decimal(body.valorKMAdicional),
-      paradaAdicional: new Decimal(body.ParadaAdicional),
-      ajudanteAdicional: new Decimal(body.AjudanteAdicional),
+      paradaAdicional: new Decimal(body.paradaAdicional),
+      ajudanteAdicional: new Decimal(body.ajudanteAdicional),
     };
 
     await this.prisma.vehicleType.create({
