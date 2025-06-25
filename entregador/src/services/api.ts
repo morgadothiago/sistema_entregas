@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import { showErrorToast } from "../util/Toast";
 
 export const api = axios.create({
-  baseURL: "http://192.168.100.96:8080/",
+  baseURL: "http://192.168.100.96:3000/",
 });
 
 // Função para definir o token de autorização
@@ -20,14 +20,17 @@ export const setAuthToken = (token: string | null) => {
 api.interceptors.request.use(
   async (config) => {
     try {
-      const token = await AsyncStorage.getItem("@auth:token");
-      console.log("🔍 Token no interceptor:", token); // Debug
+      // Só busca o token do AsyncStorage se não houver um token já configurado
+      if (!config.headers.Authorization) {
+        const token = await AsyncStorage.getItem("@auth:token");
+        console.log("🔍 Token no interceptor:", token); // Debug
 
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        console.log("✅ Header adicionado:", config.headers.Authorization);
-      } else {
-        console.log("❌ Token não encontrado");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log("✅ Header adicionado:", config.headers.Authorization);
+        } else {
+          console.log("❌ Token não encontrado");
+        }
       }
       // Adiciona o User-Agent
       config.headers["User-Agent"] = `MeuApp/1.0 (${Platform.OS})`;

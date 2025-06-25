@@ -71,7 +71,7 @@ export default function Signup() {
         showAppToast({
           message:
             "As senhas não coincidem. Por favor, verifique e tente novamente.",
-          type: "warning",
+          type: "danger",
           title: "Atenção ⚠️",
         });
         return;
@@ -113,15 +113,14 @@ export default function Signup() {
       );
       console.log("Resposta da API:", response.data);
 
+      console.log("Resposta de satus", response.statusText);
+
       showAppToast({
-        message:
-          response.data.message ||
-          "Parabéns! Seu cadastro foi realizado com sucesso. Agora você pode fazer login e começar a trabalhar!",
+        message: response.data.message || "",
         type: "success",
-        title: "Cadastro Concluído! 🎉",
       });
 
-      // navigation.navigate("SignIn");
+      navigation.navigate("SignIn");
     } catch (err: any) {
       console.log(
         "Erro completo:",
@@ -191,17 +190,11 @@ export default function Signup() {
         }
       } else if (err.response?.status === 409) {
         showAppToast({
-          message:
-            err.response?.data?.message ||
-            "Este email já está cadastrado em nossa plataforma",
-          type: "warning",
-          title: "Email já cadastrado 📧",
+          message: err.response?.data?.message || "",
+          type: "danger",
         });
       } else {
-        showErrorToast(
-          err.response?.data?.message ||
-            "Ocorreu um erro inesperado. Por favor, tente novamente."
-        );
+        showErrorToast(err.response?.data?.message || "");
       }
     }
   };
