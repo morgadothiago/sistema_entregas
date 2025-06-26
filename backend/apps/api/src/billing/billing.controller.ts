@@ -26,23 +26,34 @@ import { BillingQueryParams } from './dto/filters.dto';
 import { BillingPaginateResponse } from './dto/billing-paginate-response.dto';
 import { IPaginateResponse } from '../utils/fn';
 import { BillingFindOneResponse } from './dto/billing-findOne-response.dto';
+import { BillingCreateDto } from './dto/billing-create.dto';
 
 @Controller('billing')
 export class BillingController {
   constructor(private billingService: BillingService) {}
 
-  @Patch(':id')
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'cria faturamento de credito' })
+  createBilling(
+    @Body() body: BillingCreateDto,
+    @Req() req: Request & { user: User },
+  ): Promise<void> {
+    return this.billingService.createBilling(body, req.user);
+  }
+
+  @Patch(':key')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'atualiza faturamento' })
   async invoiceBilling(
     @Body() body: BillingUpdateDto,
-    @Param('id') id: string,
+    @Param('key') key: string,
     @Req() req: Request & { user: User },
   ): Promise<void> {
-    return this.billingService.invoiceBilling(body, +id, req.user);
+    return this.billingService.invoiceBilling(body, key, req.user);
   }
 
-  @Post(':id')
+  @Post(':key')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'cria ou atualiza recibos no faturamento' })
   @ApiConsumes('multipart/form-data')
@@ -59,11 +70,11 @@ export class BillingController {
     },
   })
   addReceipt(
-    @Param('id') id: string,
+    @Param('key') key: string,
     @Req() req: Request & { user: User },
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<void> {
-    return this.billingService.addReceipt(+id, req.user, file);
+    return this.billingService.addReceipt(key, req.user, file);
   }
 
   @Get()
@@ -83,14 +94,14 @@ export class BillingController {
     );
   }
 
-  @Get(':id')
+  @Get(':key')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'busca um faturamentos' })
   @ApiResponse({ type: BillingFindOneResponse, status: HttpStatus.OK })
   findOne(
-    @Param('id') idBilling: number,
+    @Param('key') key: string,
     @Req() req: Request & { user: User },
   ): Promise<BillingFindOneResponse> {
-    return this.billingService._findOne(+idBilling, req.user);
+    return this.billingService._findOne(key, req.user);
   }
 }
