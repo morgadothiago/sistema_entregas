@@ -19,10 +19,23 @@ export default function Layout({ children }: LayoutProps) {
     const checkSession = async () => {
       try {
         const data = await getSession();
-        console.log("data", data);
+        console.log("=== LAYOUT SESSION DATA ===");
+        console.log("Session data:", data);
+        console.log(
+          "Session token:",
+          (data as unknown as { token: string }).token
+        );
+        console.log("Session user:", data?.user);
+        console.log("===========================");
+
         if (data) {
           setUser(data.user as unknown as User);
-          setToken((data as unknown as { token: string }).token);
+          const sessionToken = (data as unknown as { token: string }).token;
+          if (sessionToken) {
+            setToken(sessionToken);
+          } else {
+            console.error("Token não encontrado na sessão do layout!");
+          }
         } else {
           redirect("/signin");
         }

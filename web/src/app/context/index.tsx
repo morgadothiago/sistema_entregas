@@ -11,24 +11,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>({} as User);
   const [token, setToken] = useState<string | null>(null);
- 
+
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchSession = async () => {
       try {
         const data = await getSession();
-        if (data && isMounted){ 
+        console.log("=== CONTEXT SESSION DATA ===");
+        console.log("Session data:", data);
+        console.log(
+          "Session token:",
+          (data as unknown as { token: string })?.token
+        );
+        console.log("Session user:", data?.user);
+        console.log("============================");
+
+        if (data && isMounted) {
+          console.log("=== SETTING TOKEN AND USER ===");
+          console.log("Setting user:", data.user);
+          console.log(
+            "Setting token:",
+            (data as unknown as { token: string }).token
+          );
+          console.log("==============================");
+
           setUser(data.user as unknown as User);
-          setToken((data as unknown as {token: string}).token);
+
+          const sessionToken = (data as unknown as { token: string }).token;
+          if (sessionToken) {
+            setToken(sessionToken);
+          } else {
+            console.error("Token não encontrado na sessão!");
+          }
         }
       } catch (error) {
         console.error("Erro ao buscar sessão:", error);
       }
     };
-    
+
     fetchSession();
-    
+
     return () => {
       isMounted = false;
     };

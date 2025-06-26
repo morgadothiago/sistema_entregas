@@ -51,21 +51,38 @@ export const authOptions: NextAuthConfig = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      console.log("=== JWT CALLBACK ===");
+      console.log("User:", user);
+      console.log("Token before:", token);
+      console.log("=========================");
+
       if (user) {
         token.user = (user as { data: User }).data;
         token.token = (user as { token: string }).token;
       }
 
+      console.log("Token after:", token);
+      console.log("=========================");
+
       return token;
     },
 
     async session({ session, token }) {
+      console.log("=== SESSION CALLBACK ===");
+      console.log("Token from JWT:", token.token);
+      console.log("User from JWT:", token.user);
+      console.log("Session before:", session);
+      console.log("=========================");
+
       if (token.token) {
         api.setToken((token as { token: string })?.token);
       }
 
       (session as unknown as { user: User }).user = token.user as User;
       (session as unknown as { token: string }).token = token.token as string;
+
+      console.log("Session after:", session);
+      console.log("=========================");
 
       return session;
     },

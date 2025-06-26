@@ -65,13 +65,13 @@ class ApiService {
   private async getError(error: AxiosError<any>): Promise<IErrorResponse> {
     if (error.status === 422) {
       return {
-        message: error.response?.data?.message,
+        message: error.response?.data?.message || "Dados inválidos",
         status: error.status,
       };
     }
     if (error.status === 409) {
       return {
-        message: error.response?.data?.message,
+        message: error.response?.data?.message || "Conflito de dados",
         status: error.status,
       };
     }
@@ -80,7 +80,7 @@ class ApiService {
       try {
         await signOut({ redirect: true, redirectTo: "/signin" });
       } catch (e) {
-        console.error("Erro ao fazer removidossignOut:", e);
+        console.error("Erro ao fazer signOut:", e);
         // Retornar erro 401 mesmo se o signOut falhar
         return {
           message: error.response?.data?.message || "Não autorizado",
@@ -89,19 +89,29 @@ class ApiService {
       }
     }
 
+    if (error.status === 500) {
+      return {
+        message: error.response?.data?.message || "Erro interno do servidor",
+        status: 500,
+      };
+    }
+
     return {
-      message: error.response?.data?.message,
+      message: error.response?.data?.message || "Erro desconhecido",
       status: error.status || 500, // Default to 500 if status is undefined
     };
   }
 
   async getUsers(filters: IFilterUser, token: string) {
     console.log("token pre", token);
+    // Garante que o token tem o formato correto
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
     return this.api
       .get("/users", {
         params: filters,
         headers: {
-          authorization: `Bearer ${token}`,
+          authorization: authToken,
         },
       })
       .then(this.getResponse<IPaginateResponse<IUserPaginate>>)
@@ -109,18 +119,22 @@ class ApiService {
   }
 
   async getAllVehicleType(page: number = 1, limit: number = 10) {
-    return this.api("/vehicle-types", {
-      params: { page, limit },
-    })
+    return this.api
+      .get("/vehicle-types", {
+        params: { page, limit },
+      })
       .then(this.getResponse<IPaginateResponse<VehicleType>>)
       .catch(this.getError);
   }
 
   async getUser(id: string, token: string) {
+    // Garante que o token tem o formato correto
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
     return this.api
       .get(`/users/${id}`, {
         headers: {
-          authorization: `Bearer ${token}`,
+          authorization: authToken,
         },
       })
       .then(this.getResponse<User>)
@@ -128,10 +142,13 @@ class ApiService {
   }
 
   async deleteUser(id: string, token: string) {
+    // Garante que o token tem o formato correto
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
     return this.api
       .delete(`/users/${id}`, {
         headers: {
-          authorization: `Bearer ${token}`,
+          authorization: authToken,
         },
       })
       .then(this.getResponse<void>)
@@ -139,10 +156,13 @@ class ApiService {
   }
 
   async deleteVehicleType(type: string, token: string) {
+    // Garante que o token tem o formato correto
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
     return this.api
       .delete(`/vehicle-types/${type}`, {
         headers: {
-          authorization: `Bearer ${token}`,
+          authorization: authToken,
         },
       })
       .then(this.getResponse<void>)
@@ -150,10 +170,29 @@ class ApiService {
   }
 
   async updateVehicleType(type: string, data: any, token: string) {
+    // Garante que o token tem o formato correto
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
     return this.api
       .patch(`/vehicle-types/${type}`, data, {
         headers: {
-          authorization: `Bearer ${token}`,
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<void>)
+      .catch(this.getError);
+  }
+
+  async createVehicleType(data: any, token: string) {
+    // Garante que o token tem o formato correto
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
+    return this.api
+      .post("/vehicle-types", data, {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
         },
       })
       .then(this.getResponse<void>)
