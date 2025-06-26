@@ -145,6 +145,7 @@ model DeliveryMan {
 
 model Billing {
   id          Int           @id @default(autoincrement())
+  key         String        @unique @default(ulid())
   amount      Decimal       @db.Decimal(15, 2)
   type        BillingType
   status      BillingStatus
@@ -155,7 +156,7 @@ model Billing {
   User        User?         @relation(fields: [userId], references: [id])
   Items       BillingItem[]
   File        File?         @relation(fields: [fileId], references: [id])
-  fileId      Int?           @unique
+  fileId      Int?          @unique
 
   @@map("billings")
 }
