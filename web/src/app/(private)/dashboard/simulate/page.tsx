@@ -25,6 +25,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const fakeRoute: [number, number][] = [
   [-23.55052, -46.633308], // São Paulo (Origem)
@@ -64,6 +65,7 @@ export default function Page() {
   const [form, setForm] = useState(initialForm);
   const [showMap, setShowMap] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -127,6 +129,73 @@ export default function Page() {
 
     // Aqui você pode enviar formDataLowerCase para a API
     // Exemplo: await api.post('/deliveries', formDataLowerCase);
+  };
+
+  // Função para enviar dados para a API com tratamento de erros
+  const submitToAPI = async (data: any) => {
+    setSubmitting(true);
+    try {
+      // Substitua pela URL da sua API
+      const response = await fetch("/api/deliveries", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        if (response.status === 422) {
+          // Erro de validação
+          toast.error(
+            errorData.message ||
+              "Dados inválidos. Verifique as informações e tente novamente.",
+            {
+              duration: 5000,
+              position: "top-center",
+            }
+          );
+        } else if (response.status === 500) {
+          // Erro interno do servidor
+          toast.error(
+            errorData.message ||
+              "Erro interno do servidor. Tente novamente mais tarde.",
+            {
+              duration: 5000,
+              position: "top-center",
+            }
+          );
+        } else {
+          // Outros erros
+          toast.error(errorData.message || "Erro ao processar solicitação.", {
+            duration: 5000,
+            position: "top-center",
+          });
+        }
+        return false;
+      }
+
+      // Sucesso
+      toast.success("Entrega cadastrada com sucesso!", {
+        duration: 4000,
+        position: "top-center",
+      });
+      return true;
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+      toast.error(
+        "Erro de conexão. Verifique sua internet e tente novamente.",
+        {
+          duration: 5000,
+          position: "top-center",
+        }
+      );
+      return false;
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -536,7 +605,7 @@ export default function Page() {
                 Cancelar
               </Button>
               <Button
-                onClick={() => {
+                onClick={async () => {
                   // Converter dados para minúsculas antes de enviar para a API
                   const formDataLowerCase = convertToLowerCase(form);
                   console.log(
@@ -544,13 +613,44 @@ export default function Page() {
                     formDataLowerCase
                   );
 
-                  // Aqui você pode enviar formDataLowerCase para a API
-                  // Exemplo: await api.post('/deliveries', formDataLowerCase);
+                  // Enviar dados para a API
+                  const success = await submitToAPI(formDataLowerCase);
 
-                  setShowMap(false);
+                  if (success) {
+                    setShowMap(false);
+                    // Opcional: resetar o formulário após sucesso
+                    // setForm(initialForm);
+                  }
                 }}
+                disabled={submitting}
               >
-                Finalizar cadastro
+                {submitting ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4 text-white mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      ></path>
+                    </svg>
+                    Enviando...
+                  </>
+                ) : (
+                  "Finalizar cadastro"
+                )}
               </Button>
             </div>
           </div>

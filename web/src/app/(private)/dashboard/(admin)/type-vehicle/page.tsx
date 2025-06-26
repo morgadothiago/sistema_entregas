@@ -41,6 +41,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function page() {
   const { token } = useAuth();
@@ -67,8 +68,8 @@ export default function page() {
     type: "",
     tarifaBase: "",
     valorKMAdicional: "",
-    paradaAdicional: "",
-    ajudanteAdicional: "",
+    paradaAdicional: "0",
+    ajudanteAdicional: "0",
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -144,13 +145,13 @@ export default function page() {
     }
 
     if (!token) {
-      alert("Token não encontrado. Faça login novamente.");
+      toast.error("Token não encontrado. Faça login novamente.");
       return;
     }
 
     // Verifica se o token é uma string válida
     if (typeof token !== "string" || token.trim() === "") {
-      alert("Token inválido. Faça login novamente.");
+      toast.error("Token inválido. Faça login novamente.");
       return;
     }
 
@@ -162,8 +163,14 @@ export default function page() {
 
       await api.deleteVehicleType(type.toLowerCase(), cleanToken);
       await getAllVehicleTypes(); // Recarrega a lista
+
+      // Toast de sucesso
+      toast.success(`Tipo de veículo "${type}" excluído com sucesso!`, {
+        duration: 4000,
+        position: "top-center",
+      });
     } catch (err: any) {
-      alert(err.message || "Erro ao excluir tipo de veículo");
+      toast.error(err.message || "Erro ao excluir tipo de veículo");
     }
   }
 
@@ -172,10 +179,10 @@ export default function page() {
     setEditingVehicleType(vehicleType);
     setFormData({
       type: vehicleType.type,
-      tarifaBase: vehicleType.tarifaBase.toString(),
-      valorKMAdicional: vehicleType.valorKMAdicional.toString(),
-      paradaAdicional: vehicleType.paradaAdicional.toString(),
-      ajudanteAdicional: vehicleType.ajudanteAdicional.toString(),
+      tarifaBase: vehicleType.tarifaBase?.toString() ?? "0",
+      valorKMAdicional: vehicleType.valorKMAdicional?.toString() ?? "0",
+      paradaAdicional: vehicleType.paradaAdicional?.toString() ?? "0",
+      ajudanteAdicional: vehicleType.ajudanteAdicional?.toString() ?? "0",
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -188,8 +195,8 @@ export default function page() {
       type: "",
       tarifaBase: "",
       valorKMAdicional: "",
-      paradaAdicional: "",
-      ajudanteAdicional: "",
+      paradaAdicional: "0",
+      ajudanteAdicional: "0",
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -251,13 +258,13 @@ export default function page() {
     }
 
     if (!token) {
-      alert("Token não encontrado. Faça login novamente.");
+      toast.error("Token não encontrado. Faça login novamente.");
       return;
     }
 
     // Verifica se o token é uma string válida
     if (typeof token !== "string" || token.trim() === "") {
-      alert("Token inválido. Faça login novamente.");
+      toast.error("Token inválido. Faça login novamente.");
       return;
     }
 
@@ -277,7 +284,7 @@ export default function page() {
         isNaN(paradaAdicional) ||
         isNaN(ajudanteAdicional)
       ) {
-        alert(
+        toast.error(
           "Por favor, insira valores numéricos válidos em todos os campos."
         );
         return;
@@ -290,12 +297,12 @@ export default function page() {
         !isFinite(paradaAdicional) ||
         !isFinite(ajudanteAdicional)
       ) {
-        alert("Por favor, insira valores numéricos válidos.");
+        toast.error("Por favor, insira valores numéricos válidos.");
         return;
       }
 
       if (tarifaBase <= 0) {
-        alert("A tarifa base deve ser maior que zero.");
+        toast.error("A tarifa base deve ser maior que zero.");
         return;
       }
 
@@ -305,27 +312,44 @@ export default function page() {
 
       if (isEditing && editingVehicleType) {
         const data = {
-          tarifaBase,
-          valorKMAdicional,
-          paradaAdicional,
-          ajudanteAdicional,
+          tarifaBase: Number(tarifaBase),
+          valorKMAdicional: Number(valorKMAdicional),
+          paradaAdicional: Number(paradaAdicional),
+          ajudanteAdicional: Number(ajudanteAdicional),
         };
         await api.updateVehicleType(editingVehicleType.type, data, cleanToken);
       } else {
-        await api.createVehicleType(
-          {
-            type: formData.type.trim(),
-            tarifaBase,
-            valorKMAdicional,
-            paradaAdicional,
-            ajudanteAdicional,
-          },
-          cleanToken
-        );
+        const vehicleTypeData = {
+          type: formData.type.trim(),
+          tarifaBase: Number(tarifaBase),
+          valorKMAdicional: Number(valorKMAdicional),
+          paradaAdicional: Number(paradaAdicional),
+          ajudanteAdicional: Number(ajudanteAdicional),
+        };
+
+        // Debug: log dos dados sendo enviados
+        console.log("=== DADOS DO FORMULÁRIO ===");
+        console.log("Form data:", formData);
+        console.log("Processed data:", vehicleTypeData);
+        console.log("Token:", cleanToken);
+        console.log("===========================");
+
+        await api.createVehicleType(vehicleTypeData, cleanToken);
       }
 
       setIsModalOpen(false);
       await getAllVehicleTypes(); // Recarrega a lista
+
+      // Toast de sucesso
+      toast.success(
+        isEditing
+          ? `Tipo de veículo "${formData.type}" atualizado com sucesso!`
+          : `Tipo de veículo "${formData.type}" criado com sucesso!`,
+        {
+          duration: 4000,
+          position: "top-center",
+        }
+      );
     } catch (err: any) {
       let errorMessage = "Erro ao salvar tipo de veículo";
 
@@ -338,12 +362,20 @@ export default function page() {
       } else if (err.status === 401) {
         errorMessage = "Token inválido ou expirado. Faça login novamente.";
       } else if (err.status === 422) {
-        errorMessage = "Dados inválidos. Verifique os campos.";
+        errorMessage =
+          err.response?.data?.message ||
+          "Dados inválidos. Verifique os campos.";
       } else if (err.status === 500) {
-        errorMessage = "Erro interno do servidor. Tente novamente.";
+        errorMessage =
+          err.response?.data?.message ||
+          "Erro interno do servidor. Tente novamente.";
       }
 
-      alert(errorMessage);
+      // Toast de erro com configurações específicas
+      toast.error(errorMessage, {
+        duration: 5000,
+        position: "top-center",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -594,7 +626,9 @@ export default function page() {
                             Parada Adicional
                           </p>
                           <p className="font-semibold text-purple-700">
-                            {formatCurrency(vehicleType.paradaAdicional)}
+                            {formatCurrency(
+                              Number(vehicleType.paradaAdicional) || 0
+                            )}
                           </p>
                         </div>
                       </div>
@@ -606,7 +640,9 @@ export default function page() {
                             Ajudante Adicional
                           </p>
                           <p className="font-semibold text-orange-700">
-                            {formatCurrency(vehicleType.ajudanteAdicional)}
+                            {formatCurrency(
+                              Number(vehicleType.ajudanteAdicional) || 0
+                            )}
                           </p>
                         </div>
                       </div>
@@ -802,7 +838,8 @@ export default function page() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        paradaAdicional: e.target.value,
+                        paradaAdicional:
+                          e.target.value === "" ? "0" : e.target.value,
                       })
                     }
                     className={
@@ -830,7 +867,8 @@ export default function page() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        ajudanteAdicional: e.target.value,
+                        ajudanteAdicional:
+                          e.target.value === "" ? "0" : e.target.value,
                       })
                     }
                     className={

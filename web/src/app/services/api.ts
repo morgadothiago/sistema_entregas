@@ -63,6 +63,14 @@ class ApiService {
     return response.data;
   }
   private async getError(error: AxiosError<any>): Promise<IErrorResponse> {
+    // Debug: log completo do erro
+    console.log("=== ERRO DA API ===");
+    console.log("Status:", error.status);
+    console.log("Response data:", error.response?.data);
+    console.log("Response status:", error.response?.status);
+    console.log("Response headers:", error.response?.headers);
+    console.log("===================");
+
     if (error.status === 422) {
       return {
         message: error.response?.data?.message || "Dados inválidos",
@@ -187,6 +195,13 @@ class ApiService {
   async createVehicleType(data: any, token: string) {
     // Garante que o token tem o formato correto
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
+    // Debug: log dos dados sendo enviados
+    console.log("=== DADOS SENDO ENVIADOS PARA API ===");
+    console.log("Data:", data);
+    console.log("Token:", authToken);
+    console.log("URL:", "/vehicle-types");
+    console.log("=====================================");
 
     return this.api
       .post("/vehicle-types", data, {
