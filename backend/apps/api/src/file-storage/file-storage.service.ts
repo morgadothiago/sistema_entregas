@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Storage } from './storage.service';
 import { File } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -6,6 +11,8 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class FileStorageService implements OnModuleInit {
   static readonly storage = new Storage();
+  private logger = new Logger(FileStorageService.name);
+
   constructor(private prisma: PrismaService) {}
 
   onModuleInit(): void {
@@ -29,30 +36,46 @@ export class FileStorageService implements OnModuleInit {
     folder: string[],
     file?: File,
   ): Promise<Pick<File, 'id'>> {
+    const filename = newFile.originalname?.split('.')?.[0];
+
     if (file) {
-      const { id, publicId, size } = file as {
+      const { id, publicId } = file as {
         filename: string;
         id: number;
         publicId: string;
         size: number;
       };
 
-      await FileStorageService.storage.delete(publicId);
+      await FileStorageService.storage
+        .delete(publicId)
+        .catch((err: Error & { error: Error }) => {
+          this.logger.error(err, err.stack);
 
-      const uploaded = await FileStorageService.storage.create(
-        newFile,
-        folder.join('/'),
-      );
+          throw new BadRequestException(err.error?.message ?? err?.message, {
+            cause: FileStorageService.name,
+            description: 'delete',
+          });
+        });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const uploaded = await FileStorageService.storage
+        .create(newFile, folder.join('/'))
+        .catch((err: Error & { error: Error }) => {
+          this.logger.error(err, err.stack);
+
+          throw new BadRequestException(err.error?.message ?? err?.message, {
+            cause: FileStorageService.name,
+            description: 'create',
+          });
+        });
+
       return await this.prisma.file.update({
         where: { id },
         data: {
           mimetype: uploaded.format,
-          size: size / 1024,
+          size: uploaded.bytes,
           publicId: uploaded.public_id,
           path: uploaded.url,
-          filename: (newFile as { originalname: string }).originalname,
+          filename,
         },
         select: {
           id: true,
@@ -66,14 +89,13 @@ export class FileStorageService implements OnModuleInit {
       folder.join('/'),
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return this.prisma.file.create({
       data: {
         mimetype: uploaded.format,
-        size: (newFile as { size: number }).size / 1024,
+        size: uploaded.bytes,
         publicId: uploaded.public_id,
         path: uploaded.url,
-        filename: (newFile as { originalname: string }).originalname,
+        filename,
       },
       select: {
         id: true,
