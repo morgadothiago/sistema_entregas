@@ -15,6 +15,7 @@ export class UpdateVehicleTypeDto {
   @ApiProperty({
     description: 'tarifa base do veículo',
     example: 100.0,
+    required: false,
     type: Number,
   })
   @IsNumber({ allowInfinity: false })
@@ -25,6 +26,7 @@ export class UpdateVehicleTypeDto {
   @ApiProperty({
     description: 'valor por KM adicional',
     example: 10.5,
+    required: false,
     type: Number,
   })
   @IsNumber({ allowInfinity: false })
@@ -35,20 +37,22 @@ export class UpdateVehicleTypeDto {
   @ApiProperty({
     description: 'valor por parada adicional',
     example: 25.0,
+    required: false,
     type: Number,
   })
   @IsNumber({ allowInfinity: false })
   @IsOptional()
   @IsNotEmpty()
-  ParadaAdicional?: number;
+  paradaAdicional?: number;
 
   @ApiProperty({
     description: 'valor por ajudante adicional',
     example: 50.0,
+    required: false,
     type: Number,
   })
   @IsNumber({ allowInfinity: false })
   @IsOptional()
   @IsNotEmpty()
-  AjudanteAdicional?: number;
+  ajudanteAdicional?: number;
 }

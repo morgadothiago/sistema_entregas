@@ -26,6 +26,7 @@ import { BillingQueryParams } from './dto/filters.dto';
 import { IPaginateResponse, paginateResponse } from '../utils/fn';
 import { BillingPaginateResponse } from './dto/billing-paginate-response.dto';
 import { BillingFindOneResponse } from './dto/billing-findOne-response.dto';
+import { BillingCreateDto } from './dto/billing-create.dto';
 
 @Injectable()
 export class BillingService {
@@ -34,6 +35,48 @@ export class BillingService {
     private fileStorage: FileStorageService,
   ) {}
   private readonly logger = new Logger('Faturamento');
+
+  createBilling(
+    body: BillingCreateDto,
+    _user: Pick<User, 'id' | 'role' | 'status'>,
+  ): Promise<void> {
+    return this.prisma.$transaction(async (tx: PrismaService) => {
+      const user = await tx.user.findUnique({
+        where: {
+          id: body.idUser,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+
+      const billing = await tx.billing.create({
+        data: {
+          amount: body.amount,
+          description: body.description,
+          type: BillingType.INCOME,
+          status: body.status ?? BillingStatus.PENDING,
+          userId: body.idUser,
+        },
+      });
+
+      if (body.status === BillingStatus.PAID) {
+        await this.updateUserBalance(body.idUser, body.amount, 'CREDIT', tx);
+        await this.createExtractEntry(
+          body.idUser,
+          body.amount,
+          ExtractType.DEPOSIT,
+          body.description ?? '',
+          billing.id,
+          tx,
+        );
+      }
+    });
+  }
 
   getBrazilDate(): Date {
     const data = new Date();
@@ -68,8 +111,9 @@ export class BillingService {
       this.prisma.billing.findMany({
         where,
         select: {
-          id: true,
+          key: true,
           amount: true,
+          userId: true,
           description: true,
           type: true,
           status: true,
@@ -89,21 +133,21 @@ export class BillingService {
   }
 
   async addReceipt(
-    idBilling: number,
+    key: string,
     user: Pick<User, 'id' | 'role' | 'status'>,
-    file?: Express.Multer.File,
+    file: Express.Multer.File,
   ): Promise<void> {
     if (!file) {
       throw new BadRequestException('Arquivo não enviado');
     }
 
-    const billing = await this.findOne(idBilling, user, true);
+    const billing = await this.findOne(key, user, true, { id: true });
 
     if (!billing) {
       throw new NotFoundException('Fatura não encontrada');
     }
 
-    await this.fileStorage.upsert(
+    const created = await this.fileStorage.upsert(
       file,
       [
         'user',
@@ -114,19 +158,32 @@ export class BillingService {
       ] as string[],
       billing.File,
     );
+
+    await this.prisma.billing.update({
+      where: {
+        id: billing.id,
+      },
+      data: {
+        File: {
+          connect: {
+            id: created.id,
+          },
+        },
+      },
+    });
   }
 
   async _findOne(
-    id: number,
+    key: string,
     user: Pick<User, 'id' | 'role' | 'status'>,
   ): Promise<BillingFindOneResponse> {
-    const billing = await this.prisma.billing.findUnique({
+    const billing = await this.prisma.billing.findFirst({
       where: {
-        id,
+        key,
         ...(user.role !== Role.ADMIN && { userId: user.id }),
       },
       select: {
-        id: true,
+        key: true,
         status: true,
         amount: true,
         type: true,
@@ -166,23 +223,42 @@ export class BillingService {
   }
 
   async findOne(
-    id: number,
+    id: number | string,
     user: Pick<User, 'id' | 'role' | 'status'>,
     addFile = false,
+    select?: { [key in keyof Billing]?: boolean },
   ): Promise<Billing & { File?: File }> {
-    const billing = await this.prisma.billing.findUnique({
+    select ??= {
+      id: true,
+      key: true,
+      status: true,
+      amount: true,
+      type: true,
+      userId: true,
+      description: true,
+    };
+
+    const billing = await this.prisma.billing.findFirst({
       where: {
-        id,
+        ...(typeof id === 'number' ? { id } : { key: id }),
         ...(user.role !== Role.ADMIN && { userId: user.id }),
       },
       select: {
-        id: true,
-        status: true,
-        amount: true,
-        type: true,
-        userId: true,
-        description: true,
-        File: addFile,
+        ...select,
+        ...(addFile && { File: true }),
+        Items: {
+          select: {
+            id: true,
+            price: true,
+            Delivery: {
+              select: {
+                status: true,
+                completedAt: true,
+                code: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -367,19 +443,20 @@ export class BillingService {
 
   async invoiceBilling(
     body: BillingUpdateDto,
-    id: number,
+    key: string,
     user: User,
   ): Promise<void> {
-    return this.prisma.$transaction(async (tx) => {
-      const billing = await this.findOne(id, user);
+    return this.prisma.$transaction(async (tx: PrismaService) => {
+      const billing = await this.findOne(key, user);
 
       if (billing.status === BillingStatus.PAID) {
         throw new BadRequestException(
           'Não é possível alterar status de uma fatura já paga',
         );
       }
+
       await tx.billing.update({
-        where: { id },
+        where: { id: billing.id },
         data: { status: body.status, description: body.description },
       });
 
@@ -397,7 +474,14 @@ export class BillingService {
           },
         });
 
-        if (!balance || balance.amount.lessThanOrEqualTo(billing.amount)) {
+        if (!balance) {
+          throw new NotFoundException('Usuario não foi encontrado');
+        }
+
+        if (
+          billing.type === 'EXPENSE' &&
+          balance.amount.lessThanOrEqualTo(billing.amount)
+        ) {
           throw new BadRequestException('Saldo insuficiente para pagar fatura');
         }
 
@@ -406,21 +490,21 @@ export class BillingService {
         await this.updateUserBalance(
           billing.userId as number,
           amount,
-          'DEBIT',
-          tx as PrismaService,
+          billing.type === 'EXPENSE' ? 'DEBIT' : 'CREDIT',
+          tx,
         );
         await this.createExtractEntry(
           billing.userId as number,
           amount,
-          'DEBIT',
-          body.description ?? billing.description ?? 'Pagamento de fatura',
+          billing.type === 'EXPENSE' ? 'DEBIT' : 'CREDIT',
+          body.description ?? billing.description ?? 'PAGA',
           billing.id,
-          tx as PrismaService,
+          tx,
         );
       }
 
       this.logger.log(
-        `Fatura ${id} atualizada - Status: ${body.status}, Valor: R$ ${billing.amount}`,
+        `Fatura ${key} atualizada - Status: ${body.status}, Valor: R$ ${billing.amount.toNumber()}`,
       );
     });
   }

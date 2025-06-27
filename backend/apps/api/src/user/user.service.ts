@@ -51,6 +51,16 @@ export class UserService {
         id,
       },
       include: {
+        Balance: {
+          select: {
+            id: true,
+            amount: true,
+          },
+        },
+        Extract: {
+          orderBy: { updatedAt: 'desc' },
+          take: 10,
+        },
         Company: {
           omit: { id: true, idUser: true, createdAt: true, updatedAt: true },
           include: {
