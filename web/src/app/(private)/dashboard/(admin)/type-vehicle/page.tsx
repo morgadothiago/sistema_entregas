@@ -66,10 +66,10 @@ export default function page() {
     useState<VehicleType | null>(null);
   const [formData, setFormData] = useState({
     type: "",
-    tarifaBase: "",
-    valorKMAdicional: "",
-    paradaAdicional: "0",
-    ajudanteAdicional: "0",
+    tarifaBase: 0,
+    valorKMAdicional: 0,
+    paradaAdicional: 0,
+    ajudanteAdicional: 0,
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -179,10 +179,10 @@ export default function page() {
     setEditingVehicleType(vehicleType);
     setFormData({
       type: vehicleType.type,
-      tarifaBase: vehicleType.tarifaBase?.toString() ?? "0",
-      valorKMAdicional: vehicleType.valorKMAdicional?.toString() ?? "0",
-      paradaAdicional: vehicleType.paradaAdicional?.toString() ?? "0",
-      ajudanteAdicional: vehicleType.ajudanteAdicional?.toString() ?? "0",
+      tarifaBase: vehicleType.tarifaBase,
+      valorKMAdicional: vehicleType.valorKMAdicional,
+      paradaAdicional: vehicleType.paradaAdicional,
+      ajudanteAdicional: vehicleType.ajudanteAdicional,
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -193,10 +193,10 @@ export default function page() {
     setEditingVehicleType(null);
     setFormData({
       type: "",
-      tarifaBase: "",
-      valorKMAdicional: "",
-      paradaAdicional: "0",
-      ajudanteAdicional: "0",
+      tarifaBase: 0,
+      valorKMAdicional: 0,
+      paradaAdicional: 0,
+      ajudanteAdicional: 0,
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -209,40 +209,46 @@ export default function page() {
       errors.type = "Nome do tipo é obrigatório";
     }
 
-    if (!formData.tarifaBase.trim()) {
+    if (formData.tarifaBase === null || formData.tarifaBase === undefined) {
       errors.tarifaBase = "Tarifa base é obrigatória";
-    } else if (
-      isNaN(Number(formData.tarifaBase)) ||
-      Number(formData.tarifaBase) <= 0
-    ) {
+    } else if (isNaN(formData.tarifaBase) || formData.tarifaBase <= 0) {
       errors.tarifaBase = "Tarifa base deve ser um número positivo";
     }
 
-    if (!formData.valorKMAdicional.trim()) {
+    if (
+      formData.valorKMAdicional === null ||
+      formData.valorKMAdicional === undefined
+    ) {
       errors.valorKMAdicional = "Valor por KM adicional é obrigatório";
     } else if (
-      isNaN(Number(formData.valorKMAdicional)) ||
-      Number(formData.valorKMAdicional) < 0
+      isNaN(formData.valorKMAdicional) ||
+      formData.valorKMAdicional < 0
     ) {
       errors.valorKMAdicional =
         "Valor por KM adicional deve ser um número não negativo";
     }
 
-    if (!formData.paradaAdicional.trim()) {
+    if (
+      formData.paradaAdicional === null ||
+      formData.paradaAdicional === undefined
+    ) {
       errors.paradaAdicional = "Valor por parada adicional é obrigatório";
     } else if (
-      isNaN(Number(formData.paradaAdicional)) ||
-      Number(formData.paradaAdicional) < 0
+      isNaN(formData.paradaAdicional) ||
+      formData.paradaAdicional < 0
     ) {
       errors.paradaAdicional =
         "Valor por parada adicional deve ser um número não negativo";
     }
 
-    if (!formData.ajudanteAdicional.trim()) {
+    if (
+      formData.ajudanteAdicional === null ||
+      formData.ajudanteAdicional === undefined
+    ) {
       errors.ajudanteAdicional = "Valor por ajudante adicional é obrigatório";
     } else if (
-      isNaN(Number(formData.ajudanteAdicional)) ||
-      Number(formData.ajudanteAdicional) < 0
+      isNaN(formData.ajudanteAdicional) ||
+      formData.ajudanteAdicional < 0
     ) {
       errors.ajudanteAdicional =
         "Valor por ajudante adicional deve ser um número não negativo";
@@ -271,11 +277,13 @@ export default function page() {
     setIsSubmitting(true);
 
     try {
-      // Validação adicional dos dados
-      const tarifaBase = parseFloat(formData.tarifaBase);
-      const valorKMAdicional = parseFloat(formData.valorKMAdicional);
-      const paradaAdicional = parseFloat(formData.paradaAdicional);
-      const ajudanteAdicional = parseFloat(formData.ajudanteAdicional);
+      // Não precisa mais de parseFloat, pois já são numbers
+      const {
+        tarifaBase,
+        valorKMAdicional,
+        paradaAdicional,
+        ajudanteAdicional,
+      } = formData;
 
       // Verifica se os valores são números válidos
       if (
@@ -312,28 +320,21 @@ export default function page() {
 
       if (isEditing && editingVehicleType) {
         const data = {
-          tarifaBase: Number(tarifaBase),
-          valorKMAdicional: Number(valorKMAdicional),
-          paradaAdicional: Number(paradaAdicional),
-          ajudanteAdicional: Number(ajudanteAdicional),
+          tarifaBase,
+          valorKMAdicional,
+          paradaAdicional,
+          ajudanteAdicional,
         };
+        console.log("Enviando para o update:", data);
         await api.updateVehicleType(editingVehicleType.type, data, cleanToken);
       } else {
         const vehicleTypeData = {
           type: formData.type.trim(),
-          tarifaBase: Number(tarifaBase),
-          valorKMAdicional: Number(valorKMAdicional),
-          paradaAdicional: Number(paradaAdicional),
-          ajudanteAdicional: Number(ajudanteAdicional),
+          tarifaBase,
+          valorKMAdicional,
+          ParadaAdicional: paradaAdicional,
+          AjudanteAdicional: ajudanteAdicional,
         };
-
-        // Debug: log dos dados sendo enviados
-        console.log("=== DADOS DO FORMULÁRIO ===");
-        console.log("Form data:", formData);
-        console.log("Processed data:", vehicleTypeData);
-        console.log("Token:", cleanToken);
-        console.log("===========================");
-
         await api.createVehicleType(vehicleTypeData, cleanToken);
       }
 
@@ -785,7 +786,10 @@ export default function page() {
                     placeholder="0.00"
                     value={formData.tarifaBase}
                     onChange={(e) =>
-                      setFormData({ ...formData, tarifaBase: e.target.value })
+                      setFormData({
+                        ...formData,
+                        tarifaBase: Number(e.target.value),
+                      })
                     }
                     className={formErrors.tarifaBase ? "border-red-500" : ""}
                   />
@@ -810,7 +814,7 @@ export default function page() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        valorKMAdicional: e.target.value,
+                        valorKMAdicional: Number(e.target.value),
                       })
                     }
                     className={
@@ -838,8 +842,7 @@ export default function page() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        paradaAdicional:
-                          e.target.value === "" ? "0" : e.target.value,
+                        paradaAdicional: Number(e.target.value),
                       })
                     }
                     className={
@@ -867,8 +870,7 @@ export default function page() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        ajudanteAdicional:
-                          e.target.value === "" ? "0" : e.target.value,
+                        ajudanteAdicional: Number(e.target.value),
                       })
                     }
                     className={
