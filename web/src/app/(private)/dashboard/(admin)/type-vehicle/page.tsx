@@ -320,6 +320,7 @@ export default function page() {
 
       if (isEditing && editingVehicleType) {
         const data = {
+          type: editingVehicleType.type,
           tarifaBase,
           valorKMAdicional,
           paradaAdicional,
@@ -332,8 +333,8 @@ export default function page() {
           type: formData.type.trim(),
           tarifaBase,
           valorKMAdicional,
-          ParadaAdicional: paradaAdicional,
-          AjudanteAdicional: ajudanteAdicional,
+          paradaAdicional,
+          ajudanteAdicional,
         };
         await api.createVehicleType(vehicleTypeData, cleanToken);
       }
@@ -352,6 +353,14 @@ export default function page() {
         }
       );
     } catch (err: any) {
+      console.log("=== ERRO DA API ===");
+      console.log("Status:", err?.response?.status);
+      console.log("Response data:", err?.response?.data);
+      console.log("Response status:", err?.response?.status);
+      console.log("Response headers:", err?.response?.headers);
+      console.log("Mensagens de erro:", err?.response?.data?.message);
+      console.log("===================");
+
       let errorMessage = "Erro ao salvar tipo de veículo";
 
       if (err.message) {
