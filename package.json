@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "expo": "^53.0.12",
-    "expo-network": "^7.1.5",
-    "install": "^0.13.0"
-  }
-}

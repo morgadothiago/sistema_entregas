@@ -1,8 +1,8 @@
-"use client";
-import { useAuth } from "@/app/context";
-import api from "@/app/services/api";
-import type { VehicleType } from "@/app/types/VehicleType";
-import { Button } from "@/components/ui/button";
+"use client"
+import { useAuth } from "@/app/context"
+import api from "@/app/services/api"
+import type { VehicleType } from "@/app/types/VehicleType"
+import { Button } from "@/components/ui/button"
 import {
   Pagination,
   PaginationContent,
@@ -10,9 +10,9 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from "@/components/ui/pagination"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -20,9 +20,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   PlusCircle,
   Edit,
@@ -39,101 +39,79 @@ import {
   Zap,
   Save,
   X,
-} from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+} from "lucide-react"
+import React, { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 export default function page() {
-  const { token } = useAuth();
-  const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth()
+  const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Estados de paginação
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+  const [itemsPerPage, setItemsPerPage] = useState(5)
 
   // Estados de busca e filtro
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("")
+  const [showFilters, setShowFilters] = useState(false)
 
   // Estados do modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const [editingVehicleType, setEditingVehicleType] =
-    useState<VehicleType | null>(null);
+    useState<VehicleType | null>(null)
   const [formData, setFormData] = useState({
     type: "",
     tarifaBase: 0,
     valorKMAdicional: 0,
     paradaAdicional: 0,
     ajudanteAdicional: 0,
-  });
-  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Debug: verificar token quando componente carrega
-  useEffect(() => {
-    console.log("=== COMPONENTE CARREGADO ===");
-    console.log("Token presente:", !!token);
-    console.log("Token:", token);
-    console.log("Token tipo:", typeof token);
-    console.log("Token length:", token?.length);
-    console.log("===========================");
-  }, [token]);
-
-  // Debug: monitorar mudanças no token
-  useEffect(() => {
-    console.log("=== TOKEN MUDOU ===");
-    console.log("Novo token:", token);
-    console.log("Token tipo:", typeof token);
-    console.log(
-      "Token válido:",
-      !!token && typeof token === "string" && token.trim() !== ""
-    );
-    console.log("===================");
-  }, [token]);
+  })
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    getAllVehicleTypes();
-  }, [currentPage, itemsPerPage]);
+    getAllVehicleTypes()
+  }, [currentPage, itemsPerPage])
 
   // Reset para primeira página quando mudar o número de itens por página
   useEffect(() => {
-    setCurrentPage(1);
-  }, [itemsPerPage]);
+    setCurrentPage(1)
+  }, [itemsPerPage])
 
   async function getAllVehicleTypes() {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await api.getAllVehicleType(currentPage, itemsPerPage);
+      setLoading(true)
+      setError(null)
+      const response = await api.getAllVehicleType(currentPage, itemsPerPage)
 
       // Verifica se é uma resposta de erro ou sucesso
       if (response && "message" in response) {
         // É um erro
-        setError(response.message);
-        setVehicleTypes([]);
+        setError(response.message)
+        setVehicleTypes([])
       } else if (
         response &&
         "data" in response &&
         Array.isArray(response.data)
       ) {
         // É uma resposta de sucesso com dados
-        setVehicleTypes(response.data);
-        setTotalPages(response.totalPage);
-        setTotalItems(response.total);
+        setVehicleTypes(response.data)
+        setTotalPages(response.totalPage)
+        setTotalItems(response.total)
       } else {
-        setVehicleTypes([]);
+        setVehicleTypes([])
       }
     } catch (err: any) {
-      console.error("Erro ao carregar tipos de veículos:", err);
-      setError(err.message || "Erro ao carregar tipos de veículos");
-      setVehicleTypes([]);
+      console.error("Erro ao carregar tipos de veículos:", err)
+      setError(err.message || "Erro ao carregar tipos de veículos")
+      setVehicleTypes([])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -141,140 +119,155 @@ export default function page() {
     if (
       !confirm(`Tem certeza que deseja excluir o tipo de veículo "${type}"?`)
     ) {
-      return;
+      return
     }
 
     if (!token) {
-      toast.error("Token não encontrado. Faça login novamente.");
-      return;
+      toast.error("Token não encontrado. Faça login novamente.", {
+        duration: 5000,
+        position: "top-center",
+      })
+      return
     }
 
     // Verifica se o token é uma string válida
     if (typeof token !== "string" || token.trim() === "") {
-      toast.error("Token inválido. Faça login novamente.");
-      return;
+      toast.error("Token inválido. Faça login novamente.", {
+        duration: 5000,
+        position: "top-center",
+      })
+      return
     }
 
     try {
       // Remove "Bearer " se já estiver presente para evitar duplicação
       const cleanToken = token.startsWith("Bearer ")
         ? token.replace("Bearer ", "")
-        : token;
+        : token
 
-      await api.deleteVehicleType(type.toLowerCase(), cleanToken);
-      await getAllVehicleTypes(); // Recarrega a lista
+      await api.deleteVehicleType(type.toLowerCase(), cleanToken)
+      await getAllVehicleTypes() // Recarrega a lista
 
       // Toast de sucesso
       toast.success(`Tipo de veículo "${type}" excluído com sucesso!`, {
         duration: 4000,
         position: "top-center",
-      });
+      })
     } catch (err: any) {
-      toast.error(err.message || "Erro ao excluir tipo de veículo");
+      toast.error(err.message || "Erro ao excluir tipo de veículo.", {
+        duration: 5000,
+        position: "top-center",
+      })
     }
   }
 
   function handleEditVehicleType(vehicleType: VehicleType) {
-    setIsEditing(true);
-    setEditingVehicleType(vehicleType);
+    setIsEditing(true)
+    setEditingVehicleType(vehicleType)
     setFormData({
       type: vehicleType.type,
       tarifaBase: vehicleType.tarifaBase,
       valorKMAdicional: vehicleType.valorKMAdicional,
       paradaAdicional: vehicleType.paradaAdicional,
       ajudanteAdicional: vehicleType.ajudanteAdicional,
-    });
-    setFormErrors({});
-    setIsModalOpen(true);
+    })
+    setFormErrors({})
+    setIsModalOpen(true)
   }
 
   function handleAddNewVehicleType() {
-    setIsEditing(false);
-    setEditingVehicleType(null);
+    setIsEditing(false)
+    setEditingVehicleType(null)
     setFormData({
       type: "",
       tarifaBase: 0,
       valorKMAdicional: 0,
       paradaAdicional: 0,
       ajudanteAdicional: 0,
-    });
-    setFormErrors({});
-    setIsModalOpen(true);
+    })
+    setFormErrors({})
+    setIsModalOpen(true)
   }
 
   function validateForm() {
-    const errors: { [key: string]: string } = {};
+    const errors: { [key: string]: string } = {}
 
     if (!formData.type.trim()) {
-      errors.type = "Nome do tipo é obrigatório";
+      errors.type = "Nome do tipo é obrigatório"
     }
 
     if (formData.tarifaBase === null || formData.tarifaBase === undefined) {
-      errors.tarifaBase = "Tarifa base é obrigatória";
+      errors.tarifaBase = "Tarifa base é obrigatória"
     } else if (isNaN(formData.tarifaBase) || formData.tarifaBase <= 0) {
-      errors.tarifaBase = "Tarifa base deve ser um número positivo";
+      errors.tarifaBase = "Tarifa base deve ser um número positivo"
     }
 
     if (
       formData.valorKMAdicional === null ||
       formData.valorKMAdicional === undefined
     ) {
-      errors.valorKMAdicional = "Valor por KM adicional é obrigatório";
+      errors.valorKMAdicional = "Valor por KM adicional é obrigatório"
     } else if (
       isNaN(formData.valorKMAdicional) ||
       formData.valorKMAdicional < 0
     ) {
       errors.valorKMAdicional =
-        "Valor por KM adicional deve ser um número não negativo";
+        "Valor por KM adicional deve ser um número não negativo"
     }
 
     if (
       formData.paradaAdicional === null ||
       formData.paradaAdicional === undefined
     ) {
-      errors.paradaAdicional = "Valor por parada adicional é obrigatório";
+      errors.paradaAdicional = "Valor por parada adicional é obrigatório"
     } else if (
       isNaN(formData.paradaAdicional) ||
       formData.paradaAdicional < 0
     ) {
       errors.paradaAdicional =
-        "Valor por parada adicional deve ser um número não negativo";
+        "Valor por parada adicional deve ser um número não negativo"
     }
 
     if (
       formData.ajudanteAdicional === null ||
       formData.ajudanteAdicional === undefined
     ) {
-      errors.ajudanteAdicional = "Valor por ajudante adicional é obrigatório";
+      errors.ajudanteAdicional = "Valor por ajudante adicional é obrigatório"
     } else if (
       isNaN(formData.ajudanteAdicional) ||
       formData.ajudanteAdicional < 0
     ) {
       errors.ajudanteAdicional =
-        "Valor por ajudante adicional deve ser um número não negativo";
+        "Valor por ajudante adicional deve ser um número não negativo"
     }
 
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   async function handleSubmit() {
     if (!validateForm()) {
-      return;
+      return
     }
 
     if (!token) {
-      toast.error("Token não encontrado. Faça login novamente.");
-      return;
+      toast.error("Token não encontrado. Faça login novamente.", {
+        duration: 5000,
+        position: "top-center",
+      })
+      return
     }
 
     // Verifica se o token é uma string válida
     if (typeof token !== "string" || token.trim() === "") {
-      toast.error("Token inválido. Faça login novamente.");
-      return;
+      toast.error("Token inválido. Faça login novamente.", {
+        duration: 5000,
+        position: "top-center",
+      })
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
       // Não precisa mais de parseFloat, pois já são numbers
@@ -283,7 +276,7 @@ export default function page() {
         valorKMAdicional,
         paradaAdicional,
         ajudanteAdicional,
-      } = formData;
+      } = formData
 
       // Verifica se os valores são números válidos
       if (
@@ -293,9 +286,10 @@ export default function page() {
         isNaN(ajudanteAdicional)
       ) {
         toast.error(
-          "Por favor, insira valores numéricos válidos em todos os campos."
-        );
-        return;
+          "Por favor, preencha todos os campos obrigatórios com valores numéricos válidos.",
+          { duration: 5000, position: "top-center" }
+        )
+        return
       }
 
       // Verifica se os valores são finitos e positivos
@@ -305,29 +299,44 @@ export default function page() {
         !isFinite(paradaAdicional) ||
         !isFinite(ajudanteAdicional)
       ) {
-        toast.error("Por favor, insira valores numéricos válidos.");
-        return;
+        toast.error("Por favor, insira apenas números válidos.", {
+          duration: 5000,
+          position: "top-center",
+        })
+        return
       }
 
       if (tarifaBase <= 0) {
-        toast.error("A tarifa base deve ser maior que zero.");
-        return;
+        toast.error("A tarifa base deve ser maior que zero.", {
+          duration: 5000,
+          position: "top-center",
+        })
+        return
       }
 
       const cleanToken = token.startsWith("Bearer ")
         ? token.replace("Bearer ", "")
-        : token;
+        : token
 
       if (isEditing && editingVehicleType) {
-        const data = {
-          type: editingVehicleType.type,
-          tarifaBase,
-          valorKMAdicional,
-          paradaAdicional,
-          ajudanteAdicional,
-        };
-        console.log("Enviando para o update:", data);
-        await api.updateVehicleType(editingVehicleType.type, data, cleanToken);
+        // Monta o objeto apenas com campos válidos
+        const data: any = {
+          tarifaBase: formData.tarifaBase,
+          valorKMAdicional: formData.valorKMAdicional,
+          paradaAdicional: formData.paradaAdicional,
+          ajudanteAdicional: formData.ajudanteAdicional,
+        }
+        // Só envie 'type' se o usuário alterou o nome
+        if (formData.type && formData.type !== editingVehicleType.type) {
+          data.type = formData.type.trim()
+        }
+        // Remove campos indefinidos ou nulos
+        Object.keys(data).forEach(
+          (key) =>
+            (data[key] === undefined || data[key] === null) && delete data[key]
+        )
+        console.log("Enviando para o update:", data)
+        await api.updateVehicleType(editingVehicleType.type, data, cleanToken)
       } else {
         const vehicleTypeData = {
           type: formData.type.trim(),
@@ -335,12 +344,12 @@ export default function page() {
           valorKMAdicional,
           paradaAdicional,
           ajudanteAdicional,
-        };
-        await api.createVehicleType(vehicleTypeData, cleanToken);
+        }
+        await api.createVehicleType(vehicleTypeData, cleanToken)
       }
 
-      setIsModalOpen(false);
-      await getAllVehicleTypes(); // Recarrega a lista
+      setIsModalOpen(false)
+      await getAllVehicleTypes() // Recarrega a lista
 
       // Toast de sucesso
       toast.success(
@@ -351,43 +360,42 @@ export default function page() {
           duration: 4000,
           position: "top-center",
         }
-      );
+      )
     } catch (err: any) {
-      console.log("=== ERRO DA API ===");
-      console.log("Status:", err?.response?.status);
-      console.log("Response data:", err?.response?.data);
-      console.log("Response status:", err?.response?.status);
-      console.log("Response headers:", err?.response?.headers);
-      console.log("Mensagens de erro:", err?.response?.data?.message);
-      console.log("===================");
+      console.log("=== ERRO DA API ===")
+      console.log("Status:", err?.response?.status)
+      console.log("Response data:", err?.response?.data)
+      console.log("Response status:", err?.response?.status)
+      console.log("Response headers:", err?.response?.headers)
+      console.log("Mensagens de erro:", err?.response?.data?.message)
+      console.log("===================")
 
-      let errorMessage = "Erro ao salvar tipo de veículo";
+      let errorMessage = "Erro ao salvar tipo de veículo"
 
       if (err.message) {
-        errorMessage = err.message;
+        errorMessage = err.message
       } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
+        errorMessage = err.response.data.message
       } else if (err.status === 409) {
-        errorMessage = "Este tipo de veículo já existe";
+        errorMessage = "Este tipo de veículo já existe"
       } else if (err.status === 401) {
-        errorMessage = "Token inválido ou expirado. Faça login novamente.";
+        errorMessage = "Token inválido ou expirado. Faça login novamente."
       } else if (err.status === 422) {
         errorMessage =
-          err.response?.data?.message ||
-          "Dados inválidos. Verifique os campos.";
+          err.response?.data?.message || "Dados inválidos. Verifique os campos."
       } else if (err.status === 500) {
         errorMessage =
           err.response?.data?.message ||
-          "Erro interno do servidor. Tente novamente.";
+          "Erro interno do servidor. Tente novamente."
       }
 
       // Toast de erro com configurações específicas
       toast.error(errorMessage, {
         duration: 5000,
         position: "top-center",
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -395,52 +403,62 @@ export default function page() {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value);
+    }).format(value)
   }
 
   function nextPage() {
-    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev))
   }
 
   function previousPage() {
-    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev))
   }
 
   function goToPage(page: number) {
-    setCurrentPage(page);
+    setCurrentPage(page)
   }
 
   // Gera array de páginas para exibir
   function getPageNumbers() {
-    const pages = [];
-    const maxVisiblePages = 5;
+    const pages = []
+    const maxVisiblePages = 5
 
     if (totalPages <= maxVisiblePages) {
       // Se temos poucas páginas, mostra todas
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
+        pages.push(i)
       }
     } else {
       // Se temos muitas páginas, mostra uma janela
-      let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-      let end = Math.min(totalPages, start + maxVisiblePages - 1);
+      let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+      let end = Math.min(totalPages, start + maxVisiblePages - 1)
 
       if (end - start + 1 < maxVisiblePages) {
-        start = Math.max(1, end - maxVisiblePages + 1);
+        start = Math.max(1, end - maxVisiblePages + 1)
       }
 
       for (let i = start; i <= end; i++) {
-        pages.push(i);
+        pages.push(i)
       }
     }
 
-    return pages;
+    return pages
   }
 
   // Filtra os tipos de veículos baseado no termo de busca
   const filteredVehicleTypes = vehicleTypes.filter((vehicleType) =>
-    vehicleType.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    vehicleType.type
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[ -\u036f]/g, "")
+      .includes(
+        searchTerm
+          .toLowerCase()
+          .trim()
+          .normalize("NFD")
+          .replace(/[ -\u036f]/g, "")
+      )
+  )
 
   if (loading) {
     return (
@@ -456,7 +474,7 @@ export default function page() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -921,5 +939,5 @@ export default function page() {
         </Dialog>
       </div>
     </div>
-  );
+  )
 }

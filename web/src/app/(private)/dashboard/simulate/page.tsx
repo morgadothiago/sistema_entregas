@@ -1,14 +1,8 @@
-"use client";
-import React, { useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Polyline,
-  Marker,
-  Popup,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import dynamic from "next/dynamic";
+"use client"
+import React, { useState } from "react"
+
+import "leaflet/dist/leaflet.css"
+import dynamic from "next/dynamic"
 import {
   FaMapMarkerAlt,
   FaTruck,
@@ -16,24 +10,24 @@ import {
   FaEnvelope,
   FaPhone,
   FaBoxOpen,
-} from "react-icons/fa";
+} from "react-icons/fa"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 const fakeRoute: [number, number][] = [
   [-23.55052, -46.633308], // São Paulo (Origem)
   [-23.559616, -46.658823], // Ponto intermediário
   [-23.564224, -46.652857], // Destino
-];
+]
 
-const MapSimulate = dynamic(() => import("./MapSimulate"), { ssr: false });
+const MapSimulate = dynamic(() => import("./MapSimulate"), { ssr: false })
 
 const initialForm = {
   clientAddress: {
@@ -59,81 +53,81 @@ const initialForm = {
   email: "",
   telefone: "",
   weight: "",
-};
+}
 
 export default function Page() {
-  const [form, setForm] = useState(initialForm);
-  const [showMap, setShowMap] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState(initialForm)
+  const [showMap, setShowMap] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
-    const { name, value, type, dataset } = e.target;
+    const { name, value, type, dataset } = e.target
     if (dataset.group) {
-      const group = dataset.group as "clientAddress" | "address";
+      const group = dataset.group as "clientAddress" | "address"
       setForm({
         ...form,
         [group]: {
           ...form[group],
           [name]: value,
         },
-      });
+      })
     } else if (type === "checkbox" && e.target instanceof HTMLInputElement) {
-      setForm({ ...form, [name]: e.target.checked });
+      setForm({ ...form, [name]: e.target.checked })
     } else {
-      setForm({ ...form, [name]: value });
+      setForm({ ...form, [name]: value })
     }
-  };
+  }
 
   const handleSimulate = () => {
-    console.log("Botão Simular clicado");
-    setLoading(true);
+    console.log("Botão Simular clicado")
+    setLoading(true)
     setTimeout(() => {
-      console.log("Definindo showMap como true");
-      setShowMap(true);
-      setLoading(false);
-    }, 800);
-  };
+      console.log("Definindo showMap como true")
+      setShowMap(true)
+      setLoading(false)
+    }, 800)
+  }
 
   // Função para converter dados para minúsculas
   const convertToLowerCase = (data: any): any => {
     if (typeof data === "string") {
-      return data.toLowerCase();
+      return data.toLowerCase()
     }
     if (typeof data === "object" && data !== null) {
       if (Array.isArray(data)) {
-        return data.map(convertToLowerCase);
+        return data.map(convertToLowerCase)
       }
-      const result: any = {};
+      const result: any = {}
       for (const key in data) {
         if (data.hasOwnProperty(key)) {
-          result[key] = convertToLowerCase(data[key]);
+          result[key] = convertToLowerCase(data[key])
         }
       }
-      return result;
+      return result
     }
-    return data;
-  };
+    return data
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setShowMap(false);
+    e.preventDefault()
+    setShowMap(false)
 
     // Converter dados para minúsculas antes de enviar para a API
-    const formDataLowerCase = convertToLowerCase(form);
-    console.log("Dados convertidos para minúsculas:", formDataLowerCase);
+    const formDataLowerCase = convertToLowerCase(form)
+    console.log("Dados convertidos para minúsculas:", formDataLowerCase)
 
     // Aqui você pode enviar formDataLowerCase para a API
     // Exemplo: await api.post('/deliveries', formDataLowerCase);
-  };
+  }
 
   // Função para enviar dados para a API com tratamento de erros
   const submitToAPI = async (data: any) => {
-    setSubmitting(true);
+    setSubmitting(true)
     try {
       // Substitua pela URL da sua API
       const response = await fetch("/api/deliveries", {
@@ -142,10 +136,10 @@ export default function Page() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json()
 
         if (response.status === 422) {
           // Erro de validação
@@ -156,7 +150,7 @@ export default function Page() {
               duration: 5000,
               position: "top-center",
             }
-          );
+          )
         } else if (response.status === 500) {
           // Erro interno do servidor
           toast.error(
@@ -166,37 +160,37 @@ export default function Page() {
               duration: 5000,
               position: "top-center",
             }
-          );
+          )
         } else {
           // Outros erros
           toast.error(errorData.message || "Erro ao processar solicitação.", {
             duration: 5000,
             position: "top-center",
-          });
+          })
         }
-        return false;
+        return false
       }
 
       // Sucesso
       toast.success("Entrega cadastrada com sucesso!", {
         duration: 4000,
         position: "top-center",
-      });
-      return true;
+      })
+      return true
     } catch (error) {
-      console.error("Erro na requisição:", error);
+      console.error("Erro na requisição:", error)
       toast.error(
         "Erro de conexão. Verifique sua internet e tente novamente.",
         {
           duration: 5000,
           position: "top-center",
         }
-      );
-      return false;
+      )
+      return false
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center py-8 px-0">
@@ -607,17 +601,17 @@ export default function Page() {
               <Button
                 onClick={async () => {
                   // Converter dados para minúsculas antes de enviar para a API
-                  const formDataLowerCase = convertToLowerCase(form);
+                  const formDataLowerCase = convertToLowerCase(form)
                   console.log(
                     "Dados convertidos para minúsculas:",
                     formDataLowerCase
-                  );
+                  )
 
                   // Enviar dados para a API
-                  const success = await submitToAPI(formDataLowerCase);
+                  const success = await submitToAPI(formDataLowerCase)
 
                   if (success) {
-                    setShowMap(false);
+                    setShowMap(false)
                     // Opcional: resetar o formulário após sucesso
                     // setForm(initialForm);
                   }
@@ -657,5 +651,5 @@ export default function Page() {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }

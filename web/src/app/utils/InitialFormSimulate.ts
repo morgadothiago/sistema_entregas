@@ -1,0 +1,25 @@
+export const initialForm = {
+  clientAddress: {
+    city: "",
+    state: "",
+    street: "",
+    number: "",
+    zipCode: "",
+  },
+  address: {
+    city: "",
+    state: "",
+    street: "",
+    number: "",
+    zipCode: "",
+  },
+  useAddressCompany: false,
+  vehicleType: "",
+  height: "",
+  width: "",
+  length: "",
+  information: "",
+  email: "",
+  telefone: "",
+  weight: "",
+}
