@@ -113,6 +113,16 @@ class ApiService {
       .catch(this.getError)
   }
 
+  async getUser(id: string, token: string): Promise<User | IErrorResponse> {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .get(`/users/${id}`, {
+        headers: { authorization: authToken },
+      })
+      .then(this.getResponse<User>)
+      .catch(this.getError)
+  }
+
   async getAllVehicleType(
     page: number = 1,
     limit: number = 10
