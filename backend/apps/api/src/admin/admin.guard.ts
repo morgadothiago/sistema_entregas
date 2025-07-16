@@ -3,10 +3,10 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
-} from "@nestjs/common";
-import { Request } from "express";
-import { Role, User } from "@prisma/client";
-import { Observable } from "rxjs";
+} from '@nestjs/common';
+import { Request } from 'express';
+import { Role, User } from '@prisma/client';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -19,10 +19,11 @@ export class AdminGuard implements CanActivate {
 
     const user = request.user || {};
 
-    if (user.role !== Role.ADMIN)
+    if (user.role !== Role.ADMIN) {
       throw new UnauthorizedException(
-        "Access denied: Admin privileges required.",
+        'Access denied: Admin privileges required.',
       );
+    }
 
     return true;
   }

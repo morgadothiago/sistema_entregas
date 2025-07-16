@@ -1,92 +1,166 @@
-import styled from "styled-components/native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Dimensions, Platform } from "react-native";
+import { StyleSheet } from "react-native";
 import { theme } from "../../global/theme";
 
-const { width, height } = Dimensions.get("window");
-
-interface ImageProps {
-  keyboardOpen: boolean;
-}
-
-export const GradientBackground = styled(LinearGradient).attrs({
-  colors: ["#00387A", "#0052B4", "#4A90E2", "#A9CCE3"],
-  start: { x: 0.5, y: 0 },
-  end: { x: 0.5, y: 1.5 },
-})`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-`;
-
-export const ImageContainer = styled.View<ImageProps>`
-  width: 100%;
-  height: ${({ keyboardOpen }: ImageProps) => (keyboardOpen ? "0px" : "20%")};
-  align-items: center;
-  justify-content: center;
-  margin-bottom: ${({ keyboardOpen }: ImageProps) =>
-    keyboardOpen ? "0px" : "12px"};
-  overflow: hidden;
-`;
-
-export const Image = styled.Image<ImageProps>`
-  width: ${({ keyboardOpen }: ImageProps) => (keyboardOpen ? "0px" : "30%")};
-  height: ${({ keyboardOpen }: ImageProps) => (keyboardOpen ? "60px" : "90px")};
-  border-radius: 10px;
-`;
-
-export const Title = styled.Text`
-  font-size: ${width < 360 ? "18px" : "22px"};
-  font-weight: bold;
-  color: #fff;
-  text-align: center;
-`;
-
-export const FormArea = styled.View<ImageProps>`
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: ${({ keyboardOpen }: ImageProps) =>
-    keyboardOpen ? "10%" : "32px"};
-`;
-
-export const Footer = styled.View`
-  position: absolute;
-  bottom: 10px;
-  width: 100%;
-  align-items: center;
-  padding: 16px;
-  flex-direction: row;
-  justify-content: space-between;
-`;
-
-export const SocialLoginArea = styled.View`
-  margin-top: 8px;
-  align-items: center;
-`;
-
-export const SocialText = styled.Text`
-  color: #fff;
-  margin-bottom: 10px;
-  font-size: ${width < 360 ? "14px" : "16px"};
-  text-align: center;
-`;
-
-export const SocialButtons = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  gap: 20px;
-`;
-
-export const SocialButton = styled.TouchableOpacity`
-  background-color: ${theme.colors.button};
-  border-radius: 10px;
-  padding: 10px;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const SocialIcon = styled.Image`
-  width: 32px;
-  height: 32px;
-`;
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#00387A",
+  },
+  background: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  backgroundImage: {
+    opacity: 0.22,
+    backgroundColor: "#00387A",
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  safeArea: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 56, 122, 0.82)",
+    zIndex: 1,
+  },
+  innerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    zIndex: 2,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  logoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    marginBottom: 8,
+    shadowColor: "#00387A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  logoText: {
+    fontSize: 34,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+    marginBottom: 2,
+    letterSpacing: 1.2,
+    textShadowColor: "#00387A",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: "#A9CCE3",
+    textAlign: "center",
+    marginBottom: 32,
+    fontWeight: "500",
+    letterSpacing: 0.5,
+  },
+  form: {
+    backgroundColor: "rgba(255,255,255,0.98)",
+    borderRadius: 22,
+    padding: 26,
+    shadowColor: "#00387A",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 18,
+    elevation: 8,
+    marginBottom: 18,
+  },
+  inputWrapper: {
+    borderWidth: 1.5,
+    borderColor: "#A9CCE3",
+    borderRadius: 14,
+    marginBottom: 12,
+    backgroundColor: theme.colors.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    height: 52,
+    shadowColor: "#00387A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  inputWrapperError: {
+    borderColor: "#f44336",
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    height: 48,
+    fontSize: 17,
+    color: theme.colors.button,
+    backgroundColor: "transparent",
+    fontWeight: "500",
+    letterSpacing: 0.2,
+    paddingLeft: 0,
+  },
+  eyeButton: {
+    padding: 4,
+    marginLeft: 4,
+  },
+  errorText: {
+    color: "#f44336",
+    marginBottom: 2,
+    marginLeft: 2,
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  button: {
+    width: "100%",
+    height: 50,
+    backgroundColor: theme.colors.button,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+    marginBottom: 4,
+    elevation: 4,
+    shadowColor: "#00387A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+  },
+  buttonText: {
+    color: theme.colors.primary,
+    fontWeight: "bold",
+    fontSize: 19,
+    letterSpacing: 0.5,
+  },
+  links: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 18,
+    paddingHorizontal: 8,
+    zIndex: 2,
+  },
+  linkButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 2,
+  },
+  linkText: {
+    color: theme.colors.button,
+    fontWeight: "bold",
+    fontSize: 15,
+    textDecorationLine: "underline",
+    letterSpacing: 0.2,
+    opacity: 0.92,
+  },
+});

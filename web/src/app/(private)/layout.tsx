@@ -1,42 +1,44 @@
-"use client";
-import React, { ReactNode, useEffect } from "react";
+"use client"
+import React, { ReactNode, useEffect } from "react"
 
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { SideBar } from "../components/MenuSheet";
-import { redirect } from "next/navigation";
-import { useAuth } from "../context";
-import { getSession } from "next-auth/react";
-import { User } from "../types/User";
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { SideBar } from "../components/MenuSheet"
+import { redirect } from "next/navigation"
+import { useAuth } from "../context"
+import { getSession } from "next-auth/react"
+import { User } from "../types/User"
 
 interface LayoutProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { setUser, setToken } = useAuth();
+  const { setUser, setToken } = useAuth()
 
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const data = await getSession();
-        console.log("data", data);
+        const data = await getSession()
+
         if (data) {
-          setUser(data.user as unknown as User);
-          setToken((data as unknown as { token: string }).token);
+          setUser(data.user as unknown as User)
+          const sessionToken = (data as unknown as { token: string }).token
+          if (sessionToken) {
+            setToken(sessionToken)
+          }
         } else {
-          redirect("/signin");
+          redirect("/signin")
         }
       } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
-        redirect("/signin");
+        redirect("/signin")
       }
-    };
+    }
 
     // Verificar sessão apenas uma vez ao montar
-    checkSession();
+    checkSession()
 
-    return () => {};
-  }, []);
+    return () => {}
+  }, [])
 
   return (
     <div>
@@ -46,5 +48,5 @@ export default function Layout({ children }: LayoutProps) {
         {children}
       </SidebarProvider>
     </div>
-  );
+  )
 }

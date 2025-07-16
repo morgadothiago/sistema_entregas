@@ -1,16 +1,16 @@
 import {
   IsEmail,
-  IsOptional,
-  IsString,
   IsIn,
   IsNumberString,
-} from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
-import { Role, UserStatus } from "@prisma/client";
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Role, UserStatus } from '@prisma/client';
 
 export class IUserQueryParams {
   @ApiProperty({
-    description: "Filter users by status",
+    description: 'Filter users by status',
     required: false,
     enum: UserStatus,
   })
@@ -20,7 +20,7 @@ export class IUserQueryParams {
   status?: UserStatus;
 
   @ApiProperty({
-    description: "Filter users by role",
+    description: 'Filter users by role',
     required: false,
     enum: Role,
   })
@@ -29,24 +29,24 @@ export class IUserQueryParams {
   @IsIn([Role.ADMIN, Role.COMPANY, Role.DELIVERY])
   role?: Role;
 
-  @ApiProperty({ description: "Filter users by email", required: false })
+  @ApiProperty({ description: 'Filter users by email', required: false })
   @IsOptional()
   @IsEmail()
   email?: string;
 
   @ApiProperty({
-    description: "Page number for pagination",
+    description: 'Page number for pagination',
     required: false,
-    default: "1",
+    default: '1',
   })
   @IsOptional()
   @IsNumberString()
   page?: string;
 
   @ApiProperty({
-    description: "Number of items per page",
+    description: 'Number of items per page',
     required: false,
-    default: "100",
+    default: '100',
   })
   @IsOptional()
   @IsNumberString()

@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import api from "@/app/services/api";
-import { useAuth } from "@/app/context";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import api from "@/app/services/api"
+import { useAuth } from "@/app/context"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Loader2,
   UserIcon,
@@ -16,36 +16,35 @@ import {
   Building2,
   FileText,
   Phone,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import type { User } from "@/app/types/User";
-import AddressDisplay from "@/app/components/AndressDisplay";
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import type { User } from "@/app/types/User"
+import AddressDisplay from "@/app/components/AndressDisplay"
 
 export default function UserDetailPage() {
-  const { id } = useParams();
-  const { token } = useAuth();
-  const [userDetail, setUserDetail] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const { id } = useParams()
+  const { token } = useAuth()
+  const [userDetail, setUserDetail] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) return
     const fetchUser = async () => {
       try {
-        if (!id) throw new Error("ID do usuário não encontrado");
-        const response = await api.getUser(id.toString(), token);
+        if (!id) throw new Error("ID do usuário não encontrado")
+        const response = await api.getUser(id.toString(), token)
 
         if (response.status === 500) {
-          console.log("Aqui");
           toast.error("Usuário não encontrado", {
             description:
               "Ocorreu um erro ao buscar os dados do usuário. Por favor, tente novamente mais tarde.",
             duration: 3000,
             position: "top-right",
             richColors: true,
-          });
-          setUserDetail(null);
+          })
+          setUserDetail(null)
         }
 
         if (response.status === 404) {
@@ -55,23 +54,21 @@ export default function UserDetailPage() {
             duration: 3000,
             position: "top-right",
             richColors: true,
-          });
-          setUserDetail(null);
+          })
+          setUserDetail(null)
 
-          return;
+          return
         }
 
-        console.log(response);
-        setUserDetail(response as User);
+        setUserDetail(response as User)
       } catch (error: unknown) {
-        console.error("Erro ao buscar usuário:", error);
-        setUserDetail(null);
+        setUserDetail(null)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    fetchUser();
-  }, [id, token]);
+    }
+    fetchUser()
+  }, [id, token])
 
   if (loading) {
     return (
@@ -92,7 +89,7 @@ export default function UserDetailPage() {
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!userDetail) {
@@ -124,7 +121,7 @@ export default function UserDetailPage() {
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -233,5 +230,5 @@ export default function UserDetailPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

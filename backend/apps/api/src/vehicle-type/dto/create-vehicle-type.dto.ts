@@ -1,17 +1,17 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, IsNumber } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateVehicleTypeDto {
   @ApiProperty({
-    description: "nome do tipo de veiculo",
-    example: "carro",
+    description: 'nome do tipo de veiculo',
+    example: 'carro',
   })
   @IsString()
   @IsNotEmpty()
   type: string;
 
   @ApiProperty({
-    description: "tarifa base do veículo",
+    description: 'tarifa base do veículo',
     example: 100.0,
     type: Number,
   })
@@ -20,7 +20,7 @@ export class CreateVehicleTypeDto {
   tarifaBase: number;
 
   @ApiProperty({
-    description: "valor por KM adicional",
+    description: 'valor por KM adicional',
     example: 10.5,
     type: Number,
   })
@@ -29,20 +29,20 @@ export class CreateVehicleTypeDto {
   valorKMAdicional: number;
 
   @ApiProperty({
-    description: "valor por parada adicional",
+    description: 'valor por parada adicional',
     example: 25.0,
     type: Number,
   })
   @IsNumber()
   @IsNotEmpty()
-  ParadaAdicional: number;
+  paradaAdicional: number;
 
   @ApiProperty({
-    description: "valor por ajudante adicional",
+    description: 'valor por ajudante adicional',
     example: 50.0,
     type: Number,
   })
   @IsNumber()
   @IsNotEmpty()
-  AjudanteAdicional: number;
+  ajudanteAdicional: number;
 }

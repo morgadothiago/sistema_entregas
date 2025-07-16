@@ -1,10 +1,8 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -13,34 +11,27 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { LogOutIcon, User2 } from "lucide-react";
-import { itemAdm, items, itemSupport } from "@/app/utils/menu";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
-import api from "@/app/services/api";
-import { useAuth } from "@/app/context";
-import Image from "next/image";
+} from "@/components/ui/sidebar"
 
-import logo from "@/app/assets/img1.png";
+import { itemAdm, items, itemSupport } from "@/app/utils/menu"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
+import { useAuth } from "@/app/context"
+import Image from "next/image"
+
+import logo from "@/app/assets/img1.png"
 
 export function SideBar() {
-  const { user } = useAuth();
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const router = useRouter();
-  const { setOpenMobile } = useSidebar();
-
-  const handleLogOut = async () => {
-    await signOut({ redirect: false });
-    api.cleanToken();
-    router.push("/signin");
-  };
+  const { user } = useAuth()
+  const [selectedItem, setSelectedItem] = useState<string | null>(null)
+  const router = useRouter()
+  const { setOpenMobile } = useSidebar()
 
   function handleNextPage(itemTitle: string) {
-    setSelectedItem(itemTitle);
-    router.push(`/dashboard/${itemTitle}`);
-    setOpenMobile(false);
+    setSelectedItem(itemTitle)
+    router.push(`/dashboard/${itemTitle}`)
+    setOpenMobile(false)
   }
 
   return (
@@ -113,8 +104,8 @@ export function SideBar() {
                           onClick={() => handleNextPage(item.url)}
                           className="flex items-center p-3 w-full"
                         >
-                          <item.icon className="mr-3 flex-shrink-0 w-5 h-5" />
-                          <span className="text-[15px] font-medium truncate">
+                          <item.icon className="mr-2 flex-shrink-0" />
+                          <span className="text-sm md:text-sm truncate">
                             {item.subTile}
                           </span>
                         </a>
@@ -157,26 +148,7 @@ export function SideBar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="mt-auto pt-6 border-t border-white/10">
-          <div className="flex justify-between gap-3">
-            <Button
-              variant="destructive"
-              onClick={handleLogOut}
-              className="flex items-center flex-1 bg-red-500 hover:bg-red-600 transition-colors duration-200 rounded-xl"
-            >
-              <LogOutIcon className="mr-2 w-5 h-5" />
-              <span className="font-medium">Sair</span>
-            </Button>
-
-            <Button
-              onClick={handleLogOut}
-              className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors duration-200"
-            >
-              <User2 className="w-5 h-5 text-white" />
-            </Button>
-          </div>
-        </SidebarFooter>
       </div>
     </Sidebar>
-  );
+  )
 }

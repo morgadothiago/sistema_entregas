@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { useAuth } from "@/app/context";
-import api from "@/app/services/api";
-import { IUserPaginate, type ERole, type EStatus } from "@/app/types/User";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useAuth } from "@/app/context"
+import api from "@/app/services/api"
+import { IUserPaginate, type ERole, type EStatus } from "@/app/types/User"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Ban,
   CheckCircle2,
@@ -34,44 +34,45 @@ import {
   ArrowRight,
   Users,
   Mail,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+  Trash2,
+} from "lucide-react"
+import { useRouter } from "next/navigation"
 
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+import React, { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 const User: React.FC = () => {
-  const limit = 10;
+  const limit = 10
 
-  const [users, setUsers] = useState<IUserPaginate[]>({} as IUserPaginate[]);
-  const [isLoading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(1);
+  const [users, setUsers] = useState<IUserPaginate[]>([])
+  const [isLoading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(1)
   const [filter, setFilter] = useState<{
-    role?: ERole;
-    status?: EStatus;
-    email?: string;
-  }>({});
-  const [lastPage, setLastPage] = useState(1);
-  const { token } = useAuth();
-  const router = useRouter();
+    role?: ERole
+    status?: EStatus
+    email?: string
+  }>({})
+  const [lastPage, setLastPage] = useState(1)
+  const { token, user: currentUser } = useAuth()
+  const router = useRouter()
 
   function nextPage() {
     setPage((currentPage) =>
-      currentPage < lastPage ? currentPage + 1 : lastPage
-    );
+      currentPage < lastPage ? currentPage + 1 : currentPage
+    )
   }
 
   function previousPage() {
     setPage((currentPage) =>
       currentPage - 1 > 0 ? currentPage - 1 : currentPage
-    );
+    )
   }
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) return
 
-    setLoading(true);
+    setLoading(true)
 
     const fetchUsers = async () => {
       try {
@@ -82,7 +83,7 @@ const User: React.FC = () => {
             limit,
           },
           token
-        );
+        )
 
         if (
           response &&
@@ -93,46 +94,100 @@ const User: React.FC = () => {
           "totalPage" in response &&
           "total" in response
         ) {
-          setUsers(response.data);
-          setPage(response.currentPage);
-          setLastPage(response.totalPage);
-          setTotal(response.total);
+          setUsers(response.data)
+          setPage(response.currentPage)
+          setLastPage(response.totalPage)
+          setTotal(response.total)
         } else if (
           response &&
           typeof response === "object" &&
           "status" in response &&
           response.status === 401
         ) {
-          console.log("Erro de autenticação:", response);
-          toast.error("Sessão expirada. Por favor, faça login novamente.");
+          toast.error("Sessão expirada. Por favor, faça login novamente.")
         } else {
-          console.error("Resposta inesperada da API:", response);
-          toast.error("Erro ao carregar usuários. Resposta inesperada.");
+          toast.error("Erro ao carregar usuários. Resposta inesperada.")
         }
       } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
-        toast.error("Erro ao carregar usuários");
+        console.error("Erro ao buscar usuários:", error)
+        toast.error("Erro ao carregar usuários")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchUsers();
-  }, [token, filter, page]);
+    fetchUsers()
+  }, [token, filter, page])
 
   function onSubmit(data: FormData) {
-    const email = data.get("mail")?.toString() || "";
-    const status = data.get("status")?.toString() || "";
-    const role = data.get("role")?.toString() || "";
+    const email = data.get("mail")?.toString() || ""
+    const status = data.get("status")?.toString() || ""
+    const role = data.get("role")?.toString() || ""
 
-    setPage(1);
+    setPage(1)
     setFilter(() => ({
       ...(email && { email }),
       ...(status &&
         status !== "" &&
         status !== "ALL" && { status: status as EStatus }),
       ...(role && role !== "" && role !== "ALL" && { role: role as ERole }),
-    }));
+    }))
+  }
+
+  const handleDeleteUser = async (userId: number, userName: string) => {
+    if (!token) {
+      toast.error("Token não disponível. Faça login novamente.")
+      return
+    }
+
+    // Verificar se o usuário está tentando deletar a si mesmo
+    if (currentUser?.id === userId) {
+      toast.error("Você não pode deletar sua própria conta!")
+      return
+    }
+
+    const confirmed = window.confirm(
+      `Tem certeza que deseja deletar o usuário "${userName}"?\n\nEsta ação não pode ser desfeita.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      setLoading(true)
+      const response = await api.deleteUser(userId.toString(), token)
+
+      if (response && typeof response === "object" && "status" in response) {
+        if (response.status === 401) {
+          toast.error("Sessão expirada. Por favor, faça login novamente.")
+        } else {
+          toast.error(response.message || "Erro ao deletar usuário")
+        }
+      } else {
+        toast.success(`Usuário "${userName}" foi deletado com sucesso!`)
+
+        // Recarregar a lista de usuários
+        const currentFilters = { page, ...filter, limit }
+        const updatedResponse = await api.getUsers(currentFilters, token)
+
+        if (
+          updatedResponse &&
+          typeof updatedResponse === "object" &&
+          "data" in updatedResponse &&
+          Array.isArray(updatedResponse.data) &&
+          "total" in updatedResponse &&
+          "totalPage" in updatedResponse
+        ) {
+          setUsers(updatedResponse.data)
+          setTotal(updatedResponse.total)
+          setLastPage(updatedResponse.totalPage)
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao deletar usuário:", error)
+      toast.error("Erro ao deletar usuário. Tente novamente.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -398,16 +453,39 @@ const User: React.FC = () => {
                       data-label="Ações"
                       className="px-4 py-3 block sm:table-cell text-right sm:text-left before:content-[attr(data-label)] before:font-semibold before:float-left sm:before:content-none before:mr-2"
                     >
-                      <div className="flex items-center justify-end sm:justify-start w-full min-w-0 flex-wrap">
+                      <div className="flex items-center justify-end sm:justify-start w-full min-w-0 flex-wrap gap-2">
                         <Button
                           variant="link"
                           onClick={() => {
-                            router.push(`/dashboard/user/${user.id}`);
+                            router.push(`/dashboard/user/${user.id}`)
                           }}
                           className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-[#003873] hover:bg-[#003873]/5 transition-colors duration-200"
                         >
                           <Eye className="w-4 h-4 mr-1.5" />
                           Ver detalhes
+                        </Button>
+                        <Button
+                          variant="link"
+                          onClick={() =>
+                            handleDeleteUser(
+                              user.id,
+                              user.name || "Usuário sem nome"
+                            )
+                          }
+                          className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                            currentUser?.id === user.id
+                              ? "text-gray-400 cursor-not-allowed opacity-50"
+                              : "text-red-600 hover:bg-red-50 hover:text-red-700"
+                          }`}
+                          disabled={isLoading || currentUser?.id === user.id}
+                          title={
+                            currentUser?.id === user.id
+                              ? "Você não pode deletar sua própria conta"
+                              : "Deletar usuário"
+                          }
+                        >
+                          <Trash2 className="w-4 h-4 mr-1.5" />
+                          Deletar
                         </Button>
                       </div>
                     </TableCell>
@@ -457,7 +535,7 @@ const User: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default User;
+export default User

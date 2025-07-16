@@ -5,20 +5,20 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from "@nestjs/websockets";
+} from '@nestjs/websockets';
 
-import { Server, Socket } from "socket.io";
-import { PrismaService } from "../prisma/prisma.service";
-import { JwtService } from "@nestjs/jwt";
-import { Logger } from "@nestjs/common";
-import { User } from "@prisma/client";
+import { Server, Socket } from 'socket.io';
+import { PrismaService } from '../prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { Logger } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 @WebSocketGateway(2000, {
-  namespace: "gps",
-  transports: ["websocket"],
+  namespace: 'gps',
+  transports: ['websocket'],
   pingTimeout: 10000,
   cors: {
-    origin: "*",
+    origin: '*',
   },
 })
 export class GpsGateway
@@ -31,7 +31,7 @@ export class GpsGateway
 
   constructor(
     private prismaService: PrismaService,
-    private jwt: JwtService
+    private jwt: JwtService,
   ) {}
 
   getClient(socketId: string): Socket | undefined {
@@ -41,24 +41,24 @@ export class GpsGateway
   afterInit(server: Server) {
     this.server = server;
     server.use((socket, next): void => {
-      const token = (socket.handshake.auth["token"] as string)?.split(" ")?.[1];
+      const token = (socket.handshake.auth['token'] as string)?.split(' ')?.[1];
 
       if (!token) {
-        next(new Error("Authentication error"));
+        next(new Error('Authentication error'));
         return;
       }
 
       this.authorize(token)
         .then((isAuthorized) => {
           if (!isAuthorized) {
-            return next(new Error("Unauthorized"));
+            return next(new Error('Unauthorized'));
           }
           (socket as { data: User }).data = isAuthorized;
           next();
         })
         .catch((error) => {
-          this.logger.error("Authorization error:", error);
-          next(new Error("Authentication error"));
+          this.logger.error('Authorization error:', error);
+          next(new Error('Authentication error'));
         });
     });
   }
@@ -66,7 +66,7 @@ export class GpsGateway
   emitRoom(
     roomCode: string,
     event: string,
-    data: { latitude: number; longitude: number }
+    data: { latitude: number; longitude: number },
   ) {
     this.server.to(roomCode).emit(event, data);
   }
@@ -78,7 +78,7 @@ export class GpsGateway
     }
   }
 
-  @SubscribeMessage("joinRoom")
+  @SubscribeMessage('joinRoom')
   async handleJoinRoom(client: Socket, roomCode: string) {
     await this.leaveAllRooms(client);
 
@@ -86,14 +86,14 @@ export class GpsGateway
     this.logger.log(`Client ${client.id} joined room ${roomCode}`);
 
     // Envia confirmação apenas para este cliente
-    client.emit("roomMessage", `Você entrou na room ${roomCode}`);
+    client.emit('roomMessage', `Você entrou na room ${roomCode}`);
 
     // Envia mensagem para todos na room (exceto o próprio cliente)
     client
       .to(roomCode)
-      .emit("roomMessage", `Novo usuário entrou na room ${roomCode}`);
+      .emit('roomMessage', `Novo usuário entrou na room ${roomCode}`);
 
-    return { event: "roomJoined", data: roomCode };
+    return { event: 'roomJoined', data: roomCode };
   }
 
   private async leaveAllRooms(client: Socket) {
@@ -104,12 +104,12 @@ export class GpsGateway
         if (room !== client.id) {
           return client.leave(room);
         }
-      })
+      }),
     );
   }
 
   handleDisconnect(client: { id: string }) {
-    this.logger.log("Client disconnected", client.id);
+    this.logger.log('Client disconnected', client.id);
 
     delete this.connectedSockets[client.id];
   }
@@ -123,25 +123,25 @@ export class GpsGateway
         select: { id: true, status: true },
       })) as User;
 
-      if (user && user.status !== "ACTIVE") {
+      if (user && user.status !== 'ACTIVE') {
         return null;
       }
 
       return user;
     } catch (error) {
-      this.logger.error("Token verification failed:", error);
+      this.logger.error('Token verification failed:', error);
       return null;
     }
   }
 
   handleConnection(client: { id: string; data: User }) {
-    this.logger.log("Client connected", client.id);
+    this.logger.log('Client connected', client.id);
 
     this.connectedSockets.set(client.id, client as Socket);
   }
 
-  @SubscribeMessage("message")
+  @SubscribeMessage('message')
   handleMessage(): string {
-    return "Hello world!";
+    return 'Hello world!';
   }
 }

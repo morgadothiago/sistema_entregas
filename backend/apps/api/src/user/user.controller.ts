@@ -6,14 +6,14 @@ import {
   Param,
   Query,
   UseGuards,
-} from "@nestjs/common";
-import { AdminGuard } from "../admin/admin.guard";
-import { UserService } from "./user.service";
-import { IUserQueryParams } from "./dto/filter";
-import { ApiTags } from "@nestjs/swagger";
+} from '@nestjs/common';
+import { AdminGuard } from '../admin/admin.guard';
+import { UserService } from './user.service';
+import { IUserQueryParams } from './dto/filter';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller("users")
-@ApiTags("Users")
+@Controller('users')
+@ApiTags('Users')
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -24,13 +24,13 @@ export class UserController {
     return this.userService.paginate(
       filters,
       +Math.max(Number(filters.page) || 1, 1),
-      +Math.max(Number(filters.limit) || 100, 1)
+      +Math.max(Number(filters.limit) || 100, 1),
     );
   }
 
-  @Get(":id")
+  @Get(':id')
   @UseGuards(AdminGuard)
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
   }
 }
