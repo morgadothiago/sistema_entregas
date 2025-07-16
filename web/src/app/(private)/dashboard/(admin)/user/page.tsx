@@ -173,7 +173,9 @@ const User: React.FC = () => {
           updatedResponse &&
           typeof updatedResponse === "object" &&
           "data" in updatedResponse &&
-          Array.isArray(updatedResponse.data)
+          Array.isArray(updatedResponse.data) &&
+          "total" in updatedResponse &&
+          "totalPage" in updatedResponse
         ) {
           setUsers(updatedResponse.data)
           setTotal(updatedResponse.total)

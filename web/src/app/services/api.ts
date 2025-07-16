@@ -18,6 +18,7 @@ import { signOut } from "next-auth/react"
 interface IErrorResponse {
   message: string
   status: number
+  data?: any
 }
 
 class ApiService {
@@ -68,33 +69,22 @@ class ApiService {
 
   private async getError(error: AxiosError<any>): Promise<IErrorResponse> {
     console.error("=== ERRO DA API ===")
-    console.error("Status:", error.status)
-    console.error("Response data:", error.response?.data)
-    console.error("Response status:", error.response?.status)
-    console.error("Response headers:", error.response?.headers)
+    if (error.response) {
+      console.error("Status:", error.response.status)
+      console.error("Data:", error.response.data)
+      if (error.response.data?.message) {
+        console.error("Detalhes:", error.response.data.message)
+      }
+    } else {
+      console.error("Erro sem resposta do servidor:", error.message)
+    }
     console.error("===================")
 
-    const status = error.status || error.response?.status
-    const message = error.response?.data?.message || "Erro desconhecido"
-
-    if (status === 422) {
-      return { message, status }
+    return {
+      status: error.response?.status ?? 500,
+      message: error.response?.data?.message ?? error.message,
+      data: error.response?.data,
     }
-    if (status === 409) {
-      return { message, status }
-    }
-    if (status === 401) {
-      try {
-        await signOut({ redirect: true, redirectTo: "/signin" })
-      } catch (e) {
-        console.error("Erro ao fazer signOut:", e)
-      }
-      return { message, status: 401 }
-    }
-    if (status === 500) {
-      return { message, status: 500 }
-    }
-    return { message, status: status || 500 }
   }
 
   async getUsers(
@@ -192,6 +182,40 @@ class ApiService {
         },
       })
       .then(this.getResponse<void>)
+      .catch(this.getError)
+  }
+
+  async getAndressCompony(token: string) {
+    return this.api
+      .get("/delivery/me", {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+  async AddNewDelivery(data: any, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .post("/delivery", data, {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+
+  async simulateDelivery(data: any, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .post("/delivery/simulate", data, {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
       .catch(this.getError)
   }
 
