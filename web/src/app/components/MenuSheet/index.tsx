@@ -19,8 +19,7 @@ import { useRouter } from "next/navigation"
 
 import { useAuth } from "@/app/context"
 import Image from "next/image"
-
-import logo from "@/app/assets/img1.png"
+import logoMarcaSimbol from "../../../../public/Logo.png"
 
 export function SideBar() {
   const { user } = useAuth()
@@ -35,20 +34,29 @@ export function SideBar() {
   }
 
   return (
-    <Sidebar className="flex-1 flex h-screen shadow-xl transition-all duration-300 ease-in-out">
+    <Sidebar className="flex-1 flex h-screen shadow-xl transition-all duration-300 ease-in-out ">
       <div className="bg-gradient-to-b from-[#003B73] via-[#2E86C1] to-[#5DADE2] flex-1 flex flex-col p-6">
-        <SidebarHeader className="bg-none mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="w-[60px] h-[60px] rounded-xl overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300">
+        <SidebarHeader className="">
+          <div className="flex flex-col items-center justify-center gap-2 py-4 px-2  animate-fade-in transition-all duration-500">
+            <div className="w-16 h-16 rounded-2xl  flex items-center justify-center">
               <Image
-                src={logo}
-                alt="Logo"
-                className="w-full h-full object-cover"
+                src={logoMarcaSimbol}
+                alt="Logo da empresa"
+                className="w-12 h-12 "
+                aria-label="Logo da empresa"
+                title="Logo da empresa"
+                priority
               />
             </div>
-            <h1 className="text-white font-bold text-2xl tracking-tight">
+            <h1
+              className="text-white font-black text-xl md:text-2xl tracking-tight text-center max-w-[220px] break-words whitespace-normal leading-tight"
+              title="Nome da empresa"
+            >
               Nome da empresa
             </h1>
+            <span className="text-white/80 text-xs text-center max-w-[140px] truncate italic font-light">
+              Entregando com agilidade
+            </span>
           </div>
         </SidebarHeader>
         <SidebarContent className="overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
