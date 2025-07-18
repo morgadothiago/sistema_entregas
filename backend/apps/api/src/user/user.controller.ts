@@ -24,7 +24,7 @@ export class UserController {
     return this.userService.paginate(
       filters,
       +Math.max(Number(filters.page) || 1, 1),
-      +Math.max(Number(filters.limit) || 100, 1)
+      +Math.max(Number(filters.limit) || 100, 1),
     );
   }
 
