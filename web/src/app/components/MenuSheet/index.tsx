@@ -3,6 +3,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -21,6 +22,8 @@ import { useAuth } from "@/app/context"
 import Image from "next/image"
 
 import logo from "@/app/assets/img1.png"
+import { Button } from "@/components/ui/button"
+import { LogOutIcon, User2 } from "lucide-react"
 
 export function SideBar() {
   const { user } = useAuth()
@@ -148,25 +151,6 @@ export function SideBar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="mt-auto pt-6 border-t border-white/10">
-          <div className="flex justify-between gap-3">
-            <Button
-              variant="destructive"
-              onClick={handleLogOut}
-              className="flex items-center flex-1 bg-red-500 hover:bg-red-600 transition-colors duration-200 rounded-xl"
-            >
-              <LogOutIcon className="mr-2 w-5 h-5" />
-              <span className="font-medium">Sair</span>
-            </Button>
-
-            <Button
-              onClick={handleLogOut}
-              className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 transition-colors duration-200"
-            >
-              <User2 className="w-5 h-5 text-white" />
-            </Button>
-          </div>
-        </SidebarFooter>
       </div>
     </Sidebar>
   )
