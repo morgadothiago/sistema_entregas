@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger"
 import {
   IsNotEmpty,
   IsNumber,
@@ -6,21 +6,21 @@ import {
   IsString,
   Max,
   Min,
-} from 'class-validator';
+} from "class-validator"
 
 export class UpdateVehicleTypeDto {
   @ApiProperty({
     required: false,
-    description: 'nome do tipo de veiculo',
-    example: 'carro',
+    description: "nome do tipo de veiculo",
+    example: "carro",
   })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  type?: string;
+  type?: string
 
   @ApiProperty({
-    description: 'tarifa base do veículo',
+    description: "tarifa base do veículo",
     minimum: 0,
     maximum: 999.99,
     example: 100.0,
@@ -32,10 +32,10 @@ export class UpdateVehicleTypeDto {
   @Max(999.99)
   @Min(0)
   @IsNotEmpty()
-  tarifaBase?: number;
+  tarifaBase?: number
 
   @ApiProperty({
-    description: 'valor por KM adicional',
+    description: "valor por KM adicional",
     minimum: 0,
     maximum: 999.99,
     example: 10.5,
@@ -47,10 +47,10 @@ export class UpdateVehicleTypeDto {
   @Max(999.99)
   @Min(0)
   @IsNotEmpty()
-  valorKMAdicional?: number;
+  valorKMAdicional?: number
 
   @ApiProperty({
-    description: 'valor por parada adicional',
+    description: "valor por parada adicional",
     minimum: 0,
     maximum: 999.99,
     example: 25.0,
@@ -62,10 +62,10 @@ export class UpdateVehicleTypeDto {
   @Max(999.99)
   @Min(0)
   @IsNotEmpty()
-  paradaAdicional?: number;
+  paradaAdicional?: number
 
   @ApiProperty({
-    description: 'valor por ajudante adicional',
+    description: "valor por ajudante adicional",
     example: 50.0,
     minimum: 0,
     maximum: 999.99,
@@ -77,5 +77,5 @@ export class UpdateVehicleTypeDto {
   @IsNotEmpty()
   @Max(999.99)
   @Min(0)
-  ajudanteAdicional?: number;
+  ajudanteAdicional?: number
 }

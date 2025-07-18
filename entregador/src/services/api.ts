@@ -1,7 +1,6 @@
 import Axios from "axios"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Platform } from "react-native"
-import { showErrorToast } from "../utils/toast"
 
 export const api = Axios.create({
   baseURL: "http://192.168.100.96:8080",
@@ -59,12 +58,10 @@ api.interceptors.response.use(
         await AsyncStorage.removeItem("@auth:token")
         await AsyncStorage.removeItem("@auth:user")
         setAuthToken(null)
-        showErrorToast("Usuário ou senha inválidos.")
       } catch (storageError) {
         console.error("Erro ao limpar dados de autenticação:", storageError)
       }
     } else {
-      showErrorToast("Erro ao fazer login. Tente novamente mais tarde.")
     }
     return Promise.reject(error)
   }

@@ -21,10 +21,9 @@ export function TextInput({
   classNameInput,
   ...rest
 }: TextInputProps) {
-  const inputBaseClasses =
-    "w-full p-3 rounded-lg bg-white text-sm border transition-all duration-200"
-  const inputFocusClasses =
-    "focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent"
+  // Create a new object without classNameInput to pass to Input component
+  const inputProps = { ...rest }
+  delete (inputProps as any).classNameInput
 
   return (
     <div className={className}>
@@ -38,10 +37,14 @@ export function TextInput({
           </div>
         )}
         <Input
-          className={`${inputBaseClasses} ${icon ? "pl-10" : ""} ${
-            classNameInput || ""
-          } ${inputFocusClasses} border-gray-200`}
-          {...rest}
+          className={`w-full border ${
+            classNameInput ? classNameInput : "border-blue-500"
+          } rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 ease-in-out ${classNameInput} ${
+            classNameInput && classNameInput.includes("error")
+              ? "border-red-500"
+              : "border-blue-500"
+          } ${icon ? "pl-10" : ""}`}
+          {...inputProps}
         />
       </div>
       {error && (

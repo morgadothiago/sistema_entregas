@@ -1,17 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-"use client";
+"use client"
 
-import { Plus, Loader } from "lucide-react";
-import Link from "next/link";
-import React, { useActionState } from "react";
-import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import type { SignInFormData } from "../types/SingInType";
-import { TextInput } from "../components/TextInput";
-import { ActionState, loginRequester } from "../actions/login";
-import { redirect, RedirectType } from "next/navigation";
-import { loginValidation } from "../schema/login.schema";
+import { Plus, Loader } from "lucide-react"
+import Link from "next/link"
+import React, { useActionState } from "react"
+import { Button } from "@/components/ui/button"
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
+import type { SignInFormData } from "../types/SingInType"
+import { TextInput } from "../components/TextInput"
+import { ActionState, loginRequester } from "../actions/login"
+import { redirect, RedirectType } from "next/navigation"
+import { loginValidation } from "../schema/login.schema"
+import bannerLogin from "../../../public/banner_login.png"
+import FundoBg from "../../../public/fundo.png"
 
 export default function SignInPage() {
   const [actionState, action, isPending] = useActionState<
@@ -21,36 +23,36 @@ export default function SignInPage() {
     message: "",
     error: "",
     success: false,
-  });
+  })
 
   const {
     register,
     setError,
     setFocus,
     formState: { errors },
-  } = useForm<SignInFormData>();
+  } = useForm<SignInFormData>()
 
   React.useEffect(() => {
     Object.keys(loginValidation.fields).forEach((key) => {
       setError(key as keyof SignInFormData, {
         type: "manual",
         message: "",
-      });
-    });
+      })
+    })
 
     if (actionState.error) {
-      let message = "Erro ao realizar login!";
+      let message = "Erro ao realizar login!"
 
       if (typeof actionState.error !== "string") {
-        message = actionState.error.message;
-        const name = actionState.error.path as keyof SignInFormData;
+        message = actionState.error.message
+        const name = actionState.error.path as keyof SignInFormData
 
         setError(name, {
           type: "manual",
           message: actionState.error.message,
-        });
+        })
 
-        setFocus(name, { shouldSelect: true });
+        setFocus(name, { shouldSelect: true })
       }
 
       toast.error("Credenciais invalidas", {
@@ -58,9 +60,9 @@ export default function SignInPage() {
         duration: 3000,
         position: "top-right",
         richColors: true,
-      });
+      })
 
-      return;
+      return
     }
 
     if (actionState.success) {
@@ -69,32 +71,50 @@ export default function SignInPage() {
         duration: 3000,
         position: "top-right",
         richColors: true,
-      });
+      })
 
-      redirect("/dashboard", RedirectType.replace);
+      redirect("/dashboard", RedirectType.replace)
     }
-  }, [actionState]);
+  }, [actionState])
 
   return (
-    <div className="flex flex-col lg:flex-row">
-      <div className="hidden lg:flex w-[50%] bg-gradient-to-b from-[#003B73] to-[#5DADE2] h-screen flex-col justify-between p-10">
-        <div className="flex flex-col mb-10 text-center md:text-left">
-          <h1 className="text-white text-3xl md:text-4xl font-bold">Login</h1>
-          <h3 className="text-white text-lg sm:text-base">
-            Entre com suas credenciais
-          </h3>
-        </div>
-        <div className="flex items-center justify-center">
+    <div className="flex flex-col lg:flex-row overflow-hidden">
+      <div
+        className="hidden lg:flex w-[598px] h-screen flex-col justify-center items-center relative overflow-hidden "
+        style={{
+          backgroundImage: `url(${bannerLogin.src})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Div para botão de cadastro no final, centralizado */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center w-full px-10">
           <Link
             href="/signup"
-            className="flex gap-2.5 py-2 items-center justify-center"
+            className="flex gap-2.5 py-2 items-center justify-center bg-gradient-to-r from-cyan-400 to-blue-600 shadow-lg hover:scale-105 hover:shadow-xl focus:ring-4 focus:ring-cyan-300/60 rounded-xl px-8 text-white font-bold text-lg transition-all duration-200 outline-none ring-0 drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]"
+            style={{
+              boxShadow:
+                "0 4px 24px 0 rgba(56,189,248,0.25), 0 0 16px 2px rgba(56,189,248,0.4)",
+            }}
           >
-            <Plus className="text-white" />
-            <h4 className="text-white font-bold text-lg ">Cadastra-se</h4>
+            <Plus className="text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.7)]" />
+            <span className="drop-shadow-[0_0_6px_rgba(56,189,248,0.7)]">
+              Cadastrar-se
+            </span>
           </Link>
         </div>
       </div>
-      <div className="flex items-center justify-center w-full h-screen p-4 bg-gray-50">
+      <div
+        className="flex items-center justify-center w-full h-screen p-4 bg-whiteD "
+        style={{
+          backgroundImage: `url(${FundoBg.src})`,
+          backgroundSize: "contain",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          width: "100%",
+          padding: "10%",
+        }}
+      >
         <form
           className="flex flex-col w-full max-w-md p-6 bg-white rounded-xl shadow-lg gap-6 border border-gray-100"
           action={action}
@@ -152,5 +172,5 @@ export default function SignInPage() {
         </form>
       </div>
     </div>
-  );
+  )
 }
