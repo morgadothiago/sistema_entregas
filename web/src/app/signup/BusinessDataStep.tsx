@@ -57,7 +57,7 @@ export function BusinessDataStep() {
           className="w-full"
           placeholder="Digite o nome da empresa"
           icon={<Building2 className="w-5 h-5 text-gray-400" />}
-          classNameInput="border border-gray-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent transition-all duration-200 bg-white text-sm"
+          classNameInput=""
           {...register("name", { required: true })}
         />
         {errors.name && (
@@ -86,7 +86,7 @@ export function BusinessDataStep() {
             className="w-full"
             placeholder="00.000.000/0000-00"
             icon={<FileText className="w-5 h-5 text-gray-400" />}
-            classNameInput="border border-gray-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent transition-all duration-200 bg-white text-sm"
+            classNameInput=""
             {...registerWithMask("cnpj", {
               mask: ["99.999.999/9999-99"] as string[],
               required: true,
@@ -117,7 +117,7 @@ export function BusinessDataStep() {
             className="w-full"
             placeholder="(00) 00000-0000"
             icon={<Phone className="w-5 h-5 text-gray-400" />}
-            classNameInput="border border-gray-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent transition-all duration-200 bg-white text-sm"
+            classNameInput=""
             {...registerWithMask("phone", {
               mask: ["(99) 99999-9999"] as string[],
               required: true,
@@ -149,7 +149,7 @@ export function BusinessDataStep() {
           className="w-full"
           placeholder="Digite o tipo de negócio"
           icon={<Store className="w-5 h-5 text-gray-400" />}
-          classNameInput="border border-gray-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent transition-all duration-200 bg-white text-sm"
+          classNameInput=""
           {...register("businessType", { required: true })}
         />
         {errors.businessType && (

@@ -1,16 +1,16 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FieldError } from "react-hook-form";
+import React from "react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { FieldError } from "react-hook-form"
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  labelName: string;
-  className: string;
-  placeholder?: string;
-  error?: FieldError | undefined;
-  required?: boolean; // Corrected 'require' to 'required'
-  classNameInput?: string;
-  icon?: React.ReactNode;
+  labelName: string
+  className?: string
+  placeholder?: string
+  error?: FieldError | undefined
+  required?: boolean
+  classNameInput?: string
+  icon?: React.ReactNode
 }
 
 export function TextInput({
@@ -21,9 +21,10 @@ export function TextInput({
   classNameInput,
   ...rest
 }: TextInputProps) {
-  // Create a new object without classNameInput to pass to Input component
-  const inputProps = { ...rest };
-  delete (inputProps as any).classNameInput;
+  const inputBaseClasses =
+    "w-full p-3 rounded-lg bg-white text-sm border transition-all duration-200"
+  const inputFocusClasses =
+    "focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent"
 
   return (
     <div className={className}>
@@ -37,21 +38,17 @@ export function TextInput({
           </div>
         )}
         <Input
-          className={`w-full border ${
-            classNameInput ? classNameInput : "border-blue-500"
-          } rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200 ease-in-out ${classNameInput} ${
-            classNameInput && classNameInput.includes("error")
-              ? "border-red-500"
-              : "border-blue-500"
-          } ${icon ? "pl-10" : ""}`}
-          {...inputProps}
+          className={`${inputBaseClasses} ${icon ? "pl-10" : ""} ${
+            classNameInput || ""
+          } ${inputFocusClasses} border-gray-200`}
+          {...rest}
         />
       </div>
       {error && (
-        <span className="text-red-500 text-sm text-left w-full">
+        <span className="text-red-500 text-sm text-left w-full mt-1">
           {error.message}
         </span>
       )}
     </div>
-  );
+  )
 }

@@ -44,12 +44,48 @@ export default function SignIn() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: { email: "", password: "" },
-  });
+    setError,
+  } = useForm();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { login, isAuthenticated } = useAuth();
 
-  const onSubmit = async (data: { email: string; password: string }) => {
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [buttonDisabled, setButtonDisabled] = useState(false);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () =>
+      setKeyboardOpen(true)
+    );
+    const hideSub = Keyboard.addListener("keyboardDidHide", () =>
+      setKeyboardOpen(false)
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const emailRef = useRef<TextInput>(null);
+
+  const handleLogin = async (data: any) => {
     setLoading(true);
     try {
       await login(data, navigation);
@@ -63,58 +99,76 @@ export default function SignIn() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ImageBackground source={backImg as any} style={styles.background}>
-          <SafeAreaView style={styles.safeArea}>
-            <View style={styles.overlay} />
-            <View style={styles.innerContainer}>
-              <View style={styles.logoContainer}>
-                <Image source={Logo as any} style={styles.logoImage} />
-                <Text style={styles.logoText}>Entrar</Text>
-              </View>
-              <Text style={styles.subtitle}>Bem-vindo de volta!</Text>
-              <View style={styles.form}>
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({
-                    field: { onChange, value },
-                    fieldState: { error },
-                  }) => (
-                    <View
-                      style={[
-                        styles.inputWrapper,
-                        error && styles.inputWrapperError,
-                      ]}
-                    >
-                      <Ionicons
-                        name="mail-outline"
-                        size={22}
-                        color={error ? "#f44336" : "#A9CCE3"}
-                        style={styles.inputIcon}
-                      />
-                      <TextInput
-                        style={styles.input}
-                        placeholder="E-mail"
-                        placeholderTextColor="#A9CCE3"
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                        value={value}
-                        onChangeText={onChange}
-                        returnKeyType="next"
-                        onSubmitEditing={() => senhaRef.current?.focus()}
-                        editable={!loading}
-                        autoFocus
-                      />
-                      {error && (
-                        <Text style={styles.errorText}>{error.message}</Text>
-                      )}
-                    </View>
-                  )}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <GradientBackground>
+        <>
+          {!keyboardVisible && (
+            <ImageContainer>
+              <Image source={Logo} resizeMode="cover" />
+            </ImageContainer>
+          )}
+
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+          >
+            <FormArea keyboardOpen={keyboardOpen}>
+              <Input
+                label="E-mail"
+                error={errors.email?.message}
+                formProps={{
+                  name: "email",
+                  control,
+                  rules: {
+                    required: "Email e obrigatorio",
+                  },
+                }}
+                inputProps={{
+                  placeholder: "Email",
+                  placeholderTextColor: "#FFF",
+                  onSubmitEditing: () => emailRef.current?.focus(),
+                  returnKeyType: "next",
+                  autoCapitalize: "none",
+                }}
+                icon="user"
+              />
+
+              <Input
+                label="Senha"
+                error={errors.password?.message}
+                ref={emailRef}
+                formProps={{
+                  name: "password",
+                  control,
+                  rules: {
+                    required: "Senha e obrigatorio",
+                  },
+                }}
+                inputProps={{
+                  placeholder: "Password",
+                  placeholderTextColor: "#FFF",
+                  onSubmitEditing: handleSubmit(handleLogin),
+                  secureTextEntry: true,
+                  autoCapitalize: "none",
+                }}
+                icon="lock"
+              />
+
+              <Button
+                onPress={handleSubmit(handleLogin)}
+                disabled={loading}
+                loading={loading}
+                label="Entrar"
+              />
+            </FormArea>
+          </KeyboardAvoidingView>
+
+          <SocialLoginArea>
+            <SocialButtons>
+              <SocialButton>
+                <AntDesign
+                  name="apple1"
+                  size={24}
+                  color={theme.colors.buttonText}
                 />
 
                 <Controller
