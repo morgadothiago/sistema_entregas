@@ -1,67 +1,43 @@
-import styled from "styled-components/native";
-import { Dimensions, Platform } from "react-native";
+import { StyleSheet } from "react-native";
 import { theme } from "../../global/theme";
 
-const { width, height } = Dimensions.get("window");
-
-type InputProps = {
-  $hasError?: boolean;
-};
-
-export const Container = styled.View`
-  width: 100%;
-  padding: ${height * 0.02}px ${width * 0.03}px;
-  margin-bottom: -20px;
-`;
-
-export const FormArea = styled.View<InputProps>`
-  width: 100%;
-  height: 56px;
-  background-color: ${theme.colors.buttonText};
-
-  flex-direction: row;
-  align-items: center;
-  border-radius: 12px;
-  overflow: hidden;
-`;
-
-export const Icon = styled.View`
-  width: ${width * 0.14}px;
-  height: 100%;
-
-  align-items: center;
-  justify-content: center;
-`;
-export const IconBox = styled.View`
-  width: 56px;
-  height: 56px;
-
-  align-items: center;
-  justify-content: center;
-`;
-
-export const Inputs = styled.TextInput`
-  flex: 1;
-  padding-left: 10px;
-  height: 56px;
-  color: ${theme.colors.text};
-  font-size: ${width * 0.035}px;
-`;
-
-export const Label = styled.Text`
-  color: ${theme.colors.button};
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 5px;
-
-  margin-left: 5px;
-`;
-
-export const ErrorTitle = styled.Text`
-  font-size: 14px;
-  color: #dc1637;
-  margin-top: 7px;
-  font-weight: bold;
-  margin-left: 5px;
-  margin-top: 2px;
-`;
+export const styles = StyleSheet.create({
+  containerInput: {
+    marginBottom: 16,
+  },
+  labelInput: {
+    fontSize: 16,
+    marginBottom: 4,
+    color: theme.colors.button,
+  },
+  input: {
+    width: "100%",
+    height: 52,
+    borderWidth: 1,
+    borderColor: theme.colors.gray[300],
+    color: theme.colors.button,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.primary,
+    fontSize: 18,
+    shadowColor: theme.colors.gray[900],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: 2,
+  },
+  inputFocused: {
+    borderColor: "#4A90E2",
+    borderWidth: 2,
+    shadowColor: "#4A90E2",
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  errorText: {
+    marginTop: 4,
+    color: theme.colors.error,
+    fontSize: 12,
+  },
+});

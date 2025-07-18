@@ -1,28 +1,20 @@
 import React from "react";
-import { ActivityIndicator } from "react-native";
-import { ButtonContainer, ButtonText } from "./styles";
-import { theme } from "../../global/theme";
 
-type ButtonProps = {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-  loading?: boolean;
+import {
+  Text,
+  TouchableOpacity,
+  type TouchableOpacityProps,
+} from "react-native";
+import { styles } from "./styles";
+
+type props = TouchableOpacityProps & {
+  title: string;
 };
 
-export function Button({
-  label,
-  onPress,
-  disabled = false,
-  loading = false,
-}: ButtonProps) {
+export default function Button({ title, ...rest }: props) {
   return (
-    <ButtonContainer onPress={onPress} disabled={disabled || loading}>
-      {loading ? (
-        <ActivityIndicator size="small" color={theme.colors.buttonText} />
-      ) : (
-        <ButtonText>{label}</ButtonText>
-      )}
-    </ButtonContainer>
+    <TouchableOpacity style={styles.container} activeOpacity={0.7} {...rest}>
+      <Text style={styles.btnTitle}>{title}</Text>
+    </TouchableOpacity>
   );
 }

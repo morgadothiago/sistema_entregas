@@ -11,16 +11,17 @@
       "backgroundColor": "#00439A"
     },
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/adaptive-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#00439A"
-    },
+    "splash": {},
     "ios": {
       "supportsTablet": true,
       "icon": "./assets/ios-light.png"
     },
     "android": {
+      "permissions": [
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_WIFE_STATE",
+        "INTERNET"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#00439A"

@@ -13,9 +13,40 @@ interface ShowToastProps {
 export const showAppToast = ({
   message,
   title = "",
-  type = "default", // use "default" para não exibir ícone
+  type = "default",
   duration = 3000,
 }: ShowToastProps) => {
+  const getToastStyles = (toastType: ToastType) => {
+    switch (toastType) {
+      case "success":
+        return {
+          backgroundColor: "#4CAF50", // Verde
+          borderColor: "#45a049",
+          textColor: "#fff",
+        };
+      case "danger":
+        return {
+          backgroundColor: "#f44336", // Vermelho
+          borderColor: "#d32f2f",
+          textColor: "#fff",
+        };
+      case "warning":
+        return {
+          backgroundColor: "#ff9800", // Laranja
+          borderColor: "#f57c00",
+          textColor: "#fff",
+        };
+      default:
+        return {
+          backgroundColor: theme.colors.buttonText,
+          borderColor: theme.colors.button,
+          textColor: theme.colors.button,
+        };
+    }
+  };
+
+  const styles = getToastStyles(type);
+
   ToastService.show({
     message,
     title,
@@ -26,28 +57,32 @@ export const showAppToast = ({
     messageStyle: {
       textAlign: "center",
       fontSize: 16,
-      color: theme.colors.button,
+      color: styles.textColor,
       fontWeight: "500",
     },
     titleStyle: {
-      color: theme.colors.button,
+      color: styles.textColor,
       fontSize: 18,
       fontWeight: "bold",
     },
     contentContainerStyle: {
-      backgroundColor: theme.colors.buttonText,
+      backgroundColor: styles.backgroundColor,
+      borderColor: styles.borderColor,
+      borderWidth: 1,
       borderRadius: 8,
       marginTop: 30,
+      paddingVertical: 16,
+      paddingHorizontal: 24,
     },
   });
 };
+
 export const showErrorToast = (message: string, title = "Erro") => {
   ToastService.show({
     title,
     message,
     type: "danger",
     animation: "slideRight",
-
     position: "top",
     duration: 4000,
     titleStyle: {
@@ -59,8 +94,8 @@ export const showErrorToast = (message: string, title = "Erro") => {
       textAlign: "center",
     },
     contentContainerStyle: {
-      backgroundColor: theme.colors.buttonText,
-      borderColor: theme.colors.Error,
+      backgroundColor: "#f44336", // Vermelho
+      borderColor: "#d32f2f",
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,

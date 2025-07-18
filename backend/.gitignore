@@ -10,10 +10,14 @@
 !.yarn/releases
 !.yarn/versions
 
+#prisma
+
+/generated
+.prisma/client
+
 # testing
 /coverage
 DOCKER/.data
-/.data
 # next.js
 /.next/
 /out/
