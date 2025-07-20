@@ -27,7 +27,7 @@ export const items = [
   {
     title: "delivryDetails",
     subTile: "Detalhes da entrega",
-    url: "/deliveryDetails",
+    url: "/delivery",
     icon: Car,
   },
   {
