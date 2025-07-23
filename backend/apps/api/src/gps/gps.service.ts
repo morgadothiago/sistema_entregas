@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { GpsGateway } from './gps.gateway';
 import { DeliveryStatus } from '@prisma/client';
 import { SocketDto } from '../websocket/dto/socket.dto';
+import { ILocalization } from '../typing/location';
 
 @Injectable()
 export class GpsService implements OnModuleInit {
@@ -17,7 +18,7 @@ export class GpsService implements OnModuleInit {
     private gpsWebsocket: GpsGateway,
   ) {}
 
-  onModuleInit() {
+  onModuleInit(): void {
     ['JWT_SECRET', 'JWT_EXPIRATION'].forEach((env) => {
       if (!process.env[env]) {
         throw new Error(`Variável de ambiente ${env} não definida`);
@@ -39,6 +40,12 @@ export class GpsService implements OnModuleInit {
 
     const delivery = await this.prisma.delivery.findUnique({
       where: { code },
+      omit: {
+        createdAt: true,
+        updatedAt: true,
+        idClientAddress: true,
+        idOriginAddress: true,
+      },
       include: {
         DeliveryMan: {
           select: {
@@ -56,14 +63,31 @@ export class GpsService implements OnModuleInit {
       );
     }
 
+    const routes = await this.prisma.$queryRawUnsafe<ILocalization[]>(
+      `
+      SELECT
+        ST_X(coord::geometry) as longitude,
+        ST_Y(coord::geometry) as latitude 
+        FROM "routes" 
+        WHERE delivery_id = $1
+    `,
+      delivery.id,
+    );
+
     if (client) {
       await this.gpsWebsocket.handleJoinRoom(client, code);
     }
 
+    (
+      delivery as unknown as {
+        Routes: ILocalization[];
+      }
+    ).Routes = routes;
+
     return delivery;
   }
 
-  async createLocation(code: string, body: CurrencyLocationDto) {
+  async createLocation(code: string, body: CurrencyLocationDto): Promise<void> {
     const { latitude, longitude } = body;
 
     const delivery = await this.prisma.delivery.findUnique({
@@ -90,15 +114,10 @@ export class GpsService implements OnModuleInit {
 
     await this.prisma.$queryRawUnsafe<{ id: number }[]>(
       `
-      INSERT INTO "Address" (city, state, street, number, "zipCode", localization, deliveryId)
-      VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326), $8)
+      INSERT INTO "routes" (coord, delivery_id)
+      VALUES (ST_SetSRID(ST_MakePoint($1, $2), 4326), $3)
       RETURNING id
       `,
-      'city',
-      'state',
-      'address',
-      'number',
-      'zipCode',
       longitude,
       latitude,
       delivery.id,

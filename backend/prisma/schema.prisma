@@ -225,7 +225,7 @@ model Router {
   createdAt  DateTime                              @default(now())
   updatedAt  DateTime                              @default(now()) @updatedAt
   Delivery   Delivery?                             @relation(fields: [deliveryId], references: [id])
-  deliveryId Int?
+  deliveryId Int? @map("delivery_id")
 
   @@map("routes")
 }
