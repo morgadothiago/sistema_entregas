@@ -124,8 +124,8 @@ export class VehicleTypeService {
       type: body.type,
       tarifaBase: new Decimal(body.tarifaBase),
       valorKMAdicional: new Decimal(body.valorKMAdicional),
-      paradaAdicional: new Decimal(body.paradaAdicional),
-      ajudanteAdicional: new Decimal(body.ajudanteAdicional),
+      paradaAdicional: new Decimal((body.paradaAdicional as number) ?? 0),
+      ajudanteAdicional: new Decimal((body.ajudanteAdicional as number) ?? 0),
     };
 
     await this.prisma.vehicleType.create({
