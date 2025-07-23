@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import api from "@/app/services/api";
-import { useAuth } from "@/app/context";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import api from "@/app/services/api"
+import { useAuth } from "@/app/context"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Loader2,
   UserIcon,
@@ -16,36 +16,45 @@ import {
   Building2,
   FileText,
   Phone,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import type { User } from "@/app/types/User";
-import AddressDisplay from "@/app/components/AndressDisplay";
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import type { User } from "@/app/types/User"
+import { EStatus } from "@/app/types/User"
+import AddressDisplay from "@/app/components/AndressDisplay"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function UserDetailPage() {
-  const { id } = useParams();
-  const { token } = useAuth();
-  const [userDetail, setUserDetail] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const { id } = useParams()
+
+  const { token } = useAuth()
+  const [userDetail, setUserDetail] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [statusLoading, setStatusLoading] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) return
     const fetchUser = async () => {
       try {
-        if (!id) throw new Error("ID do usuário não encontrado");
-        const response = await api.getUser(id.toString(), token);
-
+        if (!id) throw new Error("ID do usuário não encontrado")
+        const response = await api.getUser(id.toString(), token)
+        console.log(response)
         if (response.status === 500) {
-          console.log("Aqui");
           toast.error("Usuário não encontrado", {
             description:
               "Ocorreu um erro ao buscar os dados do usuário. Por favor, tente novamente mais tarde.",
             duration: 3000,
             position: "top-right",
             richColors: true,
-          });
-          setUserDetail(null);
+          })
+          setUserDetail(null)
         }
 
         if (response.status === 404) {
@@ -55,23 +64,51 @@ export default function UserDetailPage() {
             duration: 3000,
             position: "top-right",
             richColors: true,
-          });
-          setUserDetail(null);
+          })
+          setUserDetail(null)
 
-          return;
+          return
         }
 
-        console.log(response);
-        setUserDetail(response as User);
+        setUserDetail(response as User)
       } catch (error: unknown) {
-        console.error("Erro ao buscar usuário:", error);
-        setUserDetail(null);
+        setUserDetail(null)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    fetchUser();
-  }, [id, token]);
+    }
+    fetchUser()
+  }, [id, token])
+
+  const handleStatusChange = async (newStatus: EStatus) => {
+    if (!userDetail || !token) return
+
+    setStatusLoading(true)
+    try {
+      // Aqui você pode adicionar a chamada da API para atualizar o status
+      // const response = await api.updateUserStatus(userDetail.id, newStatus, token)
+
+      // Por enquanto, vamos apenas atualizar o estado local
+      setUserDetail((prev) => (prev ? { ...prev, status: newStatus } : null))
+
+      toast.success("Status atualizado com sucesso!", {
+        description: `Status do usuário foi alterado para ${newStatus}`,
+        duration: 3000,
+        position: "top-right",
+        richColors: true,
+      })
+    } catch (error) {
+      toast.error("Erro ao atualizar status", {
+        description:
+          "Não foi possível atualizar o status do usuário. Tente novamente.",
+        duration: 3000,
+        position: "top-right",
+        richColors: true,
+      })
+    } finally {
+      setStatusLoading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -92,7 +129,7 @@ export default function UserDetailPage() {
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!userDetail) {
@@ -124,7 +161,7 @@ export default function UserDetailPage() {
           </Card>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -168,9 +205,35 @@ export default function UserDetailPage() {
                 <span className="text-sm font-medium text-gray-500 flex items-center gap-2">
                   <Activity className="w-4 h-4 text-[#5DADE2]" /> Status
                 </span>
-                <span className="text-gray-900 text-base bg-gray-50 p-2 rounded-md">
-                  {userDetail.status ?? "Ativo"}
-                </span>
+                <Select
+                  value={userDetail.status ?? EStatus.ACTIVE}
+                  onValueChange={handleStatusChange}
+                  disabled={statusLoading}
+                >
+                  <SelectTrigger className="text-gray-900 text-base bg-gray-50 border-gray-200 hover:bg-gray-100 transition-colors">
+                    <SelectValue placeholder="Selecione o status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={EStatus.ACTIVE}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        Ativo
+                      </div>
+                    </SelectItem>
+                    <SelectItem value={EStatus.INACTIVE}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                        Inativo
+                      </div>
+                    </SelectItem>
+                    <SelectItem value={EStatus.BLOCKED}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        Bloqueado
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -233,5 +296,5 @@ export default function UserDetailPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

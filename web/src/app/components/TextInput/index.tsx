@@ -1,16 +1,16 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { FieldError } from "react-hook-form";
+import React from "react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { FieldError } from "react-hook-form"
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  labelName: string;
-  className: string;
-  placeholder?: string;
-  error?: FieldError | undefined;
-  required?: boolean; // Corrected 'require' to 'required'
-  classNameInput?: string;
-  icon?: React.ReactNode;
+  labelName: string
+  className?: string
+  placeholder?: string
+  error?: FieldError | undefined
+  required?: boolean
+  classNameInput?: string
+  icon?: React.ReactNode
 }
 
 export function TextInput({
@@ -22,8 +22,8 @@ export function TextInput({
   ...rest
 }: TextInputProps) {
   // Create a new object without classNameInput to pass to Input component
-  const inputProps = { ...rest };
-  delete (inputProps as any).classNameInput;
+  const inputProps = { ...rest }
+  delete (inputProps as any).classNameInput
 
   return (
     <div className={className}>
@@ -48,10 +48,10 @@ export function TextInput({
         />
       </div>
       {error && (
-        <span className="text-red-500 text-sm text-left w-full">
+        <span className="text-red-500 text-sm text-left w-full mt-1">
           {error.message}
         </span>
       )}
     </div>
-  );
+  )
 }

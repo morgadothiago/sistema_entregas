@@ -18,7 +18,7 @@ export function AccessDataStep() {
           className="w-full"
           placeholder="Digite seu email"
           icon={<Mail className="w-5 h-5 text-gray-400" />}
-          classNameInput="border border-gray-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent transition-all duration-200 bg-white text-sm"
+          classNameInput=""
           {...register("email", { required: true })}
         />
         {errors.email && (
@@ -47,7 +47,7 @@ export function AccessDataStep() {
           className="w-full"
           placeholder="Digite sua senha"
           icon={<Lock className="w-5 h-5 text-gray-400" />}
-          classNameInput="border border-gray-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent transition-all duration-200 bg-white text-sm"
+          classNameInput=""
           {...register("password", { required: true })}
         />
         {errors.password && (
@@ -76,7 +76,7 @@ export function AccessDataStep() {
           className="w-full"
           placeholder="Confirme sua senha"
           icon={<Shield className="w-5 h-5 text-gray-400" />}
-          classNameInput="border border-gray-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5DADE2] focus:border-transparent transition-all duration-200 bg-white text-sm"
+          classNameInput=""
           {...register("confirmPassword", { required: true })}
         />
         {errors.confirmPassword && (

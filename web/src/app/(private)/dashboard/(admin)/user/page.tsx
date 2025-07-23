@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { useAuth } from "@/app/context";
-import api from "@/app/services/api";
-import { IUserPaginate, type ERole, type EStatus } from "@/app/types/User";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useAuth } from "@/app/context"
+import api from "@/app/services/api"
+import { IUserPaginate, type ERole, type EStatus } from "@/app/types/User"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -19,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Ban,
   CheckCircle2,
@@ -35,44 +35,44 @@ import {
   Users,
   Mail,
   Trash2,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+} from "lucide-react"
+import { useRouter } from "next/navigation"
 
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
+import React, { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 const User: React.FC = () => {
-  const limit = 10;
+  const limit = 10
 
-  const [users, setUsers] = useState<IUserPaginate[]>([]);
-  const [isLoading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(1);
+  const [users, setUsers] = useState<IUserPaginate[]>([])
+  const [isLoading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(1)
   const [filter, setFilter] = useState<{
-    role?: ERole;
-    status?: EStatus;
-    email?: string;
-  }>({});
-  const [lastPage, setLastPage] = useState(1);
-  const { token, user: currentUser } = useAuth();
-  const router = useRouter();
+    role?: ERole
+    status?: EStatus
+    email?: string
+  }>({})
+  const [lastPage, setLastPage] = useState(1)
+  const { token, user: currentUser } = useAuth()
+  const router = useRouter()
 
   function nextPage() {
     setPage((currentPage) =>
       currentPage < lastPage ? currentPage + 1 : currentPage
-    );
+    )
   }
 
   function previousPage() {
     setPage((currentPage) =>
       currentPage - 1 > 0 ? currentPage - 1 : currentPage
-    );
+    )
   }
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) return
 
-    setLoading(true);
+    setLoading(true)
 
     const fetchUsers = async () => {
       try {
@@ -83,7 +83,7 @@ const User: React.FC = () => {
             limit,
           },
           token
-        );
+        )
 
         if (
           response &&
@@ -94,99 +94,101 @@ const User: React.FC = () => {
           "totalPage" in response &&
           "total" in response
         ) {
-          setUsers(response.data);
-          setPage(response.currentPage);
-          setLastPage(response.totalPage);
-          setTotal(response.total);
+          setUsers(response.data)
+          setPage(response.currentPage)
+          setLastPage(response.totalPage)
+          setTotal(response.total)
         } else if (
           response &&
           typeof response === "object" &&
           "status" in response &&
           response.status === 401
         ) {
-          toast.error("Sessão expirada. Por favor, faça login novamente.");
+          toast.error("Sessão expirada. Por favor, faça login novamente.")
         } else {
-          toast.error("Erro ao carregar usuários. Resposta inesperada.");
+          toast.error("Erro ao carregar usuários. Resposta inesperada.")
         }
       } catch (error) {
-        console.error("Erro ao buscar usuários:", error);
-        toast.error("Erro ao carregar usuários");
+        console.error("Erro ao buscar usuários:", error)
+        toast.error("Erro ao carregar usuários")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchUsers();
-  }, [token, filter, page]);
+    fetchUsers()
+  }, [token, filter, page])
 
   function onSubmit(data: FormData) {
-    const email = data.get("mail")?.toString() || "";
-    const status = data.get("status")?.toString() || "";
-    const role = data.get("role")?.toString() || "";
+    const email = data.get("mail")?.toString() || ""
+    const status = data.get("status")?.toString() || ""
+    const role = data.get("role")?.toString() || ""
 
-    setPage(1);
+    setPage(1)
     setFilter(() => ({
       ...(email && { email }),
       ...(status &&
         status !== "" &&
         status !== "ALL" && { status: status as EStatus }),
       ...(role && role !== "" && role !== "ALL" && { role: role as ERole }),
-    }));
+    }))
   }
 
   const handleDeleteUser = async (userId: number, userName: string) => {
     if (!token) {
-      toast.error("Token não disponível. Faça login novamente.");
-      return;
+      toast.error("Token não disponível. Faça login novamente.")
+      return
     }
 
     // Verificar se o usuário está tentando deletar a si mesmo
     if (currentUser?.id === userId) {
-      toast.error("Você não pode deletar sua própria conta!");
-      return;
+      toast.error("Você não pode deletar sua própria conta!")
+      return
     }
 
     const confirmed = window.confirm(
       `Tem certeza que deseja deletar o usuário "${userName}"?\n\nEsta ação não pode ser desfeita.`
-    );
+    )
 
-    if (!confirmed) return;
+    if (!confirmed) return
 
     try {
-      setLoading(true);
-      const response = await api.deleteUser(userId.toString(), token);
+      setLoading(true)
+      const response = await api.deleteUser(userId.toString(), token)
 
       if (response && typeof response === "object" && "status" in response) {
         if (response.status === 401) {
-          toast.error("Sessão expirada. Por favor, faça login novamente.");
+          toast.error("Sessão expirada. Por favor, faça login novamente.")
         } else {
-          toast.error(response.message || "Erro ao deletar usuário");
+          toast.error(response.message || "Erro ao deletar usuário")
         }
       } else {
-        toast.success(`Usuário "${userName}" foi deletado com sucesso!`);
+        toast.success(`Usuário "${userName}" foi deletado com sucesso!`)
 
         // Recarregar a lista de usuários
-        const currentFilters = { page, ...filter, limit };
-        const updatedResponse = await api.getUsers(currentFilters, token);
+        const currentFilters = { page, ...filter, limit }
+        const updatedResponse = await api.getUsers(currentFilters, token)
 
         if (
           updatedResponse &&
           typeof updatedResponse === "object" &&
           "data" in updatedResponse &&
-          Array.isArray(updatedResponse.data)
+          Array.isArray(updatedResponse.data) &&
+          "total" in updatedResponse &&
+          "totalPage" in updatedResponse
         ) {
-          setUsers(updatedResponse.data);
-          setTotal(updatedResponse.total);
-          setLastPage(updatedResponse.totalPage);
+          setUsers(updatedResponse.data)
+          setTotal(updatedResponse.total)
+          setLastPage(updatedResponse.totalPage)
         }
       }
     } catch (error) {
-      console.error("Erro ao deletar usuário:", error);
-      toast.error("Erro ao deletar usuário. Tente novamente.");
+      console.error("Erro ao deletar usuário:", error)
+      toast.error("Erro ao deletar usuário. Tente novamente.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -455,7 +457,7 @@ const User: React.FC = () => {
                         <Button
                           variant="link"
                           onClick={() => {
-                            router.push(`/dashboard/user/${user.id}`);
+                            router.push(`/dashboard/user/${user.id}`)
                           }}
                           className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium text-[#003873] hover:bg-[#003873]/5 transition-colors duration-200"
                         >
@@ -533,7 +535,7 @@ const User: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default User;
+export default User

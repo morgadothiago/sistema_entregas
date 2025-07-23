@@ -1,15 +1,15 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React from "react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  labelName: string;
-  className?: string; // Made optional to allow for default styling
-  placeholder?: string;
-  required?: boolean;
-  classNameInput?: string;
-  labelColor?: string; // New prop for dynamic label color
-  inputBorderColor?: string; // New prop for dynamic input border color
+  labelName: string
+  className?: string // Made optional to allow for default styling
+  placeholder?: string
+  required?: boolean
+  classNameInput?: string
+  labelColor?: string // New prop for dynamic label color
+  inputBorderColor?: string // New prop for dynamic input border color
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
@@ -21,8 +21,8 @@ export const TextInput: React.FC<TextInputProps> = ({
   ...rest
 }) => {
   // Create a new object without classNameInput to pass to Input component
-  const inputProps = { ...rest };
-  delete (inputProps as any).classNameInput;
+  const inputProps = { ...rest }
+  delete (inputProps as any).classNameInput
 
   return (
     <div className={`flex flex-col ${className}`}>
@@ -36,5 +36,5 @@ export const TextInput: React.FC<TextInputProps> = ({
         {...inputProps}
       />
     </div>
-  );
-};
+  )
+}

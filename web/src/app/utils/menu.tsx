@@ -7,8 +7,8 @@ import {
   Bell,
   Mail,
   Settings,
-} from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+} from "lucide-react"
+import { FaWhatsapp } from "react-icons/fa"
 
 export const items = [
   {
@@ -42,14 +42,14 @@ export const items = [
     url: "/dashboard/notifications",
     icon: Bell,
   },
-];
+]
 
 export const itemAdm = [
   {
-    title: "/admin/delivery",
-    subTile: "Configuração de entregas",
-    url: "/delivery",
-    icon: Settings,
+    title: "/admin/type-vehicle",
+    subTile: "Tipo de veiculos",
+    url: "/type-vehicle",
+    icon: Car,
   },
   {
     title: "/admin/listuser",
@@ -57,7 +57,7 @@ export const itemAdm = [
     url: "/user",
     icon: User,
   },
-];
+]
 
 export const itemSupport = [
   {
@@ -74,4 +74,4 @@ export const itemSupport = [
     },
     icon: FaWhatsapp,
   },
-];
+]

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState } from "react"
 import {
   View,
   Text,
@@ -12,18 +12,18 @@ import {
   SafeAreaView,
   Image,
   Keyboard,
-} from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import Logo from "../../../assets/ios-light.png";
-import backImg from "../../../assets/SplashScreen.png";
-import { theme } from "../../global/theme";
-import { styles } from "./styles";
-import { api } from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigation } from "@react-navigation/native";
+} from "react-native"
+import { useForm, Controller } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
+import Logo from "../../../assets/ios-light.png"
+import backImg from "../../../assets/SplashScreen.png"
+import { theme } from "../../global/theme"
+import { styles } from "./styles"
+import { api } from "../../services/api"
+import { useAuth } from "../../context/AuthContext"
+import { useNavigation } from "@react-navigation/native"
 
 // Schema de validação
 const schema = yup.object({
@@ -32,14 +32,14 @@ const schema = yup.object({
     .string()
     .min(4, "Mínimo 4 caracteres")
     .required("Senha obrigatória"),
-});
+})
 
 export default function SignIn() {
-  const senhaRef = useRef<TextInput>(null);
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
-  const navigation = useNavigation();
+  const senhaRef = useRef<TextInput>(null)
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const { login } = useAuth()
+  const navigation = useNavigation()
   const {
     control,
     handleSubmit,
@@ -47,20 +47,20 @@ export default function SignIn() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { email: "", password: "" },
-  });
+  })
 
   const onSubmit = async (data: { email: string; password: string }) => {
-    setLoading(true);
+    setLoading(true)
     try {
-      await login(data, navigation);
-      console.log(data);
+      await login(data, navigation)
+      console.log(data)
     } catch (error) {
-      console.error("Erro no login:", error);
-      alert("Erro ao fazer login. Tente novamente.");
+      console.error("Erro no login:", error)
+      alert("Erro ao fazer login. Tente novamente.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -215,5 +215,5 @@ export default function SignIn() {
         </ImageBackground>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
-  );
+  )
 }

@@ -1,45 +1,46 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import api from "../services/api";
-import { useRouter } from "next/navigation";
-import { BusinessDataStep } from "./BusinessDataStep";
-import { AddressStep } from "./AddressStep";
-import { AccessDataStep } from "./AccessDataStep";
-import { unmaskInput } from "../util/unmaskInput";
-import type { ICreateUser } from "../types/User";
+import React, { useState } from "react"
+import { useForm, FormProvider, SubmitHandler } from "react-hook-form"
+import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import api from "../services/api"
+import { useRouter } from "next/navigation"
+import { BusinessDataStep } from "./BusinessDataStep"
+import { AddressStep } from "./AddressStep"
+import { AccessDataStep } from "./AccessDataStep"
+import { unmaskInput } from "../util/unmaskInput"
+import type { ICreateUser } from "../types/User"
+import FundoBg from "../../../public/fundo.png"
 
 type FormData = {
-  companyName: string;
-  cnpj: string;
-  email: string;
-  password: string;
-  address: string;
-  number: string;
-  complement: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  phone: string;
-};
+  companyName: string
+  cnpj: string
+  email: string
+  password: string
+  address: string
+  number: string
+  complement: string
+  city: string
+  state: string
+  zipCode: string
+  phone: string
+}
 
 export default function SignUpPage() {
-  const [step, setStep] = useState(1);
-  const methods = useForm<FormData>();
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState(1)
+  const methods = useForm<FormData>()
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleBack = () => {
-    if (step > 1) setStep((prev) => prev - 1);
-  };
+    if (step > 1) setStep((prev) => prev - 1)
+  }
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (step < 3) {
-      setStep((prev) => prev + 1);
-      return;
+      setStep((prev) => prev + 1)
+      return
     }
 
     // Último passo: enviar dados
@@ -49,16 +50,12 @@ export default function SignUpPage() {
       zipCode: unmaskInput(data.zipCode),
       phone: unmaskInput(data.phone),
       cnpj: unmaskInput(data.cnpj),
-    };
+    }
 
-    console.log(unmaskedData);
-
-    setIsLoading(true);
+    setIsLoading(true)
 
     try {
-      const response = await api.newUser(unmaskedData);
-
-      console.log(response);
+      const response = await api.newUser(unmaskedData)
 
       if (response && "status" in response) {
         if (response.status === 409) {
@@ -66,33 +63,32 @@ export default function SignUpPage() {
             duration: 3000,
             position: "top-right",
             richColors: true,
-          });
+          })
         }
 
-        return;
+        return
       }
 
       toast.success("Cadastro realizado com sucesso!", {
         duration: 3000,
         position: "top-right",
         richColors: true,
-      });
+      })
 
-      setIsLoading(false);
+      setIsLoading(false)
 
       setTimeout(() => {
-        router.push("/signin");
-      }, 1500);
+        router.push("/signin")
+      }, 1500)
     } catch (error) {
-      console.log(error);
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center py-6 px-4 sm:py-8 sm:px-6 lg:px-8">
-      <div className="w-full max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-100">
+    <div className="min-h-screen h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-1xl mx-auto ">
+        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-100 max-h-[95vh] overflow-auto">
           <div className="text-center mb-6">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               Cadastro de Empresa
@@ -245,5 +241,5 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import * as React from "react";
+import * as React from "react"
 import {
   Table,
   TableHeader,
@@ -8,22 +8,22 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 
-import type { EStatus } from "@/app/types/User";
-import { Mail } from "lucide-react";
+import type { EStatus } from "@/app/types/User"
+import { Mail } from "lucide-react"
 
 interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: EStatus;
+  id: number
+  name: string
+  email: string
+  role: string
+  status: EStatus
 }
 
 export default function UserTable() {
   // Estado local para refletir mudanças imediatamente
-  const [userList, setUserList] = React.useState<User[]>([]);
+  const [userList, setUserList] = React.useState<User[]>([])
 
   const handleStatusChange = async (userId: number, newStatus: EStatus) => {
     try {
@@ -32,27 +32,24 @@ export default function UserTable() {
         prev.map((user) =>
           user.id === userId ? { ...user, status: newStatus } : user
         )
-      );
-
-      // Simule chamada à API (substitua pelo seu fetch real)
-      console.log(`Status do usuário ${userId} alterado para ${newStatus}`);
+      )
     } catch (error) {
-      console.error("Erro ao atualizar status:", error);
+      // Remover todos os console.log
     }
-  };
+  }
 
   const formatStatus = (status?: string) => {
     switch (status) {
       case "ACTIVE":
-        return "Ativo";
+        return "Ativo"
       case "INACTIVE":
-        return "Inativo";
+        return "Inativo"
       case "BLOCKED":
-        return "Bloqueado";
+        return "Bloqueado"
       default:
-        return "Desconhecido";
+        return "Desconhecido"
     }
-  };
+  }
 
   return (
     <div className="rounded-2xl border shadow-xl overflow-hidden bg-white">
@@ -237,5 +234,5 @@ export default function UserTable() {
         ))}
       </div>
     </div>
-  );
+  )
 }
