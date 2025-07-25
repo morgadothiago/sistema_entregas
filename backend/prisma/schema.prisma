@@ -79,8 +79,8 @@ model VehicleType {
   type              String    @unique
   tarifaBase        Decimal   @map("tarifa_base") @db.Decimal(5, 2)
   valorKMAdicional  Decimal   @map("valor_km_adicional") @db.Decimal(5, 2)
-  paradaAdicional   Decimal   @map("parada_adicional") @db.Decimal(5, 2)
-  ajudanteAdicional Decimal   @map("ajudante_adicional") @db.Decimal(5, 2)
+  paradaAdicional   Decimal   @map("parada_adicional") @db.Decimal(5, 2) @default(0)
+  ajudanteAdicional Decimal   @map("ajudante_adicional") @db.Decimal(5, 2) @default(0)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
   vehicle           Vehicle[]
@@ -225,7 +225,7 @@ model Router {
   createdAt  DateTime                              @default(now())
   updatedAt  DateTime                              @default(now()) @updatedAt
   Delivery   Delivery?                             @relation(fields: [deliveryId], references: [id])
-  deliveryId Int?
+  deliveryId Int? @map("delivery_id")
 
   @@map("routes")
 }

@@ -18,7 +18,10 @@ export class GpsController {
 
   @Get('delivery/:code')
   @HttpCode(HttpStatus.OK)
-  async getLocation(@Param('code') code: string, @Query() socket: SocketDto) {
+  async getLocation(
+    @Param('code') code: string,
+    @Query() socket: SocketDto,
+  ): Promise<any> {
     return this.gpsService.getLocation(code, socket);
   }
 
@@ -27,7 +30,7 @@ export class GpsController {
   createLocation(
     @Body() body: CurrencyLocationDto,
     @Param('code') code: string,
-  ) {
+  ): Promise<void> {
     return this.gpsService.createLocation(code, body);
   }
 }
