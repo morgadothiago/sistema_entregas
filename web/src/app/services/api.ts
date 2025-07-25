@@ -14,6 +14,7 @@ import type {
 import type { VehicleType, VehicleTypePaginate } from "../types/VehicleType"
 import { IPaginateResponse } from "../types/Paginate"
 import { signOut } from "next-auth/react"
+import { Delivery } from "../types/DeliveryTypes"
 
 interface IErrorResponse {
   message: string
@@ -216,6 +217,22 @@ class ApiService {
         },
       })
       .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+  async getDeliveryDetail(
+    code: string,
+    token: string
+  ): Promise<Delivery | IErrorResponse> {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .get(`/gps/delivery/${code}`, {
+        params: { socketId: "123456" },
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<Delivery>)
       .catch(this.getError)
   }
 
