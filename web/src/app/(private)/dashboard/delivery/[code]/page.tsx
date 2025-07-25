@@ -28,7 +28,7 @@ export default function page() {
     socket.on("disconnect", () => {
       console.log("Socket disconnected")
     })
-    socket.on("message", (data) => {
+    socket.on("menssage", (data) => {
       console.log("Socket message received:", data)
     })
 
