@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   DeliveryCreateDto,
@@ -7,10 +8,12 @@ import { DeliverySimulateDto } from './dto/delivery-simulate.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { VehicleTypeService } from '../vehicle-type/vehicle-type.service';
 import { LocationService } from '../location/location.service';
-import { VehicleType } from '@prisma/client';
-import { createCode } from '../utils/fn';
+import { Prisma, VehicleType } from '@prisma/client';
+import { createCode, paginateResponse } from '../utils/fn';
 import { CacheService } from '../cache/cache.service';
 import { DeliverySimulationResponseDto } from './dto/delivery-simulation-response.dto';
+import { DeliveryQueryParams } from './dto/filters.dto';
+import { DeliveryPaginateResponse } from './dto/delivery-paginate-response.dto';
 
 @Injectable()
 export class DeliveryService {
@@ -20,6 +23,99 @@ export class DeliveryService {
     private locationService: LocationService,
     private cacheService: CacheService,
   ) {}
+
+  async paginate(
+    filter: DeliveryQueryParams,
+    page: number,
+    limit: number,
+  ): Promise<DeliveryPaginateResponse> {
+    const where: Prisma.DeliveryWhereInput = {
+      ...(filter.code && {
+        code: {
+          contains: filter.code,
+          mode: 'insensitive',
+        },
+      }),
+      ...(filter.status && {
+        status: filter.status,
+      }),
+      ...(filter.vehicleType && {
+        vehicleType: filter.vehicleType,
+      }),
+      ...(filter.isFragile !== undefined && {
+        isFragile: filter.isFragile === 'true',
+      }),
+      ...((filter.minPrice || filter.maxPrice) && {
+        price: {
+          ...(filter.minPrice && { gte: parseFloat(filter.minPrice) }),
+          ...(filter.maxPrice && { lte: parseFloat(filter.maxPrice) }),
+        },
+      }),
+      ...((filter.completedFrom || filter.completedTo) && {
+        completedAt: {
+          ...(filter.completedFrom && { gte: new Date(filter.completedFrom) }),
+          ...(filter.completedTo && { lte: new Date(filter.completedTo) }),
+        },
+      }),
+      ...(filter.originCity && {
+        OriginAddress: {
+          city: {
+            contains: filter.originCity,
+            mode: 'insensitive',
+          },
+        },
+      }),
+      ...(filter.clientCity && {
+        ClientAddress: {
+          city: {
+            contains: filter.clientCity,
+            mode: 'insensitive',
+          },
+        },
+      }),
+      ...(filter.user?.role !== 'ADMIN' && {
+        Company: {
+          User: {
+            id: filter.user.id,
+          },
+        },
+      }),
+    };
+
+    const [data, count] = await Promise.all([
+      this.prismaService.delivery.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        omit: {
+          id: true,
+          idClientAddress: true,
+          idOriginAddress: true,
+          createdAt: true,
+          updatedAt: true,
+          deliveryManId: true,
+          companyId: true,
+        },
+        include: {
+          Company: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
+      this.prismaService.delivery.count({
+        where,
+      }),
+    ]);
+
+    return paginateResponse(
+      data,
+      page,
+      limit,
+      count,
+    ) as unknown as DeliveryPaginateResponse;
+  }
 
   async simulateDelivery(
     body: DeliverySimulateDto,
