@@ -221,12 +221,13 @@ class ApiService {
   }
   async getDeliveryDetail(
     code: string,
-    token: string
+    token: string,
+    socketId: string
   ): Promise<Delivery | IErrorResponse> {
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
     return this.api
       .get(`/gps/delivery/${code}`, {
-        params: { socketId: "123456" },
+        params: { socketId },
         headers: {
           authorization: authToken,
           "Content-Type": "application/json",
