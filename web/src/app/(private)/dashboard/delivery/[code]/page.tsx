@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/app/context"
 import api from "@/app/services/api"
-import { Delivery } from "@/app/types/DeliveryTypes"
+import { Delivery, DeliveryRoutes } from "@/app/types/DeliveryTypes"
 import { useParams } from "next/navigation"
 import React, { use, useEffect, useState } from "react"
 import useWebSocket, { ReadyState } from "react-use-websocket"
@@ -24,6 +24,7 @@ export default function page() {
   const { token } = useAuth()
   const { code } = useParams<{ code: string }>()
   const [deliveryDetails, setDeliveryDetails] = useState<Delivery | null>(null)
+  const [routes, setRoutes] = useState<[number, number][]>([])
 
   useEffect(() => {
     if (!token) return
@@ -42,8 +43,8 @@ export default function page() {
     socket.on("disconnect", () => {
       console.log("Socket disconnected")
     })
-    socket.on("menssage", (data) => {
-      console.log("Socket message received:", data)
+    socket.on("update-location", (data: DeliveryRoutes) => {
+      setRoutes((routes) => [...routes, [data.latitude, data.longitude]])
     })
 
     const fetchDeliveryDetail = async () => {
@@ -52,20 +53,29 @@ export default function page() {
         token as string,
         socket.id as string
       )
-      if ("error" in response) {
+      console.log(socket.id, "Socket ID")
+
+      if ("message" in response) {
         toast.error("Erro ao carregar detalhes da entrega")
-      } else {
-        toast.success("Dados recebidos com sucesso!", {
-          description: "Você pode ver os detalhes da entrega",
-          duration: 3000,
-          position: "top-right",
-          richColors: true,
-        })
-        setDeliveryDetails(response as Delivery)
+        return
       }
+      toast.success("Dados recebidos com sucesso!", {
+        description: "Você pode ver os detalhes da entrega",
+        duration: 3000,
+        position: "top-right",
+        richColors: true,
+      })
+      setDeliveryDetails(response as Delivery)
+      setRoutes(
+        response.Routes.map((r) => [Number(r.latitude), Number(r.longitude)])
+      )
+
       console.log("Delivery Detail:", response)
     }
   }, [token])
+
+  console.log("Delivery Details: ckient", deliveryDetails?.ClientAddress)
+  console.log("Delivery Details: Origim", deliveryDetails?.OriginAddress)
 
   return (
     <div className="flex flex-col md:flex-row gap-6 w-full max-w-5xl mx-auto">
@@ -158,17 +168,15 @@ export default function page() {
                 {deliveryDetails?.Routes &&
                 deliveryDetails.Routes.length > 0 ? (
                   <LeafletMap
-                    route={deliveryDetails.Routes.map((r) => {
-                      const lat = Number(r.latitude)
-                      const lng = Number(r.longitude)
-                      return [lat, lng] as [number, number]
-                    }).filter(
-                      (coords): coords is [number, number] =>
-                        Array.isArray(coords) &&
-                        coords.length === 2 &&
-                        !isNaN(coords[0]) &&
-                        !isNaN(coords[1])
-                    )}
+                    route={routes}
+                    addressOrigem={{
+                      latitude: deliveryDetails.OriginAddress.latitude,
+                      longitude: deliveryDetails.OriginAddress.longitude,
+                    }}
+                    clientAddress={{
+                      latitude: deliveryDetails.ClientAddress.latitude,
+                      longitude: deliveryDetails.ClientAddress.longitude,
+                    }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-muted-foreground text-sm">

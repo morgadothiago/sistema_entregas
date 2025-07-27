@@ -1,3 +1,5 @@
+import { DeliveryMan } from "./DeliveryMan"
+
 export interface Delivery {
   id: number
   code: string
@@ -15,8 +17,10 @@ export interface Delivery {
   completedAt?: string
   deliveryManId?: number
   vehicleType: string // ajuste conforme os tipos disponíveis
-  DeliveryMan?: any // pode ser um tipo mais detalhado se necessário
+  DeliveryMan?: DeliveryMan // pode ser um tipo mais detalhado se necessário
   Routes: DeliveryRoutes[] // idem acima, defina um tipo se houver estrutura conhecida
+  ClientAddress: DeliveryRoutes
+  OriginAddress: DeliveryRoutes
 }
 export enum DeliveryStatus {
   PENDING = "PENDING",

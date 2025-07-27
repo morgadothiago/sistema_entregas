@@ -4,8 +4,15 @@ import dynamic from "next/dynamic"
 import "leaflet/dist/leaflet.css"
 import React from "react"
 
+interface ILocalization {
+  longitude: number
+  latitude: number
+}
+
 interface LeafletMapProps {
   route: [number, number][]
+  addressOrigem?: ILocalization
+  clientAddress?: ILocalization
 }
 
 // Dynamically import react-leaflet components to avoid SSR issues
@@ -30,6 +37,7 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
 })
 
 import { useMap } from "react-leaflet"
+import { customIcon } from "./MapSimulate"
 
 // Helper to fix Leaflet marker icons in Next.js
 const fixLeafletIcons = () => {
@@ -64,7 +72,11 @@ function FitBounds({ route }: { route: [number, number][] }) {
   return null
 }
 
-export default function LeafletMap({ route }: LeafletMapProps) {
+export default function LeafletMap({
+  route,
+  addressOrigem,
+  clientAddress,
+}: LeafletMapProps) {
   React.useEffect(() => {
     fixLeafletIcons()
   }, [])
@@ -79,6 +91,8 @@ export default function LeafletMap({ route }: LeafletMapProps) {
 
   // Default center: if only one point, use it; if multiple, use the first
   const center = route.length > 0 ? route[0] : [0, 0]
+
+  console.log("Origim", addressOrigem)
 
   return (
     <MapContainer
@@ -96,12 +110,29 @@ export default function LeafletMap({ route }: LeafletMapProps) {
       {/* Draw the route as a polyline if more than one point */}
       {route.length > 1 && <Polyline positions={route} color="blue" />}
       {/* Mark the origin */}
-      <Marker position={route[0]}>
+      <Marker
+        position={
+          addressOrigem
+            ? [addressOrigem.latitude, addressOrigem.longitude]
+            : route[0]
+        }
+      >
         <Popup>Origem</Popup>
       </Marker>
+
+      <Marker position={route[route.length - 1]} icon={customIcon}>
+        <Popup>Delivery</Popup>
+      </Marker>
+
       {/* Mark the destination if more than one point */}
       {route.length > 1 && (
-        <Marker position={route[route.length - 1]}>
+        <Marker
+          position={
+            clientAddress
+              ? [clientAddress.latitude, clientAddress.longitude]
+              : route[route.length - 1]
+          }
+        >
           <Popup>Destino</Popup>
         </Marker>
       )}
