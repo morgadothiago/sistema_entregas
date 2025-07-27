@@ -7,7 +7,7 @@ import {
 import { CurrencyLocationDto } from './dto/currency-location.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { GpsGateway } from './gps.gateway';
-import { DeliveryStatus } from '@prisma/client';
+import { Delivery, DeliveryStatus } from '@prisma/client';
 import { SocketDto } from '../websocket/dto/socket.dto';
 import { ILocalization } from '../typing/location';
 
@@ -26,14 +26,11 @@ export class GpsService implements OnModuleInit {
     });
   }
 
-  async getLocation(code: string, socket: SocketDto) {
+  async getLocation(code: string, socket: SocketDto): Promise<Delivery> {
     const client = this.gpsWebsocket.getClient(socket.socketId ?? '');
 
     if (!client) {
-      /*  throw new NotFoundException(
-        `Cliente com socketId '${socket.socketId}' não foi encontrado`,
-      ); */
-      console.warn(
+      throw new NotFoundException(
         `Cliente com socketId '${socket.socketId}' não foi encontrado`,
       );
     }
@@ -43,8 +40,6 @@ export class GpsService implements OnModuleInit {
       omit: {
         createdAt: true,
         updatedAt: true,
-        idClientAddress: true,
-        idOriginAddress: true,
       },
       include: {
         DeliveryMan: {
@@ -63,16 +58,39 @@ export class GpsService implements OnModuleInit {
       );
     }
 
-    const routes = await this.prisma.$queryRawUnsafe<ILocalization[]>(
-      `
+    const [routes, clientAddress, originAddress] = await Promise.all([
+      this.prisma.$queryRawUnsafe<ILocalization[]>(
+        `
       SELECT
         ST_X(coord::geometry) as longitude,
         ST_Y(coord::geometry) as latitude 
         FROM "routes" 
         WHERE delivery_id = $1
     `,
-      delivery.id,
-    );
+        delivery.id,
+      ),
+
+      this.prisma.$queryRawUnsafe<ILocalization[]>(
+        `
+      SELECT
+        ST_X(localization::geometry) as longitude,
+        ST_Y(localization::geometry) as latitude 
+        FROM "addresses" 
+        WHERE id = $1
+    `,
+        delivery.idClientAddress,
+      ),
+      this.prisma.$queryRawUnsafe<ILocalization[]>(
+        `
+      SELECT
+        ST_X(localization::geometry) as longitude,
+        ST_Y(localization::geometry) as latitude 
+        FROM "addresses" 
+        WHERE id = $1
+    `,
+        delivery.idOriginAddress,
+      ),
+    ]);
 
     if (client) {
       await this.gpsWebsocket.handleJoinRoom(client, code);
@@ -84,7 +102,19 @@ export class GpsService implements OnModuleInit {
       }
     ).Routes = routes;
 
-    return delivery;
+    (
+      delivery as unknown as {
+        ClientAddress: ILocalization;
+      }
+    ).ClientAddress = clientAddress[0];
+
+    (
+      delivery as unknown as {
+        OriginAddress: ILocalization;
+      }
+    ).OriginAddress = originAddress[0];
+
+    return delivery as unknown as Delivery;
   }
 
   async createLocation(code: string, body: CurrencyLocationDto): Promise<void> {
