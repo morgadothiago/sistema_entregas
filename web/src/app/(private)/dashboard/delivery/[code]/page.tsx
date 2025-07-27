@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner"
 import { StatusBadge } from "@/app/components/StatusBadge"
 import { deliveryLabels } from "@/app/components/deliveryLabels"
+import LeafletMap from "../../simulate/_LeafletMap"
 
 export default function page() {
   const { token } = useAuth()
@@ -60,7 +61,7 @@ export default function page() {
           position: "top-right",
           richColors: true,
         })
-        setDeliveryDetails(response)
+        setDeliveryDetails(response as Delivery)
       }
       console.log("Delivery Detail:", response)
     }
@@ -145,9 +146,108 @@ export default function page() {
           <CardHeader>
             <CardTitle>Mapa</CardTitle>
           </CardHeader>
-          <CardContent className="h-96 flex items-center justify-center">
-            {/* Substitua pelo seu componente de mapa */}
-            <span className="text-muted-foreground">Mapa aqui</span>
+          <CardContent className="flex flex-col gap-6 p-4">
+            {/* Mapa */}
+            <div className="w-full h-64 flex flex-col rounded-lg overflow-hidden border bg-muted/40 shadow-sm">
+              <div className="px-4 py-2 border-b bg-background flex items-center gap-2">
+                <span className="font-semibold text-primary text-base">
+                  Rota da Entrega
+                </span>
+              </div>
+              <div className="flex-1 w-full h-full">
+                {deliveryDetails?.Routes &&
+                deliveryDetails.Routes.length > 0 ? (
+                  <LeafletMap
+                    route={deliveryDetails.Routes.map((r) => {
+                      const lat = Number(r.latitude)
+                      const lng = Number(r.longitude)
+                      return [lat, lng] as [number, number]
+                    }).filter(
+                      (coords): coords is [number, number] =>
+                        Array.isArray(coords) &&
+                        coords.length === 2 &&
+                        !isNaN(coords[0]) &&
+                        !isNaN(coords[1])
+                    )}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                    Mapa ou rota não disponível.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Progresso da Entrega */}
+            <div className="w-full flex flex-col gap-4 rounded-lg overflow-hidden border bg-muted/40 shadow-sm">
+              <div className="px-4 py-2 border-b bg-background flex items-center gap-2">
+                <span className="font-semibold text-primary text-base">
+                  Progresso da Entrega (atualizado em tempo real via socket)
+                </span>
+              </div>
+              <div className="flex-1 flex flex-col justify-center items-center gap-4 p-4">
+                <div className="flex flex-col items-center gap-2 w-full">
+                  <span className="text-sm text-muted-foreground">
+                    Status atual
+                  </span>
+                  {deliveryDetails?.status ? (
+                    <div className="mb-2">
+                      <StatusBadge status={deliveryDetails.status as any} />
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Indisponível
+                    </span>
+                  )}
+                </div>
+                {/* Timeline */}
+                <div className="w-full flex flex-col gap-2 max-w-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-xs">Criada</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`
+                        w-2 h-2 rounded-full
+                        ${
+                          deliveryDetails?.status === "IN_PROGRESS" ||
+                          deliveryDetails?.status === "COMPLETED"
+                            ? "bg-blue-500"
+                            : "bg-gray-300"
+                        }
+                      `}
+                    />
+                    <span className="text-xs">Em andamento</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`
+                        w-2 h-2 rounded-full
+                        ${
+                          deliveryDetails?.status === "COMPLETED"
+                            ? "bg-green-700"
+                            : deliveryDetails?.status === "CANCELLED"
+                            ? "bg-red-500"
+                            : "bg-gray-300"
+                        }
+                      `}
+                    />
+                    <span className="text-xs">
+                      {deliveryDetails?.status === "COMPLETED"
+                        ? "Concluída"
+                        : deliveryDetails?.status === "CANCELLED"
+                        ? "Cancelada"
+                        : "Concluída"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {/* Informações extras */}
+              <div className="px-4 pb-2 text-xs text-muted-foreground text-center">
+                {/* Última atualização: não exibido pois não existe updatedAt */}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
