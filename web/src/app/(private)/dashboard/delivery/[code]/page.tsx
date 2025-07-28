@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/app/context"
 import api from "@/app/services/api"
-import { Delivery } from "@/app/types/DeliveryTypes"
+import { Delivery, DeliveryRoutes } from "@/app/types/DeliveryTypes"
 import { useParams } from "next/navigation"
 import React, { useEffect, useState } from "react"
 import { io } from "socket.io-client"
@@ -42,6 +42,7 @@ export default function DeliveryDetailPage() {
   const [deliveryDetails, setDeliveryDetails] = useState<Delivery | null>(null)
   const [loading, setLoading] = useState(true)
   const [socket, setSocket] = useState<any>(null)
+  const [routes, setRoutes] = useState<[number, number][]>([])
 
   useEffect(() => {
     if (!token) return
@@ -408,17 +409,15 @@ export default function DeliveryDetailPage() {
               {deliveryDetails.Routes && deliveryDetails.Routes.length > 0 ? (
                 <div className="h-full w-full">
                   <LeafletMap
-                    route={deliveryDetails.Routes.map((r) => {
-                      const lat = Number(r.latitude)
-                      const lng = Number(r.longitude)
-                      return [lat, lng] as [number, number]
-                    }).filter(
-                      (coords): coords is [number, number] =>
-                        Array.isArray(coords) &&
-                        coords.length === 2 &&
-                        !isNaN(coords[0]) &&
-                        !isNaN(coords[1])
-                    )}
+                    route={routes}
+                    addressOrigem={{
+                      latitude: deliveryDetails.OriginAddress.latitude,
+                      longitude: deliveryDetails.OriginAddress.longitude,
+                    }}
+                    clientAddress={{
+                      latitude: deliveryDetails.ClientAddress.latitude,
+                      longitude: deliveryDetails.ClientAddress.longitude,
+                    }}
                   />
                 </div>
               ) : (
