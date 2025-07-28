@@ -237,6 +237,54 @@ class ApiService {
       .catch(this.getError)
   }
 
+  async getDelivery(
+    page: number,
+    token: string,
+    limit: number = 10
+  ): Promise<
+    | {
+        data: Delivery[]
+        total: number
+        currentPage: number
+        totalPages: number
+        nextPage: number | null
+        previousPage: number | null
+      }
+    | IErrorResponse
+  > {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+
+    // Enviar apenas os parâmetros necessários para listagem
+    const requestData = {
+      page,
+      limit,
+    }
+
+    console.log(
+      "Enviando requisição para /delivery com dados:",
+      JSON.stringify(requestData, null, 2)
+    )
+
+    return this.api
+      .post("/delivery", requestData, {
+        headers: {
+          Authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(
+        this.getResponse<{
+          data: Delivery[]
+          total: number
+          currentPage: number
+          totalPages: number
+          nextPage: number | null
+          previousPage: number | null
+        }>
+      )
+      .catch(this.getError)
+  }
+
   static getInstance() {
     return (ApiService.instance ??= new ApiService())
   }

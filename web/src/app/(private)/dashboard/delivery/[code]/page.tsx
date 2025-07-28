@@ -35,6 +35,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
+import { signOut } from "next-auth/react"
 
 export default function DeliveryDetailPage() {
   const { token } = useAuth()
@@ -44,8 +45,22 @@ export default function DeliveryDetailPage() {
   const [socket, setSocket] = useState<any>(null)
   const [routes, setRoutes] = useState<[number, number][]>([])
 
+  // Atualiza 'routes' sempre que 'deliveryDetails' mudar
+  React.useEffect(() => {
+    if (deliveryDetails?.Routes && deliveryDetails.Routes.length > 0) {
+      setRoutes(
+        deliveryDetails.Routes.map((r) => [
+          Number(r.latitude),
+          Number(r.longitude),
+        ])
+      )
+    }
+  }, [deliveryDetails])
+
   useEffect(() => {
-    if (!token) return
+    if (!token) {
+      return
+    }
 
     const initSocket = async () => {
       try {

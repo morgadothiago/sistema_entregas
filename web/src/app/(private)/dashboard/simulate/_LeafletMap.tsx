@@ -6,15 +6,16 @@ import React from "react"
 import { useMap } from "react-leaflet"
 import type L from "leaflet"
 
-interface ILocalization {
-  longitude: number
-  latitude: number
-}
-
 interface LeafletMapProps {
   route: [number, number][]
-  addressOrigem?: ILocalization
-  clientAddress?: ILocalization
+  addressOrigem: {
+    latitude: number
+    longitude: number
+  }
+  clientAddress: {
+    latitude: number
+    longitude: number
+  }
 }
 
 // Dynamically import react-leaflet components
@@ -38,32 +39,7 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
   ssr: false,
 })
 
-<<<<<<< HEAD
 // Ajusta o mapa para os limites da rota
-=======
-import { useMap } from "react-leaflet"
-import { customIcon } from "./MapSimulate"
-
-// Helper to fix Leaflet marker icons in Next.js
-const fixLeafletIcons = () => {
-  if (typeof window !== "undefined") {
-    import("leaflet").then((L) => {
-      // @ts-expect-error: _getIconUrl is a private property not typed in leaflet types
-      delete L.Icon.Default.prototype._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-        iconUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-        shadowUrl:
-          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-      })
-    })
-  }
-}
-
-// Helper component to fit map bounds to route
->>>>>>> 4817d47fda0e507ca7159751503649a373882c81
 function FitBounds({ route }: { route: [number, number][] }) {
   const map = useMap()
   React.useEffect(() => {
@@ -76,19 +52,11 @@ function FitBounds({ route }: { route: [number, number][] }) {
   return null
 }
 
-<<<<<<< HEAD
 export default function LeafletMap({ route }: LeafletMapProps) {
   const [startIcon, setStartIcon] = React.useState<L.Icon | null>(null)
   const [endIcon, setEndIcon] = React.useState<L.Icon | null>(null)
   const [mapReady, setMapReady] = React.useState(false)
 
-=======
-export default function LeafletMap({
-  route,
-  addressOrigem,
-  clientAddress,
-}: LeafletMapProps) {
->>>>>>> 4817d47fda0e507ca7159751503649a373882c81
   React.useEffect(() => {
     const loadIcons = async () => {
       const L = (await import("leaflet")).default
@@ -136,8 +104,6 @@ export default function LeafletMap({
 
   const center = route[0]
 
-  console.log("Origim", addressOrigem)
-
   return (
     <MapContainer
       center={center}
@@ -152,7 +118,6 @@ export default function LeafletMap({
       />
       <FitBounds route={route} />
       {route.length > 1 && <Polyline positions={route} color="blue" />}
-<<<<<<< HEAD
 
       {/* Origem */}
       {mapReady && startIcon && (
@@ -164,32 +129,6 @@ export default function LeafletMap({
       {/* Destino */}
       {mapReady && endIcon && route.length > 1 && (
         <Marker position={route[route.length - 1]} icon={endIcon}>
-=======
-      {/* Mark the origin */}
-      <Marker
-        position={
-          addressOrigem
-            ? [addressOrigem.latitude, addressOrigem.longitude]
-            : route[0]
-        }
-      >
-        <Popup>Origem</Popup>
-      </Marker>
-
-      <Marker position={route[route.length - 1]} icon={customIcon}>
-        <Popup>Delivery</Popup>
-      </Marker>
-
-      {/* Mark the destination if more than one point */}
-      {route.length > 1 && (
-        <Marker
-          position={
-            clientAddress
-              ? [clientAddress.latitude, clientAddress.longitude]
-              : route[route.length - 1]
-          }
-        >
->>>>>>> 4817d47fda0e507ca7159751503649a373882c81
           <Popup>Destino</Popup>
         </Marker>
       )}
