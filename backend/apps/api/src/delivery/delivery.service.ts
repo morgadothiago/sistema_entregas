@@ -8,7 +8,7 @@ import { DeliverySimulateDto } from './dto/delivery-simulate.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { VehicleTypeService } from '../vehicle-type/vehicle-type.service';
 import { LocationService } from '../location/location.service';
-import { Prisma, VehicleType } from '@prisma/client';
+import { DeliveryStatus, Prisma, VehicleType } from '@prisma/client';
 import { createCode, paginateResponse } from '../utils/fn';
 import { CacheService } from '../cache/cache.service';
 import { DeliverySimulationResponseDto } from './dto/delivery-simulation-response.dto';
@@ -263,6 +263,8 @@ export class DeliveryService {
           email: body.email.trim(),
           telefone: body.telefone.trim(),
           vehicleType: body.vehicleType,
+          isFragile: body.isFragile,
+          status: DeliveryStatus.PENDING,
           Company: {
             connect: {
               idUser,

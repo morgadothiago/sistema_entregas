@@ -1,8 +1,10 @@
 import {
+  IsBoolean,
   IsEmail,
   IsMobilePhone,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Min,
 } from 'class-validator';
@@ -75,6 +77,14 @@ export class DeliveryCreateDto extends DeliverySimulateDto {
   @IsNumber()
   @Min(0)
   weight: number;
+
+  @ApiProperty({
+    type: Boolean,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFragile: boolean;
 }
 
 export class DeliveryCreateResponse {
