@@ -14,7 +14,11 @@
     "splash": {},
     "ios": {
       "supportsTablet": true,
-      "icon": "./assets/ios-light.png"
+      "icon": "./assets/ios-light.png",
+      "bundleIdentifier": "com.anonymous.entregador",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "permissions": [

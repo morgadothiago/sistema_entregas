@@ -22,4 +22,5 @@ export const initialForm = {
   email: "",
   telefone: "",
   weight: "",
+  isFragile: false,
 }

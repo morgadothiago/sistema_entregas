@@ -11,6 +11,17 @@ import {
   FaBoxOpen,
 } from "react-icons/fa"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "sonner"
 import api from "@/app/services/api"
 import { useSession } from "next-auth/react"
@@ -31,7 +42,15 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card"
-import { Sparkles, DollarSign, MapPin, Clock, Car } from "lucide-react"
+import {
+  Sparkles,
+  DollarSign,
+  MapPin,
+  Clock,
+  Car,
+  Zap,
+  Send,
+} from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 
 const initialForm = {
@@ -46,6 +65,7 @@ const initialForm = {
   email: "",
   telefone: "",
   weight: "",
+  isFragile: false,
 }
 
 export default function Page() {
@@ -58,6 +78,11 @@ export default function Page() {
   >([])
   const [sheetOpen, setSheetOpen] = useState(false)
   const [simulationResult, setSimulationResult] = useState<any>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     async function fetchVehicleTypes() {
@@ -74,7 +99,7 @@ export default function Page() {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
-    const { name, value, type, dataset } = e.target
+    const { name, value, type, dataset, checked } = e.target as HTMLInputElement
     if (dataset.group) {
       const group = dataset.group as "clientAddress" | "address"
       setForm({
@@ -85,7 +110,7 @@ export default function Page() {
         },
       })
     } else {
-      setForm({ ...form, [name]: value })
+      setForm({ ...form, [name]: type === "checkbox" ? checked : value })
     }
   }
 
@@ -102,16 +127,16 @@ export default function Page() {
             : result.message || "Erro ao processar solicitação.",
           {
             duration: 5000,
-            position: "top-center",
-            className: "bg-red-100 text-red-800 border border-red-300",
+            position: "top-right",
+            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
           }
         )
         return false
       }
       toast.success("Entrega cadastrada com sucesso!", {
         duration: 4000,
-        position: "top-center",
-        className: "bg-green-100 text-green-800 border border-green-300",
+        position: "top-right",
+        className: "bg-green-50 text-green-900 border-l-4 border-green-500 shadow-lg",
       })
       return true
     } catch (error: any) {
@@ -122,8 +147,8 @@ export default function Page() {
               "Erro de conexão. Verifique sua internet e tente novamente.",
         {
           duration: 5000,
-          position: "top-center",
-          className: "bg-red-100 text-red-800 border border-red-300",
+          position: "top-right",
+          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
         }
       )
       return false
@@ -144,24 +169,29 @@ export default function Page() {
     for (const key of addressKeys) {
       if (!form.clientAddress[key]) {
         toast.error(`Preencha o campo "${key}" do endereço do cliente.`, {
-          className: "bg-red-100 text-red-800 border border-red-300",
+          position: "top-right",
+          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
         })
         return false
       }
     }
-    // Checa campos de endereço de entrega
-    for (const key of addressKeys) {
-      if (!form.address[key]) {
-        toast.error(`Preencha o campo "${key}" do endereço de entrega.`, {
-          className: "bg-red-100 text-red-800 border border-red-300",
-        })
-        return false
+    // Checa campos de endereço de origem (apenas se não usar endereço da empresa)
+    if (!form.useAddressCompany) {
+      for (const key of addressKeys) {
+        if (!form.address[key]) {
+          toast.error(`Preencha o campo "${key}" do endereço de origem.`, {
+            position: "top-right",
+            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
+          })
+          return false
+        }
       }
     }
     // Checa tipo de veículo
     if (!form.vehicleType) {
       toast.error("Selecione o tipo de veículo.", {
-        className: "bg-red-100 text-red-800 border border-red-300",
+        position: "top-right",
+        className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
       })
       return false
     }
@@ -176,7 +206,10 @@ export default function Page() {
       if (!form[key] || isNaN(Number(form[key])) || Number(form[key]) <= 0) {
         toast.error(
           `Preencha corretamente o campo "${key}" (valor positivo).`,
-          { className: "bg-red-100 text-red-800 border border-red-300" }
+          { 
+            position: "top-right",
+            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg" 
+          }
         )
         return false
       }
@@ -184,7 +217,8 @@ export default function Page() {
     // Checa e-mail
     if (!form.email || !/\S+@\S+\.\S+/.test(form.email)) {
       toast.error("Preencha um e-mail válido.", {
-        className: "bg-red-100 text-red-800 border border-red-300",
+        position: "top-right",
+        className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
       })
       return false
     }
@@ -195,7 +229,10 @@ export default function Page() {
     ) {
       toast.error(
         "Preencha um telefone válido no formato brasileiro. Ex: (11) 91234-5678",
-        { className: "bg-red-100 text-red-800 border border-red-300" }
+        { 
+          position: "top-right",
+          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg" 
+        }
       )
       return false
     }
@@ -217,8 +254,8 @@ export default function Page() {
     const payload = {
       clientAddress: form.clientAddress,
       address: form.address,
-      useAddressCompany: false,
-      vehicleType: form.vehicleType, // já é string (nome do tipo)
+      useAddressCompany: form.useAddressCompany,
+      vehicleType: form.vehicleType,
       height: Number(form.height),
       width: Number(form.width),
       length: Number(form.length),
@@ -226,6 +263,7 @@ export default function Page() {
       email: String(form.email),
       telefone: telefoneFormatado,
       weight: Number(form.weight),
+      isFragile: form.isFragile || false,
     }
     await submitToAPI(payload)
   }
@@ -240,7 +278,7 @@ export default function Page() {
       const payload = {
         clientAddress: form.clientAddress,
         address: form.address,
-        useAddressCompany: false,
+        useAddressCompany: form.useAddressCompany,
         vehicleType: form.vehicleType,
       }
       const result = await api.simulateDelivery(payload, token)
@@ -251,8 +289,8 @@ export default function Page() {
             : result.message || "Erro ao simular entrega.",
           {
             duration: 5000,
-            position: "top-center",
-            className: "bg-red-100 text-red-800 border border-red-300",
+            position: "top-right",
+            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
           }
         )
         setSimulating(false)
@@ -267,8 +305,8 @@ export default function Page() {
           : error?.message || "Erro de conexão ao simular.",
         {
           duration: 5000,
-          position: "top-center",
-          className: "bg-red-100 text-red-800 border border-red-300",
+          position: "top-right",
+          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
         }
       )
     } finally {
@@ -276,491 +314,752 @@ export default function Page() {
     }
   }
 
-  const addressFields = [
-    { name: "city", label: "Cidade" },
-    { name: "state", label: "Estado" },
-    { name: "street", label: "Rua" },
-    { name: "number", label: "Número" },
-    { name: "zipCode", label: "CEP" },
-  ] as const
+  if (!mounted) {
+    return null
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col justify-center items-center py-8 px-2 md:px-8 lg:px-16 overflow-x-hidden w-full">
-      <div className="w-full max-w-4xl bg-white/80 md:bg-white/70 md:backdrop-blur-lg rounded-3xl shadow-3xl p-4 sm:p-10 md:p-16 mx-auto animate-fade-in-up transition-all duration-700 border border-blue-100">
-        {/* Header */}
-        <div className="flex flex-col items-center gap-4 mb-14">
-          <h1 className="text-3xl md:text-5xl font-extrabold text-blue-800 flex items-center gap-4 tracking-tight drop-shadow-md">
-            <FaTruck className="text-blue-500" />
-            Cadastro de Entrega
-          </h1>
-          <p className="text-blue-500 text-lg font-medium text-center max-w-xl">
-            Simule e cadastre uma nova entrega rapidamente, com visual moderno e
-            responsivo.
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl -z-10" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl -z-10" />
+
+      <div className="relative z-10 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-4 mb-6 p-4 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur opacity-75" />
+                <div className="relative p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl">
+                  <FaTruck className="text-white text-3xl" />
+                </div>
+              </div>
+              <div className="text-left">
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Cadastro de Entrega
+                </h1>
+                <p className="text-slate-500 text-sm mt-1">
+                  Sistema inteligente de logística
+                </p>
+              </div>
+            </div>
+            <p className="text-slate-600 text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
+              Simule custos, calcule rotas e cadastre entregas de forma rápida e
+              intuitiva com nossa plataforma moderna
+            </p>
+          </div>
+          <form
+            className="space-y-8"
+            onSubmit={handleSubmit}
+            autoComplete="off"
+          >
+            {/* Seção Cliente */}
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-xl hover:shadow-2xl transition-all duration-300 group">
+              <CardHeader className="pb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-blue-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity" />
+                    <div className="relative p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                      <FaUser className="text-white text-xl" />
+                    </div>
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold text-slate-800 mb-1">
+                      Endereço do Cliente
+                    </CardTitle>
+                    <p className="text-sm text-slate-500">
+                      Informações do destinatário da entrega
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="client-city"
+                      className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    >
+                      🏢 Cidade
+                    </Label>
+                    <Input
+                      id="client-city"
+                      name="city"
+                      data-group="clientAddress"
+                      value={form.clientAddress.city}
+                      onChange={handleChange}
+                      placeholder="Ex: São Paulo"
+                      className="h-12 border-2 border-slate-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200 bg-white/50"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="client-state"
+                      className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    >
+                      🗺️ Estado
+                    </Label>
+                    <Input
+                      id="client-state"
+                      name="state"
+                      data-group="clientAddress"
+                      value={form.clientAddress.state}
+                      onChange={handleChange}
+                      placeholder="Ex: SP"
+                      className="h-12 border-2 border-slate-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200 bg-white/50"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="client-zipcode"
+                      className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    >
+                      📮 CEP
+                    </Label>
+                    <Input
+                      id="client-zipcode"
+                      name="zipCode"
+                      data-group="clientAddress"
+                      value={form.clientAddress.zipCode}
+                      onChange={handleChange}
+                      placeholder="00000-000"
+                      className="h-12 border-2 border-slate-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200 bg-white/50"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-3 md:col-span-2">
+                    <Label
+                      htmlFor="client-street"
+                      className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    >
+                      🛣️ Rua
+                    </Label>
+                    <Input
+                      id="client-street"
+                      name="street"
+                      data-group="clientAddress"
+                      value={form.clientAddress.street}
+                      onChange={handleChange}
+                      placeholder="Nome da rua"
+                      className="h-12 border-2 border-slate-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200 bg-white/50"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="client-number"
+                      className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    >
+                      🏠 Número
+                    </Label>
+                    <Input
+                      id="client-number"
+                      name="number"
+                      data-group="clientAddress"
+                      value={form.clientAddress.number}
+                      onChange={handleChange}
+                      placeholder="123"
+                      className="h-12 border-2 border-slate-200 hover:border-blue-300 focus:border-blue-500 transition-all duration-200 bg-white/50"
+                      required
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Seção Entrega */}
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-xl hover:shadow-2xl transition-all duration-300 group">
+              <CardHeader className="pb-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-emerald-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity" />
+                      <div className="relative p-3 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
+                        <FaMapMarkerAlt className="text-white text-xl" />
+                      </div>
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-bold text-slate-800 mb-1">
+                        Endereço de Origem
+                      </CardTitle>
+                      <p className="text-sm text-slate-500">
+                        Local de coleta da mercadoria
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-emerald-200">
+                    <Checkbox
+                      id="useAddressCompany"
+                      checked={form.useAddressCompany}
+                      onCheckedChange={(checked) =>
+                        setForm({ ...form, useAddressCompany: !!checked })
+                      }
+                      className="data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                    />
+                    <Label
+                      htmlFor="useAddressCompany"
+                      className="text-sm font-semibold text-slate-700 cursor-pointer whitespace-nowrap"
+                    >
+                      Usar endereço da empresa
+                    </Label>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {form.useAddressCompany ? (
+                  <div className="relative p-8 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 rounded-2xl border border-emerald-200 text-center overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-teal-500/5" />
+                    <div className="relative">
+                      <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl mb-4 shadow-lg">
+                        <FaMapMarkerAlt className="h-7 w-7 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-emerald-800 mb-2">
+                        Endereço da Empresa Ativo
+                      </h3>
+                      <p className="text-emerald-600 text-sm leading-relaxed max-w-sm mx-auto">
+                        Os campos de origem foram preenchidos automaticamente
+                        com o endereço cadastrado da empresa
+                      </p>
+                      <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 rounded-full">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                        <span className="text-xs font-medium text-emerald-700">
+                          Configurado automaticamente
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor="delivery-city"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      >
+                        🏢 Cidade
+                      </Label>
+                      <Input
+                        id="delivery-city"
+                        name="city"
+                        data-group="address"
+                        value={form.address.city}
+                        onChange={handleChange}
+                        placeholder="Ex: Rio de Janeiro"
+                        className="h-12 border-2 border-slate-200 hover:border-emerald-300 focus:border-emerald-500 transition-all duration-200 bg-white/50"
+                        required={!form.useAddressCompany}
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor="delivery-state"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      >
+                        🗺️ Estado
+                      </Label>
+                      <Input
+                        id="delivery-state"
+                        name="state"
+                        data-group="address"
+                        value={form.address.state}
+                        onChange={handleChange}
+                        placeholder="Ex: RJ"
+                        className="h-12 border-2 border-slate-200 hover:border-emerald-300 focus:border-emerald-500 transition-all duration-200 bg-white/50"
+                        required={!form.useAddressCompany}
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor="delivery-zipcode"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      >
+                        📮 CEP
+                      </Label>
+                      <Input
+                        id="delivery-zipcode"
+                        name="zipCode"
+                        data-group="address"
+                        value={form.address.zipCode}
+                        onChange={handleChange}
+                        placeholder="00000-000"
+                        className="h-12 border-2 border-slate-200 hover:border-emerald-300 focus:border-emerald-500 transition-all duration-200 bg-white/50"
+                        required={!form.useAddressCompany}
+                      />
+                    </div>
+                    <div className="space-y-3 md:col-span-2">
+                      <Label
+                        htmlFor="delivery-street"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      >
+                        🛣️ Rua
+                      </Label>
+                      <Input
+                        id="delivery-street"
+                        name="street"
+                        data-group="address"
+                        value={form.address.street}
+                        onChange={handleChange}
+                        placeholder="Nome da rua"
+                        className="h-12 border-2 border-slate-200 hover:border-emerald-300 focus:border-emerald-500 transition-all duration-200 bg-white/50"
+                        required={!form.useAddressCompany}
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor="delivery-number"
+                        className="text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      >
+                        🏠 Número
+                      </Label>
+                      <Input
+                        id="delivery-number"
+                        name="number"
+                        data-group="address"
+                        value={form.address.number}
+                        onChange={handleChange}
+                        placeholder="456"
+                        className="h-12 border-2 border-slate-200 hover:border-emerald-300 focus:border-emerald-500 transition-all duration-200 bg-white/50"
+                        required={!form.useAddressCompany}
+                      />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            {/* Seção Detalhes */}
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-xl hover:shadow-2xl transition-all duration-300 group">
+              <CardHeader className="pb-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-t-xl">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-purple-500 rounded-xl blur opacity-20 group-hover:opacity-30 transition-opacity" />
+                    <div className="relative p-3 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow-lg">
+                      <FaBoxOpen className="text-white text-xl" />
+                    </div>
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold text-slate-800 mb-1">
+                      Detalhes da Entrega
+                    </CardTitle>
+                    <p className="text-sm text-slate-500">
+                      Especificações do produto e contato
+                    </p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-6">
+                  {/* Tipo de Veículo */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-blue-100 rounded-lg">
+                        <FaTruck className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <Label
+                        htmlFor="vehicle-type"
+                        className="text-sm font-semibold text-slate-800"
+                      >
+                        Tipo de Veículo
+                      </Label>
+                    </div>
+                    <Select
+                      value={form.vehicleType}
+                      onValueChange={(value) =>
+                        setForm({ ...form, vehicleType: value })
+                      }
+                    >
+                      <SelectTrigger className="h-12 border-2 border-slate-200 hover:border-blue-300 focus:border-blue-500 transition-colors">
+                        <SelectValue placeholder="🚚 Selecione o tipo de veículo..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vehicleTypes.map((v) => (
+                          <SelectItem
+                            key={v.id}
+                            value={v.type}
+                            className="py-3"
+                          >
+                            <div className="flex items-center gap-2">
+                              <FaTruck className="h-4 w-4 text-slate-500" />
+                              <span>{v.type}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Dimensões do Produto */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-purple-100 rounded-lg">
+                        <FaBoxOpen className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-slate-800">
+                        Dimensões e Peso
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="weight"
+                          className="text-xs font-medium text-slate-600 uppercase tracking-wide"
+                        >
+                          ⚖️ Peso
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="weight"
+                            type="number"
+                            name="weight"
+                            value={form.weight}
+                            onChange={handleChange}
+                            placeholder="5.5"
+                            min={0}
+                            step={0.1}
+                            className="h-12 pl-3 pr-8 border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                            required
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                            kg
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="height"
+                          className="text-xs font-medium text-slate-600 uppercase tracking-wide"
+                        >
+                          📄 Altura
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="height"
+                            type="number"
+                            name="height"
+                            value={form.height}
+                            onChange={handleChange}
+                            placeholder="50"
+                            min={0}
+                            className="h-12 pl-3 pr-8 border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                            required
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                            cm
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="width"
+                          className="text-xs font-medium text-slate-600 uppercase tracking-wide"
+                        >
+                          ↔️ Largura
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="width"
+                            type="number"
+                            name="width"
+                            value={form.width}
+                            onChange={handleChange}
+                            placeholder="30"
+                            min={0}
+                            className="h-12 pl-3 pr-8 border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                            required
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                            cm
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="length"
+                          className="text-xs font-medium text-slate-600 uppercase tracking-wide"
+                        >
+                          ↕️ Comprimento
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            id="length"
+                            type="number"
+                            name="length"
+                            value={form.length}
+                            onChange={handleChange}
+                            placeholder="40"
+                            min={0}
+                            className="h-12 pl-3 pr-8 border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
+                            required
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                            cm
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contato */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-indigo-100 rounded-lg">
+                        <FaPhone className="h-4 w-4 text-indigo-600" />
+                      </div>
+                      <h3 className="text-sm font-semibold text-slate-800">
+                        Informações de Contato
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="telefone"
+                          className="text-xs font-medium text-slate-600 uppercase tracking-wide"
+                        >
+                          📞 Telefone
+                        </Label>
+                        <Input
+                          id="telefone"
+                          type="text"
+                          name="telefone"
+                          value={form.telefone}
+                          onChange={handleChange}
+                          placeholder="(11) 99999-9999"
+                          className="h-12 border-2 border-slate-200 hover:border-indigo-300 focus:border-indigo-500 transition-colors"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="email"
+                          className="text-xs font-medium text-slate-600 uppercase tracking-wide"
+                        >
+                          ✉️ E-mail
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          name="email"
+                          value={form.email}
+                          onChange={handleChange}
+                          placeholder="email@exemplo.com"
+                          className="h-12 border-2 border-slate-200 hover:border-indigo-300 focus:border-indigo-500 transition-colors"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Opções Especiais */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-amber-100 rounded-lg">
+                        <span className="text-amber-600 text-sm">⚙️</span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-slate-800">
+                        Opções Especiais
+                      </h3>
+                    </div>
+
+                    <div className="relative p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 hover:border-amber-300 transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          id="isFragile"
+                          checked={form.isFragile}
+                          onCheckedChange={(checked) =>
+                            setForm({ ...form, isFragile: !!checked })
+                          }
+                          className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                        />
+                        <Label
+                          htmlFor="isFragile"
+                          className="text-amber-800 font-semibold cursor-pointer flex items-center gap-2"
+                        >
+                          <span className="text-lg">📦</span>
+                          <span>Produto Frágil</span>
+                        </Label>
+                      </div>
+                      <p className="text-xs text-amber-600 mt-2 ml-7">
+                        Cuidados especiais serão tomados durante o transporte
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor="information"
+                        className="text-xs font-medium text-slate-600 uppercase tracking-wide"
+                      >
+                        📝 Observações
+                      </Label>
+                      <Textarea
+                        id="information"
+                        name="information"
+                        value={form.information}
+                        onChange={handleChange}
+                        rows={3}
+                        placeholder="Descreva detalhes importantes sobre a entrega, instruções especiais, horários preferenciais..."
+                        className="resize-none border-2 border-slate-200 hover:border-slate-300 focus:border-slate-500 transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Botões */}
+            <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto pt-8">
+              <Button
+                variant="outline"
+                className="group relative w-full h-16 text-lg font-bold border-2 border-blue-200 text-blue-700 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 overflow-hidden"
+                type="button"
+                onClick={handleSimulate}
+                disabled={simulating}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
+                <div className="relative flex items-center justify-center">
+                  {simulating ? (
+                    <>
+                      <div className="animate-spin h-6 w-6 mr-3 border-2 border-blue-300 border-t-blue-600 rounded-full" />
+                      <span className="animate-pulse text-lg">Simulando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-2 bg-blue-100 rounded-lg mr-3 group-hover:bg-blue-200 transition-colors">
+                        <Sparkles className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <span className="text-lg">Simular Entrega</span>
+                    </>
+                  )}
+                </div>
+              </Button>
+
+              <Button
+                className="group relative w-full h-16 text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                type="submit"
+                disabled={submitting}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <div className="relative flex items-center justify-center">
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin h-6 w-6 mr-3 border-2 border-white/30 border-t-white rounded-full" />
+                      <span className="animate-pulse text-lg">Enviando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-2 bg-white/20 rounded-lg mr-3 group-hover:bg-white/30 transition-colors">
+                        <FaTruck className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="text-lg">Cadastrar Entrega</span>
+                    </>
+                  )}
+                </div>
+              </Button>
+            </div>
+          </form>
         </div>
-        <form className="space-y-16" onSubmit={handleSubmit} autoComplete="off">
-          {/* Seção Cliente */}
-          <div className="space-y-8 group">
-            <div className="flex items-center gap-2 text-xl md:text-2xl font-bold text-blue-700 mb-2 tracking-tight transition-colors duration-300 group-focus-within:text-blue-900">
-              <FaUser className="text-blue-500 transition-colors duration-300 group-focus-within:text-blue-700" />{" "}
-              Endereço do Cliente
-            </div>
-            <div className="border-b border-blue-100 mb-4" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Cidade
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  data-group="clientAddress"
-                  value={form.clientAddress.city}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite a cidade"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Estado
-                </label>
-                <input
-                  type="text"
-                  name="state"
-                  data-group="clientAddress"
-                  value={form.clientAddress.state}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite o estado"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Rua
-                </label>
-                <input
-                  type="text"
-                  name="street"
-                  data-group="clientAddress"
-                  value={form.clientAddress.street}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite a rua"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Número
-                </label>
-                <input
-                  type="text"
-                  name="number"
-                  data-group="clientAddress"
-                  value={form.clientAddress.number}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite o número"
-                  required
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-blue-700 font-medium mb-1">
-                  CEP
-                </label>
-                <input
-                  type="text"
-                  name="zipCode"
-                  data-group="clientAddress"
-                  value={form.clientAddress.zipCode}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite o CEP"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-          {/* Seção Entrega */}
-          <div className="space-y-8 group">
-            <div className="flex items-center gap-2 text-xl md:text-2xl font-bold text-blue-700 mb-2 tracking-tight transition-colors duration-300 group-focus-within:text-blue-900">
-              <FaMapMarkerAlt className="text-blue-500 transition-colors duration-300 group-focus-within:text-blue-700" />{" "}
-              Endereço de Entrega
-            </div>
-            <div className="border-b border-blue-100 mb-4" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Cidade
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  data-group="address"
-                  value={form.address.city}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite a cidade"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Estado
-                </label>
-                <input
-                  type="text"
-                  name="state"
-                  data-group="address"
-                  value={form.address.state}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite o estado"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Rua
-                </label>
-                <input
-                  type="text"
-                  name="street"
-                  data-group="address"
-                  value={form.address.street}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite a rua"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-blue-700 font-medium mb-1">
-                  Número
-                </label>
-                <input
-                  type="text"
-                  name="number"
-                  data-group="address"
-                  value={form.address.number}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite o número"
-                  required
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-blue-700 font-medium mb-1">
-                  CEP
-                </label>
-                <input
-                  type="text"
-                  name="zipCode"
-                  data-group="address"
-                  value={form.address.zipCode}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                  placeholder="Digite o CEP"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-          {/* Seção Detalhes */}
-          <div className="space-y-8 group">
-            <div className="flex items-center gap-2 text-xl md:text-2xl font-bold text-blue-700 mb-2 tracking-tight transition-colors duration-300 group-focus-within:text-blue-900">
-              <FaBoxOpen className="text-blue-500 transition-colors duration-300 group-focus-within:text-blue-700" />{" "}
-              Detalhes da Entrega
-            </div>
-            <div className="border-b border-blue-100 mb-4" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">
-                    Tipo de veículo
-                  </label>
-                  <select
-                    name="vehicleType"
-                    value={form.vehicleType}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    required
-                  >
-                    <option value="">Selecione...</option>
-                    {vehicleTypes.map((v) => (
-                      <option key={v.id} value={v.type}>
-                        {v.type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">
-                    Altura (cm)
-                  </label>
-                  <input
-                    type="number"
-                    name="height"
-                    value={form.height}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    placeholder="Ex: 50"
-                    required
-                    min={0}
-                  />
-                </div>
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">
-                    Largura (cm)
-                  </label>
-                  <input
-                    type="number"
-                    name="width"
-                    value={form.width}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    placeholder="Ex: 30"
-                    required
-                    min={0}
-                  />
-                </div>
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">
-                    Comprimento (cm)
-                  </label>
-                  <input
-                    type="number"
-                    name="length"
-                    value={form.length}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    placeholder="Ex: 40"
-                    required
-                    min={0}
-                  />
-                </div>
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">
-                    Peso (kg)
-                  </label>
-                  <input
-                    type="number"
-                    name="weight"
-                    value={form.weight}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    placeholder="Ex: 5.5"
-                    required
-                    min={0}
-                    step={0.1}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">
-                    Telefone
-                  </label>
-                  <input
-                    type="text"
-                    name="telefone"
-                    value={form.telefone}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    placeholder="Ex: (11) 99999-9999"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-blue-700 font-medium mb-1">
-                    E-mail
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    placeholder="Ex: email@email.com"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-blue-700 font-medium mb-1">
-                    Informações adicionais
-                  </label>
-                  <textarea
-                    name="information"
-                    value={form.information}
-                    onChange={handleChange}
-                    className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-blue-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition min-h-[48px] focus:shadow-lg hover:shadow-md hover:-translate-y-0.5 duration-200"
-                    placeholder="Ex: produtos frágeis, pesados, etc."
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Botões */}
-          <div className="flex flex-col sm:flex-row gap-6 mt-12">
-            <Button
-              variant="secondary"
-              className="w-full sm:w-auto py-3 px-8 text-lg font-bold rounded-xl shadow-md hover:scale-[1.03] transition-transform duration-200 focus:ring-4 focus:ring-blue-200 focus:outline-none"
-              type="button"
-              onClick={handleSimulate}
-              disabled={simulating}
-            >
-              {simulating ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-blue-500"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    ></path>
-                  </svg>
-                  Simulando...
-                </>
-              ) : (
-                <>Simular entrega</>
-              )}
-            </Button>
-            <Button
-              variant="default"
-              className="w-full sm:w-auto py-3 px-8 text-lg font-bold rounded-xl shadow-md hover:scale-[1.03] transition-transform duration-200 focus:ring-4 focus:ring-blue-200 focus:outline-none"
-              type="submit"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-blue-500"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v8z"
-                    ></path>
-                  </svg>
-                  Enviando...
-                </>
-              ) : (
-                <>Cadastrar entrega</>
-              )}
-            </Button>
-          </div>
-        </form>
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
           side="right"
-          className="max-w-md w-full p-4 md:p-6 bg-gradient-to-br from-blue-50 via-white to-indigo-50 border-0 shadow-2xl"
+          className="max-w-lg w-full p-0 bg-white border-0 shadow-2xl"
         >
           <SheetTitle asChild>
             <VisuallyHidden>Resultado da Simulação de Entrega</VisuallyHidden>
           </SheetTitle>
-          <Card className="bg-white/90 shadow-2xl rounded-2xl border-0 overflow-hidden animate-fade-in">
-            <CardHeader className="bg-gradient-to-r from-[#003B73] via-[#00449a] to-[#5DADE2] p-6 text-white border-b-0">
+          <div className="h-full flex flex-col">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
               <div className="flex items-center gap-3 mb-2">
-                <Sparkles className="w-7 h-7 text-[#00FFB3] animate-pulse" />
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-[#00FFB3] bg-clip-text text-transparent">
-                  Simulação de Entrega
-                </CardTitle>
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">Simulação de Entrega</h2>
+                  <p className="text-blue-100 text-sm">
+                    Resultado detalhado da simulação
+                  </p>
+                </div>
               </div>
-              <CardDescription className="text-blue-100 text-sm mt-1">
-                Veja o resultado detalhado da sua simulação
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
+            </div>
+            <div className="flex-1 p-6 space-y-6 overflow-y-auto">
               {simulationResult ? (
                 <>
-                  <div className="flex flex-col items-center gap-2 mb-4">
-                    <div className="relative">
-                      <span className="text-4xl font-extrabold bg-gradient-to-r from-[#003B73] to-[#5DADE2] bg-clip-text text-transparent">
-                        R$ {simulationResult.price?.toFixed(2)}
-                      </span>
-                      <Sparkles className="w-5 h-5 text-[#00FFB3] absolute -top-2 -right-6 animate-bounce" />
+                  <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200">
+                    <div className="text-3xl font-bold text-green-600 mb-1">
+                      R$ {simulationResult.price?.toFixed(2)}
                     </div>
-                    <span className="text-xs text-gray-500 font-medium">
+                    <p className="text-sm text-green-700 font-medium">
                       Preço estimado
-                    </span>
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                      <MapPin className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <span className="block text-xs text-gray-500">
-                          Distância
-                        </span>
-                        <span className="font-bold text-blue-700 text-lg">
-                          {simulationResult.location?.distance?.toFixed(2)} km
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin className="h-4 w-4 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-700">
+                          DISTÂNCIA
                         </span>
                       </div>
+                      <div className="text-xl font-bold text-blue-800">
+                        {simulationResult.location?.distance?.toFixed(1)} km
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-orange-50 p-3 rounded-lg border border-orange-100">
-                      <Clock className="h-5 w-5 text-orange-600" />
-                      <div>
-                        <span className="block text-xs text-gray-500">
-                          Duração
+
+                    <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-4 w-4 text-orange-600" />
+                        <span className="text-xs font-medium text-orange-700">
+                          DURAÇÃO
                         </span>
-                        <span className="font-bold text-orange-700 text-lg">
-                          {simulationResult.location?.duration} min
-                        </span>
+                      </div>
+                      <div className="text-xl font-bold text-orange-800">
+                        {simulationResult.location?.duration} min
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 bg-purple-50 p-3 rounded-lg border border-purple-100 mb-4">
-                    <Car className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium text-purple-700">
-                      {form.vehicleType || "Tipo de veículo"}
-                    </span>
+
+                  <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
+                    <div className="flex items-center gap-3">
+                      <Car className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <p className="text-xs font-medium text-purple-700 mb-1">
+                          VEÍCULO
+                        </p>
+                        <p className="font-semibold text-purple-800">
+                          {form.vehicleType || "Não especificado"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+
                   {simulationResult.location?.geometry && (
-                    <div className="h-56 w-full rounded-xl overflow-hidden border border-blue-100 shadow-lg">
-                      <MapSimulate
-                        route={decodePolyline(
-                          simulationResult.location.geometry
-                        )}
-                      />
+                    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                      <div className="h-48 w-full">
+                        <MapSimulate
+                          route={decodePolyline(
+                            simulationResult.location.geometry
+                          )}
+                        />
+                      </div>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="text-gray-500 text-center">
-                  Nenhum resultado para exibir.
+                <div className="text-center py-12">
+                  <div className="text-slate-400 mb-2">
+                    <Sparkles className="h-12 w-12 mx-auto" />
+                  </div>
+                  <p className="text-slate-500">Nenhum resultado para exibir</p>
                 </div>
               )}
-            </CardContent>
-            <CardFooter className="flex flex-col gap-2 p-6 pt-0">
+            </div>
+            <div className="p-6 border-t border-slate-200 bg-slate-50">
               <SheetClose asChild>
-                <Button className="w-full bg-gradient-to-r from-[#003B73] to-[#00FFB3] text-white font-bold py-3 rounded-xl shadow-lg hover:scale-[1.03] transition-transform duration-200">
+                <Button className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg">
                   Fechar
                 </Button>
               </SheetClose>
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
     </div>

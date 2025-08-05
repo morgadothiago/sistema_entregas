@@ -2,8 +2,11 @@ import Axios from "axios"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Platform } from "react-native"
 
+const baseURL =
+  Platform.OS === "ios" ? "http://localhost:8080" : "http://10.0.2.2:8080" // para Android Emulator
+
 export const api = Axios.create({
-  baseURL: "http://192.168.100.96:8080",
+  baseURL,
 })
 
 // Função para definir o token de autorização

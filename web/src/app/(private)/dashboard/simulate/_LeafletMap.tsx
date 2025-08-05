@@ -8,14 +8,6 @@ import type L from "leaflet"
 
 interface LeafletMapProps {
   route: [number, number][]
-  addressOrigem: {
-    latitude: number
-    longitude: number
-  }
-  clientAddress: {
-    latitude: number
-    longitude: number
-  }
 }
 
 // Dynamically import react-leaflet components
@@ -53,51 +45,47 @@ function FitBounds({ route }: { route: [number, number][] }) {
 }
 
 export default function LeafletMap({ route }: LeafletMapProps) {
-  const [startIcon, setStartIcon] = React.useState<L.Icon | null>(null)
-  const [endIcon, setEndIcon] = React.useState<L.Icon | null>(null)
-  const [mapReady, setMapReady] = React.useState(false)
+  const [icons, setIcons] = React.useState<{ start: L.Icon; end: L.Icon } | null>(null)
+  const [isClient, setIsClient] = React.useState(false)
 
   React.useEffect(() => {
+    setIsClient(true)
+    
     const loadIcons = async () => {
+      if (typeof window === 'undefined') return
+      
       const L = (await import("leaflet")).default
 
-      const start = L.icon({
-        iconUrl:
-          "data:image/svg+xml;charset=UTF-8," +
-          encodeURIComponent(`
-<svg width="32" height="32" viewBox="0 0 24 24" fill="blue" xmlns="http://www.w3.org/2000/svg">
-  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
-</svg>
-`),
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
+      const startIcon = L.icon({
+        iconUrl: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#3b82f6" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="8" fill="#3b82f6" stroke="white" stroke-width="2"/>
+          </svg>
+        `),
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
       })
 
-      const end = L.icon({
-        iconUrl:
-          "data:image/svg+xml;charset=UTF-8," +
-          encodeURIComponent(`
-<svg width="32" height="32" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
-  <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/>
-</svg>
-`),
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
+      const endIcon = L.icon({
+        iconUrl: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="8" fill="#ef4444" stroke="white" stroke-width="2"/>
+          </svg>
+        `),
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
       })
 
-      setStartIcon(start)
-      setEndIcon(end)
+      setIcons({ start: startIcon, end: endIcon })
     }
 
     loadIcons()
   }, [])
 
-  if (!route || route.length === 0) {
+  if (!isClient || !route || route.length === 0) {
     return (
-      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-        Rota não disponível.
+      <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-500">
+        {!isClient ? "Carregando mapa..." : "Rota não disponível"}
       </div>
     )
   }
@@ -107,30 +95,37 @@ export default function LeafletMap({ route }: LeafletMapProps) {
   return (
     <MapContainer
       center={center}
-      zoom={14}
+      zoom={13}
       scrollWheelZoom={false}
-      whenReady={() => setMapReady(true)} // Garante que o mapa está pronto
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
-        attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+        attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FitBounds route={route} />
-      {route.length > 1 && <Polyline positions={route} color="blue" />}
-
-      {/* Origem */}
-      {mapReady && startIcon && (
-        <Marker position={route[0]} icon={startIcon}>
-          <Popup>Origem</Popup>
-        </Marker>
+      
+      {route.length > 1 && (
+        <Polyline 
+          positions={route} 
+          color="#3b82f6" 
+          weight={4}
+          opacity={0.8}
+        />
       )}
 
-      {/* Destino */}
-      {mapReady && endIcon && route.length > 1 && (
-        <Marker position={route[route.length - 1]} icon={endIcon}>
-          <Popup>Destino</Popup>
-        </Marker>
+      {icons && (
+        <>
+          <Marker position={route[0]} icon={icons.start}>
+            <Popup>Origem</Popup>
+          </Marker>
+          
+          {route.length > 1 && (
+            <Marker position={route[route.length - 1]} icon={icons.end}>
+              <Popup>Destino</Popup>
+            </Marker>
+          )}
+        </>
       )}
     </MapContainer>
   )
