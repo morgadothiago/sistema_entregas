@@ -7,6 +7,7 @@ import {
   Bell,
   Mail,
   Settings,
+  Store,
 } from "lucide-react"
 import { FaWhatsapp } from "react-icons/fa"
 
@@ -56,6 +57,12 @@ export const itemAdm = [
     subTile: "Listagem de Usuario",
     url: "/user",
     icon: User,
+  },
+  {
+    title: "/admin/stores",
+    subTile: "Logista",
+    url: "/stores",
+    icon: Store,
   },
 ]
 
