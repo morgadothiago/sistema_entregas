@@ -22,7 +22,7 @@ export const items = [
     title: "simulate",
     subTile: "Simulação de entrega",
 
-    url: "/simulate",
+    url: "simulate",
     icon: RefreshCcw,
   },
   {
@@ -38,9 +38,9 @@ export const items = [
     icon: DollarSign,
   },
   {
-    title: "notifications",
+    title: "notification",
     subTile: "Notificações",
-    url: "/dashboard/notifications",
+    url: "/notification",
     icon: Bell,
   },
 ]

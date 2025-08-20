@@ -1,0 +1,573 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
+import { toast } from "sonner"
+import {
+  Plus,
+  Search,
+  Edit,
+  Receipt as ReceiptIcon,
+  CreditCard,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react"
+import api from "@/app/services/api"
+import { useAuth } from "@/app/context"
+import { Billing, Receipt } from "@/app/types/Debt"
+import { User } from "@/app/types/User"
+
+// Type for the API response
+interface BillingApiResponse {
+  id: string
+  key: string
+  amount: number
+  status: "PENDING" | "PAID" | "OVERDUE"
+  description: string
+  createdAt: string
+  dueDate: string
+  receipts?: Receipt[]
+}
+
+interface PaginatedResponse<T> {
+  items: T[]
+  total: number
+  page: number
+  totalPages: number
+}
+
+export default function BillingDashboard() {
+  // State
+  const [billings, setBillings] = useState<Billing[]>([])
+  const [loading, setLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedBilling, setSelectedBilling] = useState<Billing | null>(null)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false)
+
+  // Pagination state
+  const [totalItems, setTotalItems] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(5)
+
+  // Auth and routing
+  const { token, isAuthenticated, user } = useAuth()
+  const router = useRouter()
+  const [userInfo, setUserInfo] = useState<User | null>(null)
+  const [searchInput, setSearchInput] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+
+  // Fetch billings on component mount and when token changes
+  useEffect(() => {
+    if (token) {
+      fetchBillings(currentPage, itemsPerPage)
+    }
+  }, [token])
+
+  // Fetch billings with optional pagination
+  const fetchBillings = async (
+    page: number = 1,
+    perPage: number = itemsPerPage
+  ) => {
+    if (!token) return
+
+    setLoading(true)
+    try {
+      console.log("Fetching billings with page:", page, "perPage:", perPage)
+
+      const response = await api.getBillings(page, perPage, token)
+      console.log("API Response:", response)
+
+      if (response) {
+        // The response is already the data we need (items array with pagination info)
+        const items = Array.isArray(response) ? response : response.data || []
+
+        // Set the billings data
+        setBillings(items)
+
+        // For now, set a default total items count
+        // The API should ideally return pagination info, but we'll handle if it doesn't
+        setTotalItems(items.length)
+
+        // Set a default total pages (1 if we have items, 0 if not)
+        const calculatedPages =
+          items.length > 0 ? Math.ceil(items.length / perPage) : 0
+        setTotalPages(calculatedPages || 1)
+
+        setCurrentPage(page)
+      } else {
+        console.error("Invalid response format:", response)
+        toast.error("Formato de resposta inválido da API")
+      }
+    } catch (error: any) {
+      console.error("Error fetching billings:", error)
+      toast.error(error.response?.data?.message || "Erro ao carregar faturas")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Handle authentication and initial data fetch
+  useEffect(() => {
+    setUserInfo(user)
+    if (!isAuthenticated) {
+      router.push("/signin")
+    } else {
+      fetchBillings(currentPage)
+    }
+  }, [isAuthenticated, router, token])
+
+  // Create a new billing
+  const handleCreateBilling = async (formData: FormData) => {
+    const newBilling = {
+      amount: Number(formData.get("amount")),
+      description: formData.get("description") as string,
+      status: "PENDING" as const,
+      key: formData.get("key") as string,
+      idUser: userInfo?.id,
+    }
+
+    try {
+      await api.newBilling(newBilling, token as string)
+      toast.success("Fatura criada com sucesso!")
+      fetchBillings(currentPage)
+      setIsCreateDialogOpen(false)
+    } catch (error: any) {
+      console.error("API Error:", error.response?.data || error.message)
+      toast.error(error.response?.data?.message || "Erro ao criar faturamento")
+    }
+  }
+
+  // Handle search input change
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchTerm(value)
+    setCurrentPage(1) // Reset to first page when searching
+  }
+
+  // Debounced search term to avoid too many re-renders
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300) // 300ms delay
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [searchTerm])
+
+  // Filter billings based on search term and status
+  const filteredBillings = billings.filter((billing: Billing) => {
+    // Apply status filter
+    if (statusFilter !== "all" && billing.status !== statusFilter) {
+      return false
+    }
+
+    // Apply search term filter
+    if (debouncedSearchTerm) {
+      const searchTermLower = debouncedSearchTerm.toLowerCase()
+      return (
+        billing.key?.toLowerCase().includes(searchTermLower) ||
+        billing.description?.toLowerCase().includes(searchTermLower) ||
+        billing.status?.toLowerCase().includes(searchTermLower) ||
+        billing.amount?.toString().includes(debouncedSearchTerm)
+      )
+    }
+
+    return true
+  })
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      console.log("Changing to page:", page)
+      setCurrentPage(page)
+      fetchBillings(page, itemsPerPage).then(() => {
+        // Scroll to top after the data is loaded
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      })
+    }
+  }
+
+  // Handle items per page change
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items)
+    setCurrentPage(1)
+    fetchBillings(1, items)
+    // Scroll to top when changing items per page
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  // Calculate pagination info
+  const startIndex = (currentPage - 1) * itemsPerPage + 1
+  const endIndex = Math.min(
+    startIndex + itemsPerPage - 1,
+    filteredBillings.length
+  )
+  // Update totalItems when filteredBillings changes
+  useEffect(() => {
+    setTotalItems(filteredBillings.length)
+  }, [filteredBillings.length])
+
+  // Get status badge color
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PAID":
+        return "bg-green-100 text-green-800"
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800"
+      case "OVERDUE":
+        return "bg-red-100 text-red-800"
+      default:
+        console.warn(`Unknown status: ${status}`)
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Faturamento</h1>
+          <p className="text-muted-foreground">
+            Gerencie todos os seus faturamentos e recibos
+          </p>
+        </div>
+
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Faturamento
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Criar Novo Faturamento</DialogTitle>
+              <DialogDescription>
+                Preencha os dados para criar um novo faturamento.
+              </DialogDescription>
+            </DialogHeader>
+            <form action={handleCreateBilling} className="space-y-4">
+              <div>
+                <Label htmlFor="amount">Valor</Label>
+                <Input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Descrição do faturamento"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="key">Chave</Label>
+                <Input
+                  id="key"
+                  name="key"
+                  placeholder="Chave de identificação"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Criar Faturamento
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Buscar por chave, descrição, status ou valor..."
+              className="pl-9 w-full"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </div>
+          <div className="w-full sm:w-48">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="all">Todos os status</option>
+              <option value="PENDING">Pendente</option>
+              <option value="PAID">Pago</option>
+              <option value="OVERDUE">Atrasado</option>
+            </select>
+          </div>
+          {(searchTerm || statusFilter !== "all") && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("")
+                setDebouncedSearchTerm("")
+                setStatusFilter("all")
+              }}
+              className="whitespace-nowrap"
+            >
+              Limpar filtros
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {searchTerm && (
+        <div className="text-sm text-muted-foreground">
+          {filteredBillings.length} resultado
+          {filteredBillings.length !== 1 ? "s" : ""} para "{searchTerm}"
+        </div>
+      )}
+
+      <div className="grid gap-6">
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Carregando...</p>
+          </div>
+        ) : filteredBillings.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">
+                Nenhum faturamento encontrado
+              </h3>
+              <p className="text-muted-foreground">
+                {searchTerm
+                  ? "Tente ajustar sua pesquisa"
+                  : "Comece criando seu primeiro faturamento"}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredBillings.map((billing: Billing, index: number) => (
+            <Card
+              key={`billing-${billing.id || `index-${index}`}`}
+              className="hover:shadow-md transition-shadow"
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <CardTitle className="text-lg">{billing.key}</CardTitle>
+                    <Badge className={getStatusColor(billing.status)}>
+                      {billing.status === "PAID"
+                        ? "Pago"
+                        : billing.status === "PENDING"
+                        ? "Pendente"
+                        : "Vencido"}
+                    </Badge>
+                  </div>
+                  <div className="text-xl font-bold">
+                    R${" "}
+                    {billing.amount.toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </div>
+                </div>
+                <CardDescription>{billing.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Criado em:{" "}
+                    {new Date(billing.createdAt).toLocaleDateString("pt-BR")}
+                    {billing.receipts && billing.receipts.length > 0 && (
+                      <span className="ml-4">
+                        {billing.receipts.length} recibo(s)
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4 mr-1" />
+                          Editar
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Editar Faturamento</DialogTitle>
+                        </DialogHeader>
+                        <form className="space-y-4">
+                          <div>
+                            <Label htmlFor="edit-amount">Valor</Label>
+                            <Input
+                              id="edit-amount"
+                              name="amount"
+                              type="number"
+                              step="0.01"
+                              defaultValue={billing.amount}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="edit-description">Descrição</Label>
+                            <Textarea
+                              id="edit-description"
+                              name="description"
+                              defaultValue={billing.description}
+                              required
+                            />
+                          </div>
+                          <Button type="submit" className="w-full">
+                            Atualizar
+                          </Button>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 p-4 bg-gray-50 rounded-lg border">
+            <div className="text-sm text-gray-600">
+              Mostrando {filteredBillings.length} de {totalItems} itens
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1"
+              >
+                Primeira
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="w-10 h-10"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex items-center gap-1 mx-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number
+                  if (totalPages <= 5) {
+                    pageNum = i + 1
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i
+                  } else {
+                    pageNum = currentPage - 2 + i
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      className={`w-10 h-10 ${
+                        currentPage === pageNum ? "font-bold" : ""
+                      }`}
+                      onClick={() => handlePageChange(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  )
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1"
+              >
+                Última
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-600">Itens por página:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) =>
+                  handleItemsPerPageChange(Number(e.target.value))
+                }
+                className="border rounded p-1 text-sm w-16 text-center"
+                disabled={loading}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

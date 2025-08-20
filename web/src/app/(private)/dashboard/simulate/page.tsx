@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 import api from "@/app/services/api"
-import { useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import {
   Sheet,
   SheetContent,
@@ -52,6 +52,9 @@ import {
   Send,
 } from "lucide-react"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import { redirect } from "next/dist/server/api-utils"
+import { useAuth } from "@/app/context"
+import { useRouter } from "next/navigation"
 
 const initialForm = {
   clientAddress: { city: "", state: "", street: "", number: "", zipCode: "" },
@@ -76,13 +79,21 @@ export default function Page() {
   const [vehicleTypes, setVehicleTypes] = useState<
     { id: number; type: string }[]
   >([])
+  const { token } = useAuth()
+  const router = useRouter()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [simulationResult, setSimulationResult] = useState<any>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    if (!token) {
+      signOut()
+      router.push("/signin")
+      return
+    }
+
     setMounted(true)
-  }, [])
+  }, [token])
 
   useEffect(() => {
     async function fetchVehicleTypes() {
@@ -128,7 +139,8 @@ export default function Page() {
           {
             duration: 5000,
             position: "top-right",
-            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
+            className:
+              "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
           }
         )
         return false
@@ -136,7 +148,8 @@ export default function Page() {
       toast.success("Entrega cadastrada com sucesso!", {
         duration: 4000,
         position: "top-right",
-        className: "bg-green-50 text-green-900 border-l-4 border-green-500 shadow-lg",
+        className:
+          "bg-green-50 text-green-900 border-l-4 border-green-500 shadow-lg",
       })
       return true
     } catch (error: any) {
@@ -148,7 +161,8 @@ export default function Page() {
         {
           duration: 5000,
           position: "top-right",
-          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
+          className:
+            "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
         }
       )
       return false
@@ -170,7 +184,8 @@ export default function Page() {
       if (!form.clientAddress[key]) {
         toast.error(`Preencha o campo "${key}" do endereço do cliente.`, {
           position: "top-right",
-          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
+          className:
+            "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
         })
         return false
       }
@@ -181,7 +196,8 @@ export default function Page() {
         if (!form.address[key]) {
           toast.error(`Preencha o campo "${key}" do endereço de origem.`, {
             position: "top-right",
-            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
+            className:
+              "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
           })
           return false
         }
@@ -206,9 +222,10 @@ export default function Page() {
       if (!form[key] || isNaN(Number(form[key])) || Number(form[key]) <= 0) {
         toast.error(
           `Preencha corretamente o campo "${key}" (valor positivo).`,
-          { 
+          {
             position: "top-right",
-            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg" 
+            className:
+              "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
           }
         )
         return false
@@ -229,9 +246,10 @@ export default function Page() {
     ) {
       toast.error(
         "Preencha um telefone válido no formato brasileiro. Ex: (11) 91234-5678",
-        { 
+        {
           position: "top-right",
-          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg" 
+          className:
+            "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
         }
       )
       return false
@@ -282,6 +300,7 @@ export default function Page() {
         vehicleType: form.vehicleType,
       }
       const result = await api.simulateDelivery(payload, token)
+
       if (result && result.status && result.status !== 200) {
         toast.error(
           Array.isArray(result.message)
@@ -290,7 +309,8 @@ export default function Page() {
           {
             duration: 5000,
             position: "top-right",
-            className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
+            className:
+              "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
           }
         )
         setSimulating(false)
@@ -306,7 +326,8 @@ export default function Page() {
         {
           duration: 5000,
           position: "top-right",
-          className: "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
+          className:
+            "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
         }
       )
     } finally {
@@ -918,7 +939,9 @@ export default function Page() {
                   {simulating ? (
                     <>
                       <div className="animate-spin h-6 w-6 mr-3 border-2 border-blue-300 border-t-blue-600 rounded-full" />
-                      <span className="animate-pulse text-lg">Simulando...</span>
+                      <span className="animate-pulse text-lg">
+                        Simulando...
+                      </span>
                     </>
                   ) : (
                     <>

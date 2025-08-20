@@ -14,7 +14,6 @@ import type {
 import type { VehicleType, VehicleTypePaginate } from "../types/VehicleType"
 import { IPaginateResponse } from "../types/Paginate"
 import { signOut } from "next-auth/react"
-import { Delivery } from "../types/DeliveryTypes"
 
 interface IErrorResponse {
   message: string
@@ -41,7 +40,7 @@ class ApiService {
     ApiService.token = ""
   }
 
-  async getInfo() {
+  async getInfo(token: string | null) {
     this.api.get("")
   }
 
@@ -219,69 +218,75 @@ class ApiService {
       .then(this.getResponse<any>)
       .catch(this.getError)
   }
-  async getDeliveryDetail(
-    code: string,
-    token: string,
-    socketId: string
-  ): Promise<Delivery | IErrorResponse> {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-    return this.api
-      .get(`/gps/delivery/${code}`, {
-        params: { socketId },
-        headers: {
-          authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(this.getResponse<Delivery>)
-      .catch(this.getError)
-  }
 
-  async getDelivery(
-    page: number,
-    token: string,
-    limit: number = 10
-  ): Promise<
-    | {
-        data: Delivery[]
-        total: number
-        currentPage: number
-        totalPages: number
-        nextPage: number | null
-        previousPage: number | null
-      }
-    | IErrorResponse
-  > {
+  async newBilling(data: any, token: string) {
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
 
-    // Enviar apenas os parâmetros necessários para listagem
-    const requestData = {
-      page,
-      limit,
-    }
-
-    console.log(
-      "Enviando requisição para /delivery com dados:",
-      JSON.stringify(requestData, null, 2)
-    )
-
-    return this.api
-      .post("/delivery", requestData, {
+    try {
+      const response = await this.api.post("/billing", data, {
         headers: {
           Authorization: authToken,
           "Content-Type": "application/json",
         },
       })
-      .then(
-        this.getResponse<{
-          data: Delivery[]
-          total: number
-          currentPage: number
-          totalPages: number
-          nextPage: number | null
-          previousPage: number | null
-        }>
-      )
+
+      return response.data
+    } catch (error) {
+      console.error("Error creating billing:", error)
+      throw error // Or handle it as per your error handling strategy
+    }
+  }
+
+  async getBillings(page: number = 1, limit: number = 10, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .get("/billing", {
+        params: { page, limit },
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+
+  async getAllBillings(token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .get("/billing/all", {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+
+  async getDebtByCode(code: string, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .get(`/billing/${code}`, {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+
+  async createDebt(data: any, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .post("/billing", data, {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
       .catch(this.getError)
   }
 
