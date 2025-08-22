@@ -2,14 +2,14 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { VehicleType } from '@prisma/client';
-import { CreateVehicleTypeDto } from './dto/create-vehicle-type.dto';
-import { UpdateVehicleTypeDto } from './dto/update-vehicle-type.dto';
-import { IPaginateResponse, paginateResponse } from '../utils/fn';
-import { Decimal } from '@prisma/client/runtime/library';
-import { IRoute } from '../typing/location';
+} from "@nestjs/common"
+import { PrismaService } from "../prisma/prisma.service"
+import { VehicleType } from "@prisma/client"
+import { CreateVehicleTypeDto } from "./dto/create-vehicle-type.dto"
+import { UpdateVehicleTypeDto } from "./dto/update-vehicle-type.dto"
+import { IPaginateResponse, paginateResponse } from "../utils/fn"
+import { Decimal } from "@prisma/client/runtime/library"
+import { IRoute } from "../typing/location"
 
 @Injectable()
 export class VehicleTypeService {
@@ -18,63 +18,63 @@ export class VehicleTypeService {
   async findOne(type: string): Promise<VehicleType> {
     const vehicleType = await this.prisma.vehicleType.findUnique({
       where: { type },
-    });
+    })
 
     if (!vehicleType) {
       throw new NotFoundException(
-        `Tipo de veiculo '${type}' não foi encontrado`,
-      );
+        `Tipo de veiculo '${type}' não foi encontrado`
+      )
     }
 
-    return vehicleType;
+    return vehicleType
   }
 
   async delete(type: string): Promise<void> {
     const vehicleType = await this.prisma.vehicleType.findUnique({
       where: { type },
       select: { id: true },
-    });
+    })
 
     if (!vehicleType) {
       throw new NotFoundException(
-        `Tipo de veiculo '${type}' nao foi encontrado`,
-      );
+        `Tipo de veiculo '${type}' nao foi encontrado`
+      )
     }
 
     await this.prisma.vehicleType.delete({
       where: {
         id: vehicleType.id,
       },
-    });
+    })
   }
 
   calculatePrice(vehicleType: VehicleType, geoInfo: IRoute): number {
-    const distanceKM = geoInfo.distance;
+    const distanceKM = geoInfo.distance
 
-    const precoBasePrimeiros5KM = vehicleType.tarifaBase.toNumber();
+    const precoBasePrimeiros5KM = vehicleType.tarifaBase.toNumber()
 
-    const kmAdicionais = Math.max(0, distanceKM - 5);
+    const kmAdicionais = Math.max(0, distanceKM - 5)
     const precoKMAdicionais =
-      kmAdicionais * vehicleType.valorKMAdicional.toNumber();
+      kmAdicionais * vehicleType.valorKMAdicional.toNumber()
 
-    const precoTotal = precoBasePrimeiros5KM + precoKMAdicionais;
+    const precoTotal = precoBasePrimeiros5KM + precoKMAdicionais
 
-    return Math.round(precoTotal * 100) / 100;
+    return Math.round(precoTotal * 100) / 100
   }
 
   async update(
     type: string,
-    updateVehicleTypeDto: UpdateVehicleTypeDto,
+    updateVehicleTypeDto: UpdateVehicleTypeDto
   ): Promise<void> {
     const vehicleType = await this.prisma.vehicleType.findUnique({
       where: { type },
       select: { id: true },
-    });
+    })
 
     if (!vehicleType) {
       throw new NotFoundException(
-        `Tipo de veiculo '${type}' nao foi encontrado`,
-      );
+        `Tipo de veiculo '${type}' nao foi encontrado`
+      )
     }
 
     if (updateVehicleTypeDto.type) {
@@ -85,10 +85,10 @@ export class VehicleTypeService {
             not: vehicleType.id,
           },
         },
-      });
+      })
 
       if (conflict) {
-        throw new ConflictException(`Tipo de veiculo '${type}' já existe`);
+        throw new ConflictException(`Tipo de veiculo '${type}' já existe`)
       }
     }
 
@@ -101,12 +101,12 @@ export class VehicleTypeService {
       ajudanteAdicional:
         updateVehicleTypeDto.ajudanteAdicional as unknown as Decimal,
       type: updateVehicleTypeDto.type,
-    };
+    }
 
     await this.prisma.vehicleType.update({
       where: { id: vehicleType.id },
       data: vehicleTypeDto,
-    });
+    })
   }
 
   async create(body: CreateVehicleTypeDto): Promise<void> {
@@ -114,30 +114,30 @@ export class VehicleTypeService {
       where: {
         type: body.type,
       },
-    });
+    })
 
     if (conflict) {
-      throw new ConflictException(`Tipo de veiculo '${body.type}' já existe`);
+      throw new ConflictException(`Tipo de veiculo '${body.type}' já existe`)
     }
 
     const vehicleTypeDto = {
       type: body.type,
       tarifaBase: new Decimal(body.tarifaBase),
       valorKMAdicional: new Decimal(body.valorKMAdicional),
-      paradaAdicional: new Decimal((body.paradaAdicional as number) ?? 0),
-      ajudanteAdicional: new Decimal((body.ajudanteAdicional as number) ?? 0),
-    };
+      paradaAdicional: new Decimal(body.paradaAdicional || 0),
+      ajudanteAdicional: new Decimal(body.ajudanteAdicional || 0),
+    }
 
     await this.prisma.vehicleType.create({
       data: vehicleTypeDto,
-    });
+    })
   }
 
   async findAll(
     page: number,
-    registers: number,
+    registers: number
   ): Promise<IPaginateResponse<Partial<VehicleType>>> {
-    const where = {};
+    const where = {}
 
     const [data, total] = await Promise.all([
       this.prisma.vehicleType.findMany({
@@ -150,8 +150,8 @@ export class VehicleTypeService {
       this.prisma.vehicleType.count({
         where,
       }),
-    ]);
+    ])
 
-    return paginateResponse(data, page, registers, total);
+    return paginateResponse(data, page, registers, total)
   }
 }
