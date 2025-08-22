@@ -6,8 +6,16 @@ import React from "react"
 import { useMap } from "react-leaflet"
 import type L from "leaflet"
 
-interface LeafletMapProps {
+export interface LeafletMapProps {
   route: [number, number][]
+  addressOrigem: {
+    latitude: number
+    longitude: number
+  }
+  clientAddress: {
+    latitude: number
+    longitude: number
+  }
 }
 
 // Dynamically import react-leaflet components

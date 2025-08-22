@@ -124,6 +124,16 @@ class ApiService {
       .then(this.getResponse<IPaginateResponse<VehicleType>>)
       .catch(this.getError)
   }
+  async getDeliveryDetail(code: string, token: string, socketId?: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .get(`/delivery/${code}`, {
+        headers: { authorization: authToken },
+        params: socketId ? { socketId } : {},
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
 
   async deleteUser(id: string, token: string): Promise<void | IErrorResponse> {
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
@@ -289,7 +299,6 @@ class ApiService {
       .then(this.getResponse<any>)
       .catch(this.getError)
   }
-
   static getInstance() {
     return (ApiService.instance ??= new ApiService())
   }
