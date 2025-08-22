@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import {
   Card,
@@ -22,15 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  PaginationEllipsis,
-} from "@/components/ui/pagination"
+
 import { toast } from "sonner"
 import {
   Plus,
@@ -48,21 +40,17 @@ import api from "@/app/services/api"
 import { useAuth } from "@/app/context"
 import { Billing, Receipt } from "@/app/types/Debt"
 import { User } from "@/app/types/User"
+import { SelectItem } from "@radix-ui/react-select"
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 // Type for the API response
 interface BillingApiResponse {
-  id: string
-  key: string
-  amount: number
-  status: "PENDING" | "PAID" | "OVERDUE"
-  description: string
-  createdAt: string
-  dueDate: string
-  receipts?: Receipt[]
-}
-
-interface PaginatedResponse<T> {
-  items: T[]
+  data: Billing[]
   total: number
   page: number
   totalPages: number
@@ -111,9 +99,11 @@ export default function BillingDashboard() {
       const response = await api.getBillings(page, perPage, token)
       console.log("API Response:", response)
 
-      if (response) {
+      if (response && "data" in response) {
         // The response is already the data we need (items array with pagination info)
-        const items = Array.isArray(response) ? response : response.data || []
+        const items = Array.isArray(response.data)
+          ? response.data
+          : response.data || []
 
         // Set the billings data
         setBillings(items)
@@ -192,25 +182,27 @@ export default function BillingDashboard() {
   }, [searchTerm])
 
   // Filter billings based on search term and status
-  const filteredBillings = billings.filter((billing: Billing) => {
-    // Apply status filter
-    if (statusFilter !== "all" && billing.status !== statusFilter) {
-      return false
-    }
+  const filteredBillings = useMemo(() => {
+    return billings.filter((billing) => {
+      // Apply status filter
+      if (statusFilter !== "all" && billing.status !== statusFilter) {
+        return false
+      }
 
-    // Apply search term filter
-    if (debouncedSearchTerm) {
-      const searchTermLower = debouncedSearchTerm.toLowerCase()
-      return (
-        billing.key?.toLowerCase().includes(searchTermLower) ||
-        billing.description?.toLowerCase().includes(searchTermLower) ||
-        billing.status?.toLowerCase().includes(searchTermLower) ||
-        billing.amount?.toString().includes(debouncedSearchTerm)
-      )
-    }
+      // Apply search term filter
+      if (debouncedSearchTerm) {
+        const searchTermLower = debouncedSearchTerm.toLowerCase()
+        return (
+          (billing.key || "").toLowerCase().includes(searchTermLower) ||
+          (billing.description || "").toLowerCase().includes(searchTermLower) ||
+          billing.status.toLowerCase().includes(searchTermLower) ||
+          billing.amount.toString().includes(debouncedSearchTerm)
+        )
+      }
 
-    return true
-  })
+      return true
+    })
+  }, [billings, statusFilter, debouncedSearchTerm])
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -460,6 +452,69 @@ export default function BillingDashboard() {
                               required
                             />
                           </div>
+
+                          <div className="space-y-2">
+                            <Label
+                              htmlFor="status"
+                              className="text-sm font-medium text-gray-700"
+                            >
+                              Status
+                            </Label>
+                            <Select name="status" defaultValue={billing.status}>
+                              <SelectTrigger className="w-full h-10 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                                <SelectValue>
+                                  {billing.status && (
+                                    <div className="flex items-center">
+                                      <span
+                                        className={`w-2 h-2 rounded-full mr-2 ${
+                                          billing.status === "PENDING"
+                                            ? "bg-yellow-500"
+                                            : billing.status === "PAID"
+                                            ? "bg-green-500"
+                                            : "bg-red-500"
+                                        }`}
+                                      />
+                                      {billing.status === "PENDING"
+                                        ? "Pendente"
+                                        : billing.status === "PAID"
+                                        ? "Pago"
+                                        : "Atrasado"}
+                                    </div>
+                                  )}
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent className="bg-white border border-gray-200 rounded-md shadow-lg">
+                                <SelectItem
+                                  value="PENDING"
+                                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+                                >
+                                  <div className="flex items-center">
+                                    <span className="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
+                                    Pendente
+                                  </div>
+                                </SelectItem>
+                                <SelectItem
+                                  value="PAID"
+                                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+                                >
+                                  <div className="flex items-center">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                                    Pago
+                                  </div>
+                                </SelectItem>
+                                <SelectItem
+                                  value="OVERDUE"
+                                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
+                                >
+                                  <div className="flex items-center">
+                                    <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                                    Atrasado
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
                           <Button type="submit" className="w-full">
                             Atualizar
                           </Button>

@@ -104,6 +104,8 @@ export default function DeliveryDetailPage() {
           socketInstance?.id || "no-socket"
         )
 
+        console.log(response)
+
         if ("error" in response) {
           toast.error("Erro ao carregar detalhes da entrega")
           return
