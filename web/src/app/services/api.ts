@@ -299,6 +299,18 @@ class ApiService {
       .then(this.getResponse<any>)
       .catch(this.getError)
   }
+  async updateDebt(id: string, data: any, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .put(`/billing/${id}`, data, {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
 
   async getAlldelivery(token: string) {
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`

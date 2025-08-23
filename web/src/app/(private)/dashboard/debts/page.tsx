@@ -115,12 +115,23 @@ export default function BillingDashboard() {
       router.push("/signin")
       return
     }
-
     if (token) {
       setUserInfo(user)
       fetchBillings(currentPage, itemsPerPage)
     }
-  }, [isAuthenticated, token, currentPage, itemsPerPage, user, router])
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+    }, 300)
+    return () => clearTimeout(handler)
+  }, [
+    isAuthenticated,
+    token,
+    currentPage,
+    itemsPerPage,
+    user,
+    router,
+    searchTerm,
+  ])
 
   // Create a new billing
   const handleCreateBilling = async (formData: FormData) => {
@@ -149,14 +160,6 @@ export default function BillingDashboard() {
     setSearchTerm(value)
     setCurrentPage(1)
   }
-
-  // Debounce search
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm)
-    }, 300)
-    return () => clearTimeout(handler)
-  }, [searchTerm])
 
   // Filter billings
   const filteredBillings = useMemo(() => {
@@ -210,6 +213,41 @@ export default function BillingDashboard() {
         return "bg-red-100 text-red-800"
       default:
         return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const [editingBilling, setEditingBilling] = useState<Billing | null>(null)
+
+  const handleUpdateBilling = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault()
+
+    if (!editingBilling) return
+
+    const formData = new FormData(event.currentTarget)
+    const updatedBilling = {
+      ...editingBilling,
+      amount: parseFloat(formData.get("amount") as string),
+    }
+
+    console.log(updatedBilling)
+
+    try {
+      const response = await api.updateDebt(
+        updatedBilling.id.toString(),
+        updatedBilling,
+        token as string
+      )
+      toast.success("Fatura atualizada com sucesso!")
+
+      console.log("Fatura atualizada com sucesso!", response)
+
+      fetchBillings(currentPage, itemsPerPage)
+      setIsReceiptDialogOpen(false)
+    } catch (error: any) {
+      console.error("API Error:", error.response?.data || error.message)
+      toast.error(error.response?.data?.message || "Erro ao atualizar fatura")
     }
   }
 
@@ -384,7 +422,12 @@ export default function BillingDashboard() {
                   <div className="flex space-x-2">
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingBilling(billing)}
+                          type="button"
+                        >
                           <Edit className="w-4 h-4 mr-1" />
                           Editar
                         </Button>
@@ -393,7 +436,13 @@ export default function BillingDashboard() {
                         <DialogHeader>
                           <DialogTitle>Editar Faturamento</DialogTitle>
                         </DialogHeader>
-                        <form className="space-y-4">
+                        <form
+                          className="space-y-4"
+                          onSubmit={(e) => {
+                            e.preventDefault()
+                            handleUpdateBilling(e)
+                          }}
+                        >
                           <div>
                             <Label htmlFor="edit-amount">Valor</Label>
                             <Input
@@ -401,7 +450,7 @@ export default function BillingDashboard() {
                               name="amount"
                               type="number"
                               step="0.01"
-                              defaultValue={billing.amount}
+                              defaultValue={editingBilling?.amount || ""}
                               required
                             />
                           </div>
