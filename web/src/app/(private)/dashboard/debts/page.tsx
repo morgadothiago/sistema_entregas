@@ -28,17 +28,13 @@ import {
   Plus,
   Search,
   Edit,
-  Receipt as ReceiptIcon,
-  CreditCard,
   FileText,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from "lucide-react"
 import api from "@/app/services/api"
 import { useAuth } from "@/app/context"
-import { Billing, Receipt } from "@/app/types/Debt"
+import { Billing } from "@/app/types/Debt"
 import { User } from "@/app/types/User"
 import { SelectItem } from "@radix-ui/react-select"
 import {
@@ -47,14 +43,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
-// Type for the API response
-interface BillingApiResponse {
-  data: Billing[]
-  total: number
-  page: number
-  totalPages: number
-}
 
 export default function BillingDashboard() {
   // State
@@ -75,20 +63,14 @@ export default function BillingDashboard() {
   const { token, isAuthenticated, user } = useAuth()
   const router = useRouter()
   const [userInfo, setUserInfo] = useState<User | null>(null)
-  const [searchInput, setSearchInput] = useState("")
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
-  // Fetch billings on component mount and when token changes
-  useEffect(() => {
-    if (token) {
-      fetchBillings(currentPage, itemsPerPage)
-    }
-  }, [token])
-
-  // Fetch billings with optional pagination
+  // Fetch billings with optional pagination + retry
   const fetchBillings = async (
     page: number = 1,
-    perPage: number = itemsPerPage
+    perPage: number = itemsPerPage,
+    retries: number = 2
   ) => {
     if (!token) return
 
@@ -100,45 +82,45 @@ export default function BillingDashboard() {
       console.log("API Response:", response)
 
       if (response && "data" in response) {
-        // The response is already the data we need (items array with pagination info)
         const items = Array.isArray(response.data)
           ? response.data
           : response.data || []
 
-        // Set the billings data
         setBillings(items)
-
-        // For now, set a default total items count
-        // The API should ideally return pagination info, but we'll handle if it doesn't
         setTotalItems(items.length)
-
-        // Set a default total pages (1 if we have items, 0 if not)
         const calculatedPages =
           items.length > 0 ? Math.ceil(items.length / perPage) : 0
         setTotalPages(calculatedPages || 1)
-
         setCurrentPage(page)
       } else {
         console.error("Invalid response format:", response)
         toast.error("Formato de resposta inválido da API")
       }
     } catch (error: any) {
-      console.error("Error fetching billings:", error)
-      toast.error(error.response?.data?.message || "Erro ao carregar faturas")
+      if (error.response?.status === 429 && retries > 0) {
+        console.warn("Rate limit atingido, tentando novamente...")
+        setTimeout(() => fetchBillings(page, perPage, retries - 1), 1000)
+      } else {
+        console.error("Error fetching billings:", error)
+        toast.error(error.response?.data?.message || "Erro ao carregar faturas")
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  // Handle authentication and initial data fetch
+  // ✅ Unificado: só um useEffect para evitar chamadas duplicadas
   useEffect(() => {
-    setUserInfo(user)
     if (!isAuthenticated) {
       router.push("/signin")
-    } else {
-      fetchBillings(currentPage)
+      return
     }
-  }, [isAuthenticated, router, token])
+
+    if (token) {
+      setUserInfo(user)
+      fetchBillings(currentPage, itemsPerPage)
+    }
+  }, [isAuthenticated, token, currentPage, itemsPerPage, user, router])
 
   // Create a new billing
   const handleCreateBilling = async (formData: FormData) => {
@@ -153,7 +135,7 @@ export default function BillingDashboard() {
     try {
       await api.newBilling(newBilling, token as string)
       toast.success("Fatura criada com sucesso!")
-      fetchBillings(currentPage)
+      fetchBillings(currentPage, itemsPerPage)
       setIsCreateDialogOpen(false)
     } catch (error: any) {
       console.error("API Error:", error.response?.data || error.message)
@@ -165,31 +147,23 @@ export default function BillingDashboard() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchTerm(value)
-    setCurrentPage(1) // Reset to first page when searching
+    setCurrentPage(1)
   }
 
-  // Debounced search term to avoid too many re-renders
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
-
+  // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm)
-    }, 300) // 300ms delay
-
-    return () => {
-      clearTimeout(handler)
-    }
+    }, 300)
+    return () => clearTimeout(handler)
   }, [searchTerm])
 
-  // Filter billings based on search term and status
+  // Filter billings
   const filteredBillings = useMemo(() => {
     return billings.filter((billing) => {
-      // Apply status filter
       if (statusFilter !== "all" && billing.status !== statusFilter) {
         return false
       }
-
-      // Apply search term filter
       if (debouncedSearchTerm) {
         const searchTermLower = debouncedSearchTerm.toLowerCase()
         return (
@@ -199,44 +173,33 @@ export default function BillingDashboard() {
           billing.amount.toString().includes(debouncedSearchTerm)
         )
       }
-
       return true
     })
   }, [billings, statusFilter, debouncedSearchTerm])
 
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      console.log("Changing to page:", page)
-      setCurrentPage(page)
-      fetchBillings(page, itemsPerPage).then(() => {
-        // Scroll to top after the data is loaded
-        window.scrollTo({ top: 0, behavior: "smooth" })
-      })
-    }
-  }
-
-  // Handle items per page change
-  const handleItemsPerPageChange = (items: number) => {
-    setItemsPerPage(items)
-    setCurrentPage(1)
-    fetchBillings(1, items)
-    // Scroll to top when changing items per page
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
-  // Calculate pagination info
-  const startIndex = (currentPage - 1) * itemsPerPage + 1
-  const endIndex = Math.min(
-    startIndex + itemsPerPage - 1,
-    filteredBillings.length
-  )
-  // Update totalItems when filteredBillings changes
+  // Atualiza totalItems quando filteredBillings mudar
   useEffect(() => {
     setTotalItems(filteredBillings.length)
   }, [filteredBillings.length])
 
-  // Get status badge color
+  // Paginação
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+      fetchBillings(page, itemsPerPage).then(() =>
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      )
+    }
+  }
+
+  const handleItemsPerPageChange = (items: number) => {
+    setItemsPerPage(items)
+    setCurrentPage(1)
+    fetchBillings(1, items)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  // Status badge
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PAID":
@@ -246,7 +209,6 @@ export default function BillingDashboard() {
       case "OVERDUE":
         return "bg-red-100 text-red-800"
       default:
-        console.warn(`Unknown status: ${status}`)
         return "bg-gray-100 text-gray-800"
     }
   }

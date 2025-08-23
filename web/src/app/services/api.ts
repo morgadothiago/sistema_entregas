@@ -299,6 +299,20 @@ class ApiService {
       .then(this.getResponse<any>)
       .catch(this.getError)
   }
+
+  async getAlldelivery(token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .get("/delivery", {
+        headers: {
+          authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+
   static getInstance() {
     return (ApiService.instance ??= new ApiService())
   }
