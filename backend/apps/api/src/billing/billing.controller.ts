@@ -10,6 +10,7 @@ import {
   Query,
   Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -27,6 +28,7 @@ import { BillingPaginateResponse } from './dto/billing-paginate-response.dto';
 import { IPaginateResponse } from '../utils/fn';
 import { BillingFindOneResponse } from './dto/billing-findOne-response.dto';
 import { BillingCreateDto } from './dto/billing-create.dto';
+import { AdminGuard } from '../admin/admin.guard';
 
 @Controller('billing')
 export class BillingController {
@@ -35,6 +37,7 @@ export class BillingController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'cria faturamento de credito' })
+  @UseGuards(AdminGuard)
   createBilling(
     @Body() body: BillingCreateDto,
     @Req() req: Request & { user: User },
@@ -45,6 +48,7 @@ export class BillingController {
   @Patch(':key')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'atualiza faturamento' })
+  @UseGuards(AdminGuard)
   async invoiceBilling(
     @Body() body: BillingUpdateDto,
     @Param('key') key: string,
