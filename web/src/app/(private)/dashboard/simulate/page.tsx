@@ -143,6 +143,7 @@ export default function Page() {
               "bg-red-50 text-red-900 border-l-4 border-red-500 shadow-lg",
           }
         )
+
         return false
       }
       toast.success("Entrega cadastrada com sucesso!", {
@@ -151,6 +152,9 @@ export default function Page() {
         className:
           "bg-green-50 text-green-900 border-l-4 border-green-500 shadow-lg",
       })
+
+      console.log("resultado", result)
+
       return true
     } catch (error: any) {
       toast.error(

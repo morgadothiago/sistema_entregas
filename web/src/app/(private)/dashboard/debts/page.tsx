@@ -1,312 +1,276 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useAuth } from "@/app/context"
+import api from "@/app/services/api"
+import { Billing } from "@/app/types/Debt"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+
+import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
+  CardContent,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
+  DialogTrigger,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog"
-
-import { toast } from "sonner"
-import {
-  Plus,
-  Search,
-  Edit,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react"
-import api from "@/app/services/api"
-import { useAuth } from "@/app/context"
-import { Billing } from "@/app/types/Debt"
-import { User } from "@/app/types/User"
-import { SelectItem } from "@radix-ui/react-select"
 import {
   Select,
-  SelectContent,
   SelectTrigger,
+  SelectContent,
+  SelectItem,
   SelectValue,
 } from "@/components/ui/select"
+import { Edit, Plus, Search } from "lucide-react"
+import { NewBilling } from "@/app/types/Billing"
 
-export default function BillingDashboard() {
-  // State
-  const [billings, setBillings] = useState<Billing[]>([])
-  const [loading, setLoading] = useState(false)
+import { signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+
+export default function BillingPage() {
+  const { token, loading, user } = useAuth()
+  const [billings, setBillings] = useState<Billing[] | null>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedBilling, setSelectedBilling] = useState<Billing | null>(null)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false)
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [error, setError] = useState<string | null>(null)
+  const [amount, setAmount] = useState<number>(0)
+  const [description, setDescription] = useState<string>("")
+  const [status, setStatus] = useState<
+    "PENDING" | "PAID" | "CANCELED" | "FAILED"
+  >("PENDING")
 
-  // Pagination state
-  const [totalItems, setTotalItems] = useState(0)
-  const [totalPages, setTotalPages] = useState(1)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(5)
-
-  // Auth and routing
-  const { token, isAuthenticated, user } = useAuth()
   const router = useRouter()
-  const [userInfo, setUserInfo] = useState<User | null>(null)
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm)
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-
-  // Fetch billings with optional pagination + retry
-  const fetchBillings = async (
-    page: number = 1,
-    perPage: number = itemsPerPage,
-    retries: number = 2
-  ) => {
-    if (!token) return
-
-    setLoading(true)
-    try {
-      console.log("Fetching billings with page:", page, "perPage:", perPage)
-
-      const response = await api.getBillings(page, perPage, token)
-      console.log("API Response:", response)
-
-      if (response && "data" in response) {
-        const items = Array.isArray(response.data)
-          ? response.data
-          : response.data || []
-
-        setBillings(items)
-        setTotalItems(items.length)
-        const calculatedPages =
-          items.length > 0 ? Math.ceil(items.length / perPage) : 0
-        setTotalPages(calculatedPages || 1)
-        setCurrentPage(page)
-      } else {
-        console.error("Invalid response format:", response)
-        toast.error("Formato de resposta inválido da API")
-      }
-    } catch (error: any) {
-      if (error.response?.status === 429 && retries > 0) {
-        console.warn("Rate limit atingido, tentando novamente...")
-        setTimeout(() => fetchBillings(page, perPage, retries - 1), 1000)
-      } else {
-        console.error("Error fetching billings:", error)
-        toast.error(error.response?.data?.message || "Erro ao carregar faturas")
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // ✅ Unificado: só um useEffect para evitar chamadas duplicadas
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!loading && !token) {
+      signOut({
+        callbackUrl: "/signin",
+        redirect: true,
+      })
       router.push("/signin")
       return
     }
-    if (token) {
-      setUserInfo(user)
-      fetchBillings(currentPage, itemsPerPage)
-    }
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm)
-    }, 300)
-    return () => clearTimeout(handler)
-  }, [
-    isAuthenticated,
-    token,
-    currentPage,
-    itemsPerPage,
-    user,
-    router,
-    searchTerm,
-  ])
 
-  // Create a new billing
-  const handleCreateBilling = async (formData: FormData) => {
-    const newBilling = {
-      amount: Number(formData.get("amount")),
-      description: formData.get("description") as string,
-      status: "PENDING" as const,
-      key: formData.get("key") as string,
-      idUser: userInfo?.id,
-    }
+    fetchBillings()
+  }, [token, loading, router])
 
+  const fetchBillings = async () => {
+    setIsLoading(true)
     try {
-      await api.newBilling(newBilling, token as string)
-      toast.success("Fatura criada com sucesso!")
-      fetchBillings(currentPage, itemsPerPage)
-      setIsCreateDialogOpen(false)
-    } catch (error: any) {
-      console.error("API Error:", error.response?.data || error.message)
-      toast.error(error.response?.data?.message || "Erro ao criar faturamento")
+      setIsLoading(true)
+      const response = await api.getBillings(token as string)
+
+      console.log(response)
+
+      // Verifica se é uma resposta de erro ou sucesso
+      if (response && "message" in response) {
+        // É um erro
+        setError(response.message)
+        toast.error(error)
+        setBillings([])
+      } else if (
+        response &&
+        "data" in response &&
+        Array.isArray(response.data)
+      ) {
+        // É uma resposta de sucesso com dados
+        toast.success("Faturamentos carregados com sucesso")
+        setBillings(response.data)
+      } else {
+        setBillings([])
+      }
+      setIsLoading(false)
+    } catch (err) {
+      setError("Erro ao carregar as entregas. Tente novamente.")
+      setIsLoading(false)
     }
   }
 
-  // Handle search input change
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
-
-  // Filter billings
-  const filteredBillings = useMemo(() => {
-    return billings.filter((billing) => {
-      if (statusFilter !== "all" && billing.status !== statusFilter) {
-        return false
-      }
-      if (debouncedSearchTerm) {
-        const searchTermLower = debouncedSearchTerm.toLowerCase()
-        return (
-          (billing.key || "").toLowerCase().includes(searchTermLower) ||
-          (billing.description || "").toLowerCase().includes(searchTermLower) ||
-          billing.status.toLowerCase().includes(searchTermLower) ||
-          billing.amount.toString().includes(debouncedSearchTerm)
-        )
-      }
-      return true
-    })
-  }, [billings, statusFilter, debouncedSearchTerm])
-
-  // Atualiza totalItems quando filteredBillings mudar
   useEffect(() => {
-    setTotalItems(filteredBillings.length)
-  }, [filteredBillings.length])
-
-  // Paginação
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-      fetchBillings(page, itemsPerPage).then(() =>
-        window.scrollTo({ top: 0, behavior: "smooth" })
-      )
+    if (!loading && !token) {
+      signOut({
+        callbackUrl: "/signin",
+        redirect: true,
+      })
+      router.push("/signin")
+      return
     }
+
+    fetchBillings()
+  }, [token, loading, router])
+
+  function filterBillings(
+    billings: Billing[] | undefined,
+    searchTerm: string,
+    statusFilter: "all" | Billing["status"]
+  ): Billing[] {
+    const normalizedSearch = searchTerm.toLowerCase()
+
+    return (billings ?? []).filter((b) => {
+      const matchesSearch =
+        b.key.toLowerCase().includes(normalizedSearch) ||
+        b.description.toLowerCase().includes(normalizedSearch)
+
+      const matchesStatus = statusFilter === "all" || b.status === statusFilter
+
+      return matchesSearch && matchesStatus
+    })
   }
 
-  const handleItemsPerPageChange = (items: number) => {
-    setItemsPerPage(items)
-    setCurrentPage(1)
-    fetchBillings(1, items)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+  const filteredBillings = filterBillings(
+    billings as Billing[],
+    searchTerm,
+    statusFilter as "all" | "PENDING" | "PAID" | "OVERDUE"
+  )
 
-  // Status badge
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "PAID":
-        return "bg-green-100 text-green-800"
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-800"
-      case "OVERDUE":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+    status === "PAID"
+      ? "bg-green-100 text-green-800"
+      : status === "PENDING"
+      ? "bg-yellow-100 text-yellow-800"
+      : "bg-red-100 text-red-800"
+  }
+
+  const handleAddNewBilling = async (data: NewBilling) => {
+    try {
+      const response = await api.createNewBilling(data, token as string)
+
+      if (response && "message" in response) {
+        toast.error(response.message)
+
+        return
+      }
+      toast.success("Faturamento criado com sucesso")
+      setDialogOpen(false)
+      fetchBillings()
+    } catch (err) {
+      toast.error("Erro ao criar novo faturamento")
+      console.log(err)
     }
   }
 
-  const [editingBilling, setEditingBilling] = useState<Billing | null>(null)
-
-  const handleUpdateBilling = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault()
-
-    if (!editingBilling) return
-
-    const formData = new FormData(event.currentTarget)
-    const updatedBilling = {
-      ...editingBilling,
-      amount: parseFloat(formData.get("amount") as string),
-    }
-
-    console.log(updatedBilling)
-
-    try {
-      const response = await api.updateDebt(
-        updatedBilling.id.toString(),
-        updatedBilling,
-        token as string
-      )
-      toast.success("Fatura atualizada com sucesso!")
-
-      console.log("Fatura atualizada com sucesso!", response)
-
-      fetchBillings(currentPage, itemsPerPage)
-      setIsReceiptDialogOpen(false)
-    } catch (error: any) {
-      console.error("API Error:", error.response?.data || error.message)
-      toast.error(error.response?.data?.message || "Erro ao atualizar fatura")
-    }
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600 text-lg">Carregando faturamentos...</p>
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-lg shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold">Faturamento</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-gray-900">Faturamentos</h1>
+          <p className="text-gray-500 mt-1">
             Gerencie todos os seus faturamentos e recibos
           </p>
         </div>
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors">
+              <Plus className="w-4 h-4" />
               Novo Faturamento
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Criar Novo Faturamento</DialogTitle>
               <DialogDescription>
                 Preencha os dados para criar um novo faturamento.
               </DialogDescription>
             </DialogHeader>
-            <form action={handleCreateBilling} className="space-y-4">
-              <div>
-                <Label htmlFor="amount">Valor</Label>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!user?.id) {
+                  setError("Usuário não autenticado")
+                  return
+                }
+                handleAddNewBilling({
+                  idUser: user?.id as number,
+                  amount,
+                  description,
+                  status,
+                })
+              }}
+            >
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Valor</label>
                 <Input
-                  id="amount"
-                  name="amount"
                   type="number"
-                  step="0.01"
                   placeholder="0.00"
                   required
+                  value={amount}
+                  onChange={(e) => setAmount(Number(e.target.value))}
                 />
               </div>
-              <div>
-                <Label htmlFor="description">Descrição</Label>
-                <Textarea
-                  id="description"
-                  name="description"
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Descrição</label>
+                <Input
                   placeholder="Descrição do faturamento"
                   required
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
-              <div>
-                <Label htmlFor="key">Chave</Label>
-                <Input
-                  id="key"
-                  name="key"
-                  placeholder="Chave de identificação"
-                  required
-                />
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Status</label>
+                <div className="space-y-1">
+                  <Select
+                    value={status}
+                    onValueChange={(val) => setStatus(val as typeof status)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        value="PAID"
+                        className="bg-green-100 text-green-800"
+                      >
+                        Pago
+                      </SelectItem>
+                      <SelectItem
+                        value="PENDING"
+                        className="bg-yellow-100 text-yellow-800"
+                      >
+                        Pendente
+                      </SelectItem>
+                      <SelectItem
+                        value="CANCELED"
+                        className="bg-red-100 text-red-800"
+                      >
+                        Cancelado
+                      </SelectItem>
+                      <SelectItem
+                        value="FAILED"
+                        className="bg-red-100 text-red-800"
+                      >
+                        Falhou
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
                 Criar Faturamento
               </Button>
             </form>
@@ -314,326 +278,92 @@ export default function BillingDashboard() {
         </Dialog>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar por chave, descrição, status ou valor..."
-              className="pl-9 w-full"
-              value={searchTerm}
-              onChange={handleSearch}
-            />
-          </div>
-          <div className="w-full sm:w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="all">Todos os status</option>
-              <option value="PENDING">Pendente</option>
-              <option value="PAID">Pago</option>
-              <option value="OVERDUE">Atrasado</option>
-            </select>
-          </div>
-          {(searchTerm || statusFilter !== "all") && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchTerm("")
-                setDebouncedSearchTerm("")
-                setStatusFilter("all")
-              }}
-              className="whitespace-nowrap"
-            >
-              Limpar filtros
-            </Button>
-          )}
+      {/* Filtros */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Buscar por chave ou descrição..."
+            className="pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filtrar por status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="PAID">Pago</SelectItem>
+            <SelectItem value="PENDING">Pendente</SelectItem>
+            <SelectItem value="OVERDUE">Atrasado</SelectItem>
+          </SelectContent>
+        </Select>
+        {searchTerm || statusFilter !== "all" ? (
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchTerm("")
+              setStatusFilter("all")
+            }}
+          >
+            Limpar filtros
+          </Button>
+        ) : null}
       </div>
 
-      {searchTerm && (
-        <div className="text-sm text-muted-foreground">
-          {filteredBillings.length} resultado
-          {filteredBillings.length !== 1 ? "s" : ""} para "{searchTerm}"
+      {/* Lista de faturamentos */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-40 bg-white rounded-lg">
+          <p className="text-gray-500">Carregando...</p>
         </div>
-      )}
-
-      <div className="grid gap-6">
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Carregando...</p>
-          </div>
-        ) : filteredBillings.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">
-                Nenhum faturamento encontrado
-              </h3>
-              <p className="text-muted-foreground">
-                {searchTerm
-                  ? "Tente ajustar sua pesquisa"
-                  : "Comece criando seu primeiro faturamento"}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredBillings.map((billing: Billing, index: number) => (
+      ) : filteredBillings?.length === 0 ? (
+        <Card className="text-center py-12">
+          <CardContent>Nenhum faturamento encontrado.</CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredBillings?.map((billing) => (
             <Card
-              key={`billing-${billing.id || `index-${index}`}`}
-              className="hover:shadow-md transition-shadow"
+              key={billing.key}
+              className="hover:shadow-lg transition-shadow cursor-pointer bg-white"
             >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <CardTitle className="text-lg">{billing.key}</CardTitle>
-                    <Badge className={getStatusColor(billing.status)}>
-                      {billing.status === "PAID"
-                        ? "Pago"
-                        : billing.status === "PENDING"
-                        ? "Pendente"
-                        : "Vencido"}
-                    </Badge>
-                  </div>
-                  <div className="text-xl font-bold">
-                    R${" "}
-                    {billing.amount.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </div>
+              <CardHeader className="flex flex-col space-y-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg font-bold">
+                    {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(billing.amount)}
+                  </CardTitle>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                      billing.status
+                    )}`}
+                  >
+                    {billing.status}
+                  </span>
                 </div>
-                <CardDescription>{billing.description}</CardDescription>
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-500 text-sm">
+                    {new Date(billing.dueDate).toLocaleDateString("pt-BR")}
+                  </p>
+                  <Button variant="ghost" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    Criado em:{" "}
-                    {new Date(billing.createdAt).toLocaleDateString("pt-BR")}
-                    {billing.receipts && billing.receipts.length > 0 && (
-                      <span className="ml-4">
-                        {billing.receipts.length} recibo(s)
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setEditingBilling(billing)}
-                          type="button"
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Editar
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Editar Faturamento</DialogTitle>
-                        </DialogHeader>
-                        <form
-                          className="space-y-4"
-                          onSubmit={(e) => {
-                            e.preventDefault()
-                            handleUpdateBilling(e)
-                          }}
-                        >
-                          <div>
-                            <Label htmlFor="edit-amount">Valor</Label>
-                            <Input
-                              id="edit-amount"
-                              name="amount"
-                              type="number"
-                              step="0.01"
-                              defaultValue={editingBilling?.amount || ""}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="edit-description">Descrição</Label>
-                            <Textarea
-                              id="edit-description"
-                              name="description"
-                              defaultValue={billing.description}
-                              required
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label
-                              htmlFor="status"
-                              className="text-sm font-medium text-gray-700"
-                            >
-                              Status
-                            </Label>
-                            <Select name="status" defaultValue={billing.status}>
-                              <SelectTrigger className="w-full h-10 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
-                                <SelectValue>
-                                  {billing.status && (
-                                    <div className="flex items-center">
-                                      <span
-                                        className={`w-2 h-2 rounded-full mr-2 ${
-                                          billing.status === "PENDING"
-                                            ? "bg-yellow-500"
-                                            : billing.status === "PAID"
-                                            ? "bg-green-500"
-                                            : "bg-red-500"
-                                        }`}
-                                      />
-                                      {billing.status === "PENDING"
-                                        ? "Pendente"
-                                        : billing.status === "PAID"
-                                        ? "Pago"
-                                        : "Atrasado"}
-                                    </div>
-                                  )}
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent className="bg-white border border-gray-200 rounded-md shadow-lg">
-                                <SelectItem
-                                  value="PENDING"
-                                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-                                >
-                                  <div className="flex items-center">
-                                    <span className="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
-                                    Pendente
-                                  </div>
-                                </SelectItem>
-                                <SelectItem
-                                  value="PAID"
-                                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-                                >
-                                  <div className="flex items-center">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                                    Pago
-                                  </div>
-                                </SelectItem>
-                                <SelectItem
-                                  value="OVERDUE"
-                                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-                                >
-                                  <div className="flex items-center">
-                                    <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
-                                    Atrasado
-                                  </div>
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <Button type="submit" className="w-full">
-                            Atualizar
-                          </Button>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
+                <CardDescription className="line-clamp-2">
+                  {billing.description}
+                </CardDescription>
               </CardContent>
             </Card>
-          ))
-        )}
-
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 p-4 bg-gray-50 rounded-lg border">
-            <div className="text-sm text-gray-600">
-              Mostrando {filteredBillings.length} de {totalItems} itens
-            </div>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(1)}
-                disabled={currentPage === 1}
-                className="px-3 py-1"
-              >
-                Primeira
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="w-10 h-10"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-
-              <div className="flex items-center gap-1 mx-2">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum: number
-                  if (totalPages <= 5) {
-                    pageNum = i + 1
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i
-                  } else {
-                    pageNum = currentPage - 2 + i
-                  }
-
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="sm"
-                      className={`w-10 h-10 ${
-                        currentPage === pageNum ? "font-bold" : ""
-                      }`}
-                      onClick={() => handlePageChange(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  )
-                })}
-              </div>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="w-10 h-10"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(totalPages)}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1"
-              >
-                Última
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-600">Itens por página:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) =>
-                  handleItemsPerPageChange(Number(e.target.value))
-                }
-                className="border rounded p-1 text-sm w-16 text-center"
-                disabled={loading}
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

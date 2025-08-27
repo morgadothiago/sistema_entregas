@@ -38,11 +38,12 @@ export interface Billing {
   id: string
   key: string
   amount: number
-  status: "PENDING" | "PAID" | "OVERDUE"
+  status: "PENDING" | "PAID" | "OVERDUE" | "CANCELED" | "FAILED"
   description: string
   createdAt: string
   dueDate: string
   receipts?: Receipt[]
+  type: string
 }
 
 export interface Receipt {

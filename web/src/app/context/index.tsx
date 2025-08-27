@@ -9,8 +9,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>({} as User)
+  const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true) // 👈 novo estado
 
   useEffect(() => {
     let isMounted = true
@@ -22,15 +23,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (data && isMounted) {
           setUser(data.user as unknown as User)
 
-          const sessionToken = (data as unknown as { token: string })?.token
+          const sessionToken = (data as unknown as { token?: string })?.token
           if (sessionToken) {
             setToken(sessionToken)
           } else {
-            console.error("Token não encontrado na sessão!")
+            console.warn("Token não encontrado na sessão!")
           }
         }
       } catch (error) {
         console.error("Erro ao buscar sessão:", error)
+      } finally {
+        if (isMounted) setLoading(false) // 👈 só finaliza aqui
       }
     }
 
@@ -47,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, setToken, token, isAuthenticated }}
+      value={{ user, setUser, setToken, token, isAuthenticated, loading }} // 👈 exporta loading
     >
       {children}
     </AuthContext.Provider>

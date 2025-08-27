@@ -14,6 +14,8 @@ import type {
 import type { VehicleType, VehicleTypePaginate } from "../types/VehicleType"
 import { IPaginateResponse } from "../types/Paginate"
 import { signOut } from "next-auth/react"
+import { BillingFilters, IBillingResponse, NewBilling } from "../types/Billing"
+import { Billing } from "../types/Debt"
 
 interface IErrorResponse {
   message: string
@@ -68,17 +70,17 @@ class ApiService {
   }
 
   private async getError(error: AxiosError<any>): Promise<IErrorResponse> {
-    console.error("=== ERRO DA API ===")
+    console.log("=== ERRO DA API ===")
     if (error.response) {
-      console.error("Status:", error.response.status)
-      console.error("Data:", error.response.data)
+      console.log("Status:", error.response.status)
+      console.log("Data:", error.response.data)
       if (error.response.data?.message) {
-        console.error("Detalhes:", error.response.data.message)
+        console.log("Detalhes:", error.response.data.message)
       }
     } else {
-      console.error("Erro sem resposta do servidor:", error.message)
+      console.log("Erro sem resposta do servidor:", error.message)
     }
-    console.error("===================")
+    console.log("===================")
 
     return {
       status: error.response?.status ?? 500,
@@ -96,7 +98,7 @@ class ApiService {
       .get("/users", {
         params: filters,
         headers: {
-          authorization: authToken,
+          Authorization: authToken,
         },
       })
       .then(this.getResponse<IPaginateResponse<IUserPaginate>>)
@@ -107,7 +109,7 @@ class ApiService {
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
     return this.api
       .get(`/users/${id}`, {
-        headers: { authorization: authToken },
+        headers: { Authorization: authToken },
       })
       .then(this.getResponse<User>)
       .catch(this.getError)
@@ -128,7 +130,7 @@ class ApiService {
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
     return this.api
       .get(`/delivery/${code}`, {
-        headers: { authorization: authToken },
+        headers: { Authorization: authToken },
         params: socketId ? { socketId } : {},
       })
       .then(this.getResponse<any>)
@@ -140,7 +142,7 @@ class ApiService {
     return this.api
       .delete(`/users/${id}`, {
         headers: {
-          authorization: authToken,
+          Authorization: authToken,
         },
       })
       .then(this.getResponse<void>)
@@ -155,7 +157,7 @@ class ApiService {
     return this.api
       .delete(`/vehicle-types/${type}`, {
         headers: {
-          authorization: authToken,
+          Authorization: authToken,
         },
       })
       .then(this.getResponse<void>)
@@ -171,7 +173,7 @@ class ApiService {
     return this.api
       .patch(`/vehicle-types/${type}`, data, {
         headers: {
-          authorization: authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       })
@@ -187,7 +189,7 @@ class ApiService {
     return this.api
       .post("/vehicle-types", data, {
         headers: {
-          authorization: authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       })
@@ -198,7 +200,7 @@ class ApiService {
   async getAndressCompony(token: string) {
     return this.api
       .get("/delivery/me", {
-        headers: { authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then(this.getResponse<any>)
       .catch(this.getError)
@@ -208,7 +210,7 @@ class ApiService {
     return this.api
       .post("/delivery", data, {
         headers: {
-          authorization: authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       })
@@ -221,90 +223,7 @@ class ApiService {
     return this.api
       .post("/delivery/simulate", data, {
         headers: {
-          authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(this.getResponse<any>)
-      .catch(this.getError)
-  }
-
-  async newBilling(data: any, token: string) {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-
-    try {
-      const response = await this.api.post("/billing", data, {
-        headers: {
           Authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      })
-
-      return response.data
-    } catch (error) {
-      console.error("Error creating billing:", error)
-      throw error // Or handle it as per your error handling strategy
-    }
-  }
-
-  async getBillings(page: number = 1, limit: number = 10, token: string) {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-    return this.api
-      .get("/billing", {
-        params: { page, limit },
-        headers: {
-          authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(this.getResponse<any>)
-      .catch(this.getError)
-  }
-
-  async getAllBillings(token: string) {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-    return this.api
-      .get("/billing/all", {
-        headers: {
-          authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(this.getResponse<any>)
-      .catch(this.getError)
-  }
-
-  async getDebtByCode(code: string, token: string) {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-    return this.api
-      .get(`/billing/${code}`, {
-        headers: {
-          authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(this.getResponse<any>)
-      .catch(this.getError)
-  }
-
-  async createDebt(data: any, token: string) {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-    return this.api
-      .post("/billing", data, {
-        headers: {
-          authorization: authToken,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(this.getResponse<any>)
-      .catch(this.getError)
-  }
-  async updateDebt(id: string, data: any, token: string) {
-    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
-    return this.api
-      .put(`/billing/${id}`, data, {
-        headers: {
-          authorization: authToken,
           "Content-Type": "application/json",
         },
       })
@@ -317,11 +236,48 @@ class ApiService {
     return this.api
       .get("/delivery", {
         headers: {
-          authorization: authToken,
+          Authorization: authToken,
           "Content-Type": "application/json",
         },
       })
       .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+
+  async getBillings(
+    token: string,
+    filters?: {
+      type?: string
+      status?: string
+      description?: string
+      page?: number
+      limit?: number
+    }
+  ) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+
+    return this.api
+      .get("/billing", {
+        headers: {
+          Authorization: authToken,
+          "Content-Type": "application/json",
+        },
+        params: filters, // <<<<< aqui entram os filtros
+      })
+      .then(this.getResponse<IBillingResponse>)
+      .catch(this.getError)
+  }
+
+  async createNewBilling(data: NewBilling, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .post("/billing", data, {
+        headers: {
+          Authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<IBillingResponse>)
       .catch(this.getError)
   }
 
