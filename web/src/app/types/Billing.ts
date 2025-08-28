@@ -1,13 +1,5 @@
 import { Billing } from "./Debt"
 
-export interface BillingFilters {
-  type?: string
-  status?: string
-  description?: string
-  page?: number
-  limit?: number
-}
-
 export interface ICreateBilling {
   type: string
   status: string
@@ -30,4 +22,32 @@ export interface NewBilling {
 export interface IBillingResponse {
   data: Billing[]
   total: number
+}
+
+// ------------------------------------------------------------
+export enum EBillingStatus {
+  PENDING = "PENDING",
+  PAID = "PAID",
+  CANCELED = "CANCELED",
+  FAILED = "FAILED",
+}
+export enum EBillingType {
+  INCOME = "INCOME",
+  EXPENSE = "EXPENSE",
+}
+
+export interface updateBilling {
+  amount: number
+  description: string
+  status: EBillingStatus
+}
+
+export interface FilteredBillings {
+  idUser?: number
+  amount: number
+  type: EBillingType
+  status: EBillingStatus
+  description: string
+  page?: number
+  limit?: number
 }

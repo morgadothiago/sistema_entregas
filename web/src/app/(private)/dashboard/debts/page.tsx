@@ -31,19 +31,27 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Edit, Plus, Search } from "lucide-react"
-import { NewBilling } from "@/app/types/Billing"
+import {
+  EBillingStatus,
+  EBillingType,
+  FilteredBillings,
+  NewBilling,
+} from "@/app/types/Billing"
 
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 
 export default function BillingPage() {
   const { token, loading, user } = useAuth()
   const [billings, setBillings] = useState<Billing[] | null>([])
   const [isLoading, setIsLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [dialogEditOpen, setDialogEditOpen] = useState(false)
+
   const [error, setError] = useState<string | null>(null)
+  const [filters, setFilters] = useState<FilteredBillings>()
+
   const [amount, setAmount] = useState<number>(0)
   const [description, setDescription] = useState<string>("")
   const [status, setStatus] = useState<
@@ -51,26 +59,21 @@ export default function BillingPage() {
   >("PENDING")
 
   const router = useRouter()
-  useEffect(() => {
-    if (!loading && !token) {
-      signOut({
-        callbackUrl: "/signin",
-        redirect: true,
-      })
-      router.push("/signin")
-      return
-    }
-
-    fetchBillings()
-  }, [token, loading, router])
 
   const fetchBillings = async () => {
     setIsLoading(true)
     try {
       setIsLoading(true)
-      const response = await api.getBillings(token as string)
+      const response = await api.getBillings(token as string, {
+        page: filters?.page,
+        limit: filters?.limit,
+        amount: filters?.amount,
+        type: filters?.type,
+        status: filters?.status,
+        description: filters?.description,
+      })
 
-      console.log(response)
+      console.log("Aqui esta buscando os dados", response.data)
 
       // Verifica se é uma resposta de erro ou sucesso
       if (response && "message" in response) {
@@ -105,45 +108,25 @@ export default function BillingPage() {
       router.push("/signin")
       return
     }
-
     fetchBillings()
   }, [token, loading, router])
 
-  function filterBillings(
-    billings: Billing[] | undefined,
-    searchTerm: string,
-    statusFilter: "all" | Billing["status"]
-  ): Billing[] {
-    const normalizedSearch = searchTerm.toLowerCase()
+  useEffect(() => {
+    fetchBillings()
+  }, [filters])
 
-    return (billings ?? []).filter((b) => {
-      const matchesSearch =
-        b.key.toLowerCase().includes(normalizedSearch) ||
-        b.description.toLowerCase().includes(normalizedSearch)
-
-      const matchesStatus = statusFilter === "all" || b.status === statusFilter
-
-      return matchesSearch && matchesStatus
-    })
-  }
-
-  const filteredBillings = filterBillings(
-    billings as Billing[],
-    searchTerm,
-    statusFilter as "all" | "PENDING" | "PAID" | "OVERDUE"
-  )
-
-  const getStatusColor = (status: string) => {
-    status === "PAID"
-      ? "bg-green-100 text-green-800"
-      : status === "PENDING"
-      ? "bg-yellow-100 text-yellow-800"
-      : "bg-red-100 text-red-800"
-  }
-
-  const handleAddNewBilling = async (data: NewBilling) => {
+  const handleAddNewBilling = async (data: FilteredBillings) => {
     try {
-      const response = await api.createNewBilling(data, token as string)
+      if (typeof data.idUser !== "number") {
+        toast.error("Usuário não autenticado")
+        return
+      }
+      // Ensure idUser is always a number
+      const billingData = {
+        ...data,
+        idUser: data.idUser as number,
+      }
+      const response = await api.createNewBilling(billingData, token as string)
 
       if (response && "message" in response) {
         toast.error(response.message)
@@ -153,9 +136,9 @@ export default function BillingPage() {
       toast.success("Faturamento criado com sucesso")
       setDialogOpen(false)
       fetchBillings()
+      setBillings(response.data || [])
     } catch (err) {
       toast.error("Erro ao criar novo faturamento")
-      console.log(err)
     }
   }
 
@@ -166,6 +149,14 @@ export default function BillingPage() {
         <p className="text-gray-600 text-lg">Carregando faturamentos...</p>
       </div>
     )
+  }
+
+  const handleFilterd = (prop: keyof FilteredBillings) => {
+    return (data: any) => {
+      setFilters((prev: any) => {
+        return { ...prev, [prop]: data }
+      })
+    }
   }
 
   return (
@@ -203,9 +194,10 @@ export default function BillingPage() {
                 }
                 handleAddNewBilling({
                   idUser: user?.id as number,
-                  amount,
-                  description,
-                  status,
+                  amount: filters?.amount || 0,
+                  type: filters?.type as EBillingType,
+                  status: filters?.status as EBillingStatus,
+                  description: filters?.description as string,
                 })
               }}
             >
@@ -278,92 +270,177 @@ export default function BillingPage() {
         </Dialog>
       </div>
 
+      <div className="relative w-full max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none outline-blue-400" />
+        <Input
+          placeholder="Buscar faturamentos..."
+          className="pl-10 pr-10 py-2 rounded-2xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+        />
+      </div>
+
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Buscar por chave ou descrição..."
-            className="pl-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+      <div className=" flex flex-col  sm:flex-row sm:items-center gap-4  p-4 rounded-lg shadow-sm">
+        <Select value={filters?.status} onValueChange={handleFilterd("status")}>
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filtrar por status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="PAID">Pago</SelectItem>
             <SelectItem value="PENDING">Pendente</SelectItem>
-            <SelectItem value="OVERDUE">Atrasado</SelectItem>
+            <SelectItem value="CANCELED">Cancelado</SelectItem>
+            <SelectItem value="FAILED">Falhou</SelectItem>
           </SelectContent>
         </Select>
-        {searchTerm || statusFilter !== "all" ? (
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSearchTerm("")
-              setStatusFilter("all")
-            }}
-          >
-            Limpar filtros
-          </Button>
-        ) : null}
+
+        {/* Type Filter */}
+
+        <Select value={filters?.status} onValueChange={handleFilterd("status")}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filtrar por status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="INCOME">ENTRADA DE VALOR</SelectItem>
+            <SelectItem value="EXPENSE">SAIDA DE VALOR</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button
+          variant="outline"
+          className="w-full sm:w-auto bg-blue-400 hover:bg-blue-500 text-white hover:text-white"
+          onClick={() => setFilters({} as FilteredBillings)}
+        >
+          Limpar filtros
+        </Button>
       </div>
 
       {/* Lista de faturamentos */}
       {isLoading ? (
         <div className="flex items-center justify-center h-40 bg-white rounded-lg">
-          <p className="text-gray-500">Carregando...</p>
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-600 text-lg">Carregando faturamentos...</p>
+          </div>
         </div>
-      ) : filteredBillings?.length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>Nenhum faturamento encontrado.</CardContent>
+      ) : billings?.length === 0 ? (
+        <Card className="text-center py-12 bg-gray-50 shadow-md">
+          <CardContent>
+            <p className="text-gray-500 text-lg">
+              Nenhum faturamento encontrado.
+            </p>
+            <Button
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => setDialogOpen(true)}
+            >
+              Criar Novo Faturamento
+            </Button>
+          </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredBillings?.map((billing) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {billings?.map((billing) => (
             <Card
               key={billing.key}
-              className="hover:shadow-lg transition-shadow cursor-pointer bg-white"
+              className="hover:shadow-lg transition-shadow cursor-pointer bg-white border border-gray-200 rounded-lg"
             >
-              <CardHeader className="flex flex-col space-y-2">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg font-bold">
+              <CardHeader className="flex flex-col space-y-2 p-4">
+                <div className="flex justify-between  items-center w-full">
+                  <CardTitle className="text-lg font-bold text-gray-800">
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
-                    }).format(billing.amount)}
+                    }).format(billing?.amount || 0)}
                   </CardTitle>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                      billing.status
-                    )}`}
-                  >
-                    {billing.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      className={`px-2 py-1 text-sm ${
+                        billing.status === "PAID"
+                          ? "bg-green-100 text-green-800"
+                          : billing.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {{
+                        PAID: "Pago",
+                        PENDING: "Pendente",
+                        CANCELED: "Cancelado",
+                        FAILED: "Falhou",
+                      }[billing?.status as keyof typeof EBillingStatus] ||
+                        "Desconhecido"}
+                    </Badge>
+                    <Badge
+                      className={`px-2 py-1 text-sm rounded-md ${
+                        billing.type === EBillingType.INCOME
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {billing.type === EBillingType.INCOME
+                        ? "ENTRADA"
+                        : "SAÍDA"}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-gray-500 text-sm">
-                    {new Date(billing.dueDate).toLocaleDateString("pt-BR")}
-                  </p>
-                  <Button variant="ghost" size="sm">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="line-clamp-2">
+                <CardDescription className="text-gray-600 line-clamp-2">
                   {billing.description}
                 </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-600 hover:text-blue-800"
+                  onClick={() => {
+                    setDialogEditOpen(true)
+                  }}
+                >
+                  <Edit className="h-4 w-4" /> Editar
+                </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Dialog de atualizar */}
+      {/* <Dialog open={dialogEditOpen} onOpenChange={setDialogEditOpen}>
+        <DialogTrigger asChild>
+          <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors">
+            <Plus className="w-4 h-4" />
+            Novo Faturamento
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Editar o faturamento</DialogTitle>
+            <DialogDescription>
+              Preencha os dados para criar um novo faturamento.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4">
+            <Button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              <Select>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filtrar por status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="PAID">Pendente</SelectItem>
+                  <SelectItem value="PENDING">Pendente</SelectItem>
+                  <SelectItem value="CANCELED">Cancelado</SelectItem>
+                  <SelectItem value="FAILED">Falhou</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input placeholder="Descrição" />
+              Editar Faturamento
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div> */}
     </div>
   )
 }

@@ -70,18 +70,13 @@ class ApiService {
   }
 
   private async getError(error: AxiosError<any>): Promise<IErrorResponse> {
-    console.log("=== ERRO DA API ===")
     if (error.response) {
       console.log("Status:", error.response.status)
       console.log("Data:", error.response.data)
       if (error.response.data?.message) {
         console.log("Detalhes:", error.response.data.message)
       }
-    } else {
-      console.log("Erro sem resposta do servidor:", error.message)
     }
-    console.log("===================")
-
     return {
       status: error.response?.status ?? 500,
       message: error.response?.data?.message ?? error.message,
@@ -246,13 +241,7 @@ class ApiService {
 
   async getBillings(
     token: string,
-    filters?: {
-      type?: string
-      status?: string
-      description?: string
-      page?: number
-      limit?: number
-    }
+    filters: BillingFilters = { page: 1, limit: 100 }
   ) {
     const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
 
