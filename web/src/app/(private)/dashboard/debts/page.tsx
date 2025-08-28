@@ -73,7 +73,7 @@ export default function BillingPage() {
         description: filters?.description,
       })
 
-      console.log("Aqui esta buscando os dados", response.data)
+      console.log("Aqui esta buscando os dados", response)
 
       // Verifica se é uma resposta de erro ou sucesso
       if (response && "message" in response) {
@@ -109,11 +109,7 @@ export default function BillingPage() {
       return
     }
     fetchBillings()
-  }, [token, loading, router])
-
-  useEffect(() => {
-    fetchBillings()
-  }, [filters])
+  }, [token, loading, router, filters])
 
   const handleAddNewBilling = async (data: FilteredBillings) => {
     try {
@@ -343,14 +339,14 @@ export default function BillingPage() {
               className="hover:shadow-lg transition-shadow cursor-pointer bg-white border border-gray-200 rounded-lg"
             >
               <CardHeader className="flex flex-col space-y-2 p-4">
-                <div className="flex justify-between  items-center w-full">
+                <div className="flex flex-col   justify-between  items-start w-full gap-3.5">
                   <CardTitle className="text-lg font-bold text-gray-800">
                     {new Intl.NumberFormat("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     }).format(billing?.amount || 0)}
                   </CardTitle>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-row justify-end items-end  w-full gap-2">
                     <Badge
                       className={`px-2 py-1 text-sm ${
                         billing.status === "PAID"
