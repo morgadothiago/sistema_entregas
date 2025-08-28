@@ -51,3 +51,12 @@ export interface FilteredBillings {
   page?: number
   limit?: number
 }
+
+export interface BillingFilters {
+  page?: number
+  limit?: number
+  type?: EBillingType
+  status?: EBillingStatus
+  amount?: number
+  description?: string
+}
