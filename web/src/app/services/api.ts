@@ -219,6 +219,18 @@ class ApiService {
       .catch(this.getError)
   }
 
+  async getDeliveryByCode(code: string, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    console.log("Fazendo requisição para:", `/gps/delivery/${code}`)
+    console.log("Token de autorização:", authToken ? "Presente" : "Ausente")
+    return this.api
+      .get(`/gps/delivery/${code}`, {
+        headers: { authorization: authToken },
+      })
+      .then(this.getResponse<any>)
+      .catch(this.getError)
+  }
+
   static getInstance() {
     return (ApiService.instance ??= new ApiService())
   }

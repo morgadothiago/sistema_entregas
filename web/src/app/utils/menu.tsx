@@ -25,8 +25,8 @@ export const items = [
     icon: RefreshCcw,
   },
   {
-    title: "delivry",
-    subTile: "Entregador",
+    title: "delivryDetails",
+    subTile: "Detalhes da entrega",
     url: "/delivery",
     icon: Car,
   },
