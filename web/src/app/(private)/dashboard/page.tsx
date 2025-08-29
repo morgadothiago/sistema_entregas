@@ -5,26 +5,19 @@ import { signOut } from "next-auth/react"
 import { useEffect } from "react"
 
 export default function Dashboard() {
-  const { token, loading, user } = useAuth()
+  const { user, token } = useAuth()
 
-  useEffect(() => {
-    if (!loading && !token) {
-      signOut({
-        callbackUrl: "/signin",
-        redirect: true,
-      })
-    }
-  }, [token, loading])
+  // useEffect(() => {
+  //   if (!token) {
+  //     signOut({
+  //       callbackUrl: "/signin",
+  //     })
+  //   } else {
+  //     console.log("Tem token valido", token)
+  //   }
+  // }, [token])
 
-  if (loading) {
-    return <div>Loading...</div>
-  }
-
-  console.log(user)
-
-  if (!token) {
-    return <div>Você não está autenticado.</div>
-  }
+  console.log(token)
 
   return (
     <div>

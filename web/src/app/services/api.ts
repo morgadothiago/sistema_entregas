@@ -270,6 +270,19 @@ class ApiService {
       .catch(this.getError)
   }
 
+  async upDateBilling(data: Billing, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+    return this.api
+      .patch(`/billing/${data.key}`, data, {
+        headers: {
+          Authorization: authToken,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(this.getResponse<IBillingResponse>)
+      .catch(this.getError)
+  }
+
   static getInstance() {
     return (ApiService.instance ??= new ApiService())
   }

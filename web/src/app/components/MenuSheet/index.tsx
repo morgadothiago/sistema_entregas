@@ -60,37 +60,42 @@ export function SideBar() {
           </div>
         </SidebarHeader>
         <SidebarContent className="overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-          <SidebarGroup className="mb-6">
-            <SidebarGroupLabel className="text-lg text-white/90 font-semibold mb-3">
-              Application
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu className="space-y-1">
-                {items.map((item) => (
-                  <SidebarMenuItem
-                    key={item.title}
-                    className={`transition-all duration-200 rounded-xl ${
-                      selectedItem === item.title
-                        ? "bg-white/95 text-[#003B73] shadow-lg transform scale-[1.02]"
-                        : "text-white hover:bg-white/10 hover:transform hover:scale-[1.02]"
-                    }`}
-                  >
-                    <SidebarMenuButton asChild>
-                      <a
-                        onClick={() => handleNextPage(item.url)}
-                        className="flex items-center p-3 w-full"
-                      >
-                        <item.icon className="mr-3 flex-shrink-0 w-5 h-5" />
-                        <span className="text-[15px] font-medium truncate">
-                          {item.subTile}
-                        </span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {/* Menu para usuários comuns (não admin) */}
+          {user?.role !== "ADMIN" && (
+            <SidebarGroup className="mb-6">
+              <SidebarGroupLabel className="text-lg text-white/90 font-semibold mb-3">
+                Application
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  {items.map((item) => (
+                    <SidebarMenuItem
+                      key={item.title}
+                      className={`transition-all duration-200 rounded-xl ${
+                        selectedItem === item.title
+                          ? "bg-white/95 text-[#003B73] shadow-lg transform scale-[1.02]"
+                          : "text-white hover:bg-white/10 hover:transform hover:scale-[1.02]"
+                      }`}
+                    >
+                      <SidebarMenuButton asChild>
+                        <a
+                          onClick={() => handleNextPage(item.url)}
+                          className="flex items-center p-3 w-full"
+                        >
+                          <item.icon className="mr-3 flex-shrink-0 w-5 h-5" />
+                          <span className="text-[15px] font-medium truncate">
+                            {item.subTile}
+                          </span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* Menu apenas para administradores */}
           {user?.role === "ADMIN" && (
             <SidebarGroup className="mb-6">
               <SidebarGroupLabel className="text-lg text-white/90 font-semibold mb-3">
@@ -124,6 +129,8 @@ export function SideBar() {
               </SidebarGroupContent>
             </SidebarGroup>
           )}
+
+          {/* Menu de suporte para todos os usuários */}
           <SidebarGroup>
             <SidebarGroupLabel className="text-lg text-white/90 font-semibold mb-3">
               Suporte

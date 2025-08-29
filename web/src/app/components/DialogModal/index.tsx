@@ -1,11 +1,8 @@
-"use client"
-
-import { useState } from "react"
+import React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -18,124 +15,252 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus } from "lucide-react"
-import { NewBilling } from "@/app/types/Billing"
+import { DollarSign, Edit, X } from "lucide-react"
+import { EBillingStatus, EBillingType } from "@/app/types/Billing"
+import { Billing } from "@/app/types/Debt"
 
-interface BillingDialogProps {
-  triggerText?: string
+interface DialogModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  billing?: Billing | null
+  editable?: boolean
+  onSubmit?: (data: {
+    amount: number
+    description: string
+    status: string
+    type: string
+  }) => void
   title?: string
   description?: string
-  onSubmit: (data: NewBilling) => void
-  initialAmount?: number
-  initialDescription?: string
-  initialStatus?: "PENDING" | "PAID" | "CANCELED" | "FAILED"
-  userId: number
+  buttonText?: string
+  children?: React.ReactNode
 }
 
-export function BillingDialog({
-  triggerText = "Novo Faturamento",
-  title = "Criar Novo Faturamento",
-  description = "Preencha os dados para criar um novo faturamento.",
+export default function DialogModal({
+  open,
+  onOpenChange,
+  billing,
+  editable = true,
   onSubmit,
-  initialAmount = 0,
-  initialDescription = "",
-  initialStatus = "PENDING",
-  userId,
-}: BillingDialogProps) {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [amount, setAmount] = useState<number>(initialAmount)
-  const [billingDescription, setBillingDescription] =
-    useState<string>(initialDescription)
-  const [status, setStatus] = useState<
-    "PENDING" | "PAID" | "CANCELED" | "FAILED"
-  >(initialStatus)
+  title = "Editar Faturamento",
+  description = "Edite os dados do faturamento para atualizar.",
+  buttonText = "Atualizar Faturamento",
+  children,
+}: DialogModalProps) {
+  const [editAmount, setEditAmount] = React.useState<number>(0)
+  const [editDescription, setEditDescription] = React.useState<string>("")
+  const [editStatus, setEditStatus] = React.useState<string>("")
+  const [editType, setEditType] = React.useState<string>("")
+
+  React.useEffect(() => {
+    if (billing) {
+      setEditAmount(billing.amount || 0)
+      setEditDescription(billing.description || "")
+      setEditStatus(billing.status || "")
+      setEditType(billing.type || "")
+    }
+  }, [billing])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({
-      idUser: userId,
-      amount,
-      description: billingDescription,
-      status,
-    })
-    setDialogOpen(false)
-    setAmount(initialAmount)
-    setBillingDescription(initialDescription)
-    setStatus(initialStatus)
+    if (onSubmit) {
+      onSubmit({
+        amount: editAmount,
+        description: editDescription,
+        status: editStatus,
+        type: editType,
+      })
+    }
   }
 
+  const handleViewMode = () => {
+    onOpenChange(false)
+  }
+
+  // Se tem children, renderiza eles em vez do formulário padrão
+  if (children) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="space-y-2">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-lg font-semibold text-gray-900">
+                {title}
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-7 w-7 p-0 hover:bg-gray-100"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <DialogDescription className="text-xs text-gray-500">
+              {description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-1">{children}</div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  // Renderiza o formulário padrão quando não há children
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogTrigger asChild>
-        <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors">
-          <Plus className="w-4 h-4" /> {triggerText}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Valor</label>
-            <Input
-              type="number"
-              placeholder="0.00"
-              required
-              value={amount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-            />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-2">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-lg font-semibold text-gray-900">
+              {editable ? title : "Visualizar Faturamento"}
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-7 w-7 p-0 hover:bg-gray-100"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
           </div>
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Descrição</label>
+          <DialogDescription className="text-xs text-gray-500">
+            {editable ? description : "Visualize os dados do faturamento."}
+          </DialogDescription>
+        </DialogHeader>
+
+        <form className="space-y-3" onSubmit={handleSubmit}>
+          {/* Valor */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-gray-600">Valor</label>
+            <div className="relative">
+              <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+              <Input
+                type="number"
+                placeholder="0.00"
+                required={editable}
+                value={editAmount}
+                onChange={(e) => setEditAmount(Number(e.target.value))}
+                className="pl-7 h-8 text-sm font-medium border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
+                disabled={!editable}
+              />
+            </div>
+          </div>
+
+          {/* Descrição */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-gray-600">
+              Descrição
+            </label>
             <Input
               placeholder="Descrição do faturamento"
-              required
-              value={billingDescription}
-              onChange={(e) => setBillingDescription(e.target.value)}
+              required={editable}
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              className="h-8 text-xs border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
+              disabled={!editable}
             />
           </div>
-          <div className="space-y-1">
-            <label className="text-sm font-medium">Status</label>
-            <Select
-              value={status}
-              onValueChange={(val) => setStatus(val as typeof status)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  value="PAID"
-                  className="bg-green-100 text-green-800"
-                >
-                  Pago
-                </SelectItem>
-                <SelectItem
-                  value="PENDING"
-                  className="bg-yellow-100 text-yellow-800"
-                >
-                  Pendente
-                </SelectItem>
-                <SelectItem
-                  value="CANCELED"
-                  className="bg-red-100 text-red-800"
-                >
-                  Cancelado
-                </SelectItem>
-                <SelectItem value="FAILED" className="bg-red-100 text-red-800">
-                  Falhou
-                </SelectItem>
-              </SelectContent>
-            </Select>
+
+          {/* Status e Tipo em linha */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-gray-600">
+                Status
+              </label>
+              <Select
+                value={editStatus}
+                onValueChange={(val) => setEditStatus(val)}
+                disabled={!editable}
+              >
+                <SelectTrigger className="h-8 border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value={EBillingStatus.PAID}
+                    className="text-green-700 hover:bg-green-50 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      Pago
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value={EBillingStatus.PENDING}
+                    className="text-yellow-700 hover:bg-yellow-50 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                      Pendente
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value={EBillingStatus.CANCELED}
+                    className="text-red-700 hover:bg-red-50 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      Cancelado
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value={EBillingStatus.FAILED}
+                    className="text-red-700 hover:bg-red-50 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      Falhou
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-gray-600">Tipo</label>
+              <Select
+                value={editType}
+                onValueChange={(val) => setEditType(val)}
+                disabled={!editable}
+              >
+                <SelectTrigger className="h-8 border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 text-xs">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value={EBillingType.INCOME}
+                    className="text-green-700 hover:bg-green-50 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      Entrada
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value={EBillingType.EXPENSE}
+                    className="text-red-700 hover:bg-red-50 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                      Saída
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <Button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700"
-          >
-            Criar Faturamento
-          </Button>
+
+          {/* Botão de ação */}
+          <div className="pt-1">
+            <Button
+              type={editable ? "submit" : "button"}
+              className="w-full h-9 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium text-sm transition-all duration-200 hover:scale-[1.01] shadow-sm hover:shadow-md"
+              onClick={!editable ? handleViewMode : undefined}
+            >
+              {editable ? buttonText : "Fechar"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
