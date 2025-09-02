@@ -3,8 +3,12 @@
 import { useAuth } from "@/app/context"
 import api from "@/app/services/api"
 import { Billing } from "@/app/types/Debt"
-import { useEffect, useState } from "react"
-import { toast } from "sonner"
+import { useEffect, useState, useCallback, useMemo } from "react"
+import {
+  BillingToast,
+  ReceiptToast,
+  ValidationToast,
+} from "@/components/ui/custom-toast"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -51,6 +55,151 @@ import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 
+// Importar componentes refatorados
+import {
+  BillingCard,
+  BillingStats,
+  BillingFilters,
+  BillingSearch,
+  BillingPagination,
+  BillingEmptyState,
+  BillingHeader,
+  CreateBillingForm,
+  EditBillingForm,
+  BillingDetailsDialog,
+  Icon,
+} from "@/components/billing"
+import { themeVariants } from "@/app/theme/global"
+
+// Componentes reutilizáveis (movidos para arquivos separados)
+
+// Componente FileUpload reutilizável
+interface FileUploadProps {
+  file: File | null
+  onFileSelect: (file: File | null) => void
+  theme: "green" | "blue"
+  required?: boolean
+  id: string
+}
+
+const FileUpload: React.FC<FileUploadProps> = ({
+  file,
+  onFileSelect,
+  theme,
+  required = false,
+  id,
+}) => {
+  const themeColors = {
+    green: {
+      border: "border-green-300 hover:border-green-400",
+      bg: "from-green-100 to-emerald-100",
+      text: "text-green-600",
+      button:
+        "from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700",
+      preview: "border-green-200 bg-green-100",
+    },
+    blue: {
+      border: "border-blue-300 hover:border-blue-400",
+      bg: "from-blue-100 to-indigo-100",
+      text: "text-blue-600",
+      button:
+        "from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700",
+      preview: "border-blue-200 bg-blue-100",
+    },
+  }
+
+  const colors = themeColors[theme]
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-semibold text-gray-700">
+        Arquivo do Recibo {required && "*"}
+      </label>
+      <div
+        className={`border-2 border-dashed ${colors.border} rounded-2xl p-6 text-center transition-colors duration-300`}
+      >
+        <div className="space-y-4">
+          <div
+            className={`mx-auto w-16 h-16 bg-gradient-to-r ${colors.bg} rounded-full flex items-center justify-center`}
+          >
+            <Icon name="document" className={colors.text} size="lg" />
+          </div>
+          <div>
+            <p className="text-lg font-semibold text-gray-700 mb-2">
+              {file ? file.name : "Arraste e solte o arquivo aqui"}
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              ou clique para selecionar
+            </p>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              onChange={(e) => onFileSelect(e.target.files?.[0] || null)}
+              className="hidden"
+              id={id}
+            />
+            <label
+              htmlFor={id}
+              className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${colors.button} text-white font-semibold rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 shadow-lg`}
+            >
+              <Icon name="upload" className="mr-2" />
+              Selecionar Arquivo
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* Preview do Arquivo */}
+      {file && (
+        <div className={`bg-white/80 rounded-xl p-4 border ${colors.preview}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 ${colors.preview} rounded-lg`}>
+                <Icon name="check" className={colors.text} />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-800">{file.name}</p>
+                <p className="text-sm text-gray-500">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onFileSelect(null)}
+              className="text-red-600 hover:text-red-800 hover:bg-red-50"
+            >
+              <Icon name="close" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Componente FeatureList reutilizável
+interface FeatureListProps {
+  features: string[]
+  theme: "green" | "blue"
+}
+
+const FeatureList: React.FC<FeatureListProps> = ({ features, theme }) => {
+  const textColor = theme === "green" ? "text-green-700" : "text-blue-700"
+
+  return (
+    <div className={`space-y-2 text-sm ${textColor}`}>
+      {features.map((feature, index) => (
+        <div key={index} className="flex items-center justify-center gap-2">
+          <Icon name="check" size="sm" />
+          <span>{feature}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function BillingPage() {
   const { token, loading, user } = useAuth()
   const [billings, setBillings] = useState<Billing[] | null>([])
@@ -64,6 +213,20 @@ export default function BillingPage() {
   const [amount, setAmount] = useState<number>(0)
   const [description, setDescription] = useState<string>("")
   const [status, setStatus] = useState<EBillingStatus>(EBillingStatus.PENDING)
+  const [dialogReciptsOpen, setDialogReciptsOpen] = useState(false)
+  const [dialogDetailsOpen, setDialogDetailsOpen] = useState(false)
+  const [selectedBillingForDetails, setSelectedBillingForDetails] =
+    useState<Billing | null>(null)
+
+  const [selectedBillingForReceipt, setSelectedBillingForReceipt] =
+    useState<Billing | null>(null)
+  const [receiptMode, setReceiptMode] = useState<"SELECT" | "CREATE" | "EDIT">(
+    "SELECT"
+  )
+  const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState(false)
+  const [receiptDescription, setReceiptDescription] = useState("")
+  const [receiptAmount, setReceiptAmount] = useState<number>(0)
 
   const [editingBilling, setEditingBilling] = useState<Billing | null>(null)
   const [editAmount, setEditAmount] = useState<number>(0)
@@ -75,10 +238,12 @@ export default function BillingPage() {
 
   const router = useRouter()
 
-  const fetchBillings = async () => {
+  const fetchBillings = useCallback(async () => {
+    console.log("🔄 fetchBillings chamado")
+    if (!token) return
+
     setIsLoading(true)
     try {
-      setIsLoading(true)
       const response = await api.getBillings(token as string, {
         page: filters?.page,
         limit: filters?.limit,
@@ -89,7 +254,7 @@ export default function BillingPage() {
       })
 
       // Verifica se é uma resposta de erro ou sucesso
-      if (response && "message" in response) {
+      if (response && "message" in response && response.message) {
         // É um erro
         setBillings([])
       } else if (
@@ -98,7 +263,8 @@ export default function BillingPage() {
         Array.isArray(response.data)
       ) {
         // É uma resposta de sucesso com dados
-        toast.success("Faturamentos carregados com sucesso")
+        BillingToast.loaded()
+
         setBillings(response.data)
       } else {
         setBillings([])
@@ -108,7 +274,7 @@ export default function BillingPage() {
       setError("Erro ao carregar as entregas. Tente novamente.")
       setIsLoading(false)
     }
-  }
+  }, [token, filters])
 
   useEffect(() => {
     if (!loading && !token) {
@@ -119,15 +285,17 @@ export default function BillingPage() {
       router.push("/signin")
       return
     }
-    fetchBillings()
-  }, [token, loading, router, filters])
+    if (token) {
+      fetchBillings()
+    }
+  }, [token, loading, router, fetchBillings])
 
   console.log("aqui esta buscando os dados", billings)
 
   const handleAddNewBilling = async (data: FilteredBillings) => {
     try {
       if (typeof data.idUser !== "number") {
-        toast.error("Usuário não autenticado")
+        ValidationToast.required("Usuário autenticado")
         return
       }
       // Ensure idUser is always a number
@@ -138,29 +306,15 @@ export default function BillingPage() {
       const response = await api.createNewBilling(billingData, token as string)
 
       if (response && "message" in response) {
-        toast.error(response.message, {
-          position: "top-left",
-          duration: 5000,
-          style: {
-            background: "#ef4444",
-            color: "white",
-            border: "2px solid #dc2626",
-            borderRadius: "12px",
-            fontSize: "14px",
-            fontWeight: "600",
-            boxShadow: "0 10px 25px rgba(239, 68, 68, 0.3)",
-          },
-          icon: "❌",
-        })
-
+        BillingToast.error(response.message)
         return
       }
-      toast.success("Faturamento criado com sucesso")
+      BillingToast.created()
       setDialogOpen(false)
       fetchBillings()
       setBillings(response.data || [])
     } catch (err) {
-      toast.error("Erro ao criar novo faturamento")
+      BillingToast.error("Erro ao criar novo faturamento")
     }
   }
 
@@ -175,7 +329,7 @@ export default function BillingPage() {
 
   const handleUpdateBilling = async () => {
     if (!editingBilling || !user?.id) {
-      toast.error("Dados inválidos para edição")
+      ValidationToast.required("Dados para edição")
       return
     }
 
@@ -191,21 +345,16 @@ export default function BillingPage() {
       const response = await api.upDateBilling(updateData, token as string)
 
       if (response && "message" in response) {
-        toast.error(response.message, {
-          duration: 3000,
-          position: "top-right",
-          richColors: true,
-        })
-
+        BillingToast.error(response.message)
         return
       }
 
-      toast.success("Faturamento atualizado com sucesso")
+      BillingToast.updated()
       setDialogEditOpen(false)
       setEditingBilling(null)
       fetchBillings()
     } catch (err) {
-      toast.error("Erro ao atualizar faturamento")
+      BillingToast.error("Erro ao atualizar faturamento")
     }
   }
 
@@ -242,6 +391,75 @@ export default function BillingPage() {
     })
   }
 
+  const handleReceiptDialog = (billing: Billing) => {
+    setSelectedBillingForReceipt(billing)
+    setReceiptAmount(billing.amount || 0)
+    setReceiptDescription(billing.description || "")
+    setReceiptMode("SELECT")
+    setDialogReciptsOpen(true)
+  }
+
+  const handleViewDetails = (billing: Billing) => {
+    setSelectedBillingForDetails(billing)
+    setDialogDetailsOpen(true)
+  }
+
+  const handleCreateReceipt = async () => {
+    if (!receiptFile || !selectedBillingForReceipt) {
+      ReceiptToast.fileRequired()
+      return
+    }
+
+    console.log("aqui esta o receiptFile", receiptFile)
+
+    if (!receiptDescription.trim()) {
+      ReceiptToast.descriptionRequired()
+      return
+    }
+
+    setIsUploadingReceipt(true)
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      ReceiptToast.created()
+      console.log("aqui esta o receiptFile", receiptFile)
+      setDialogReciptsOpen(false)
+      resetReceiptForm()
+      fetchBillings()
+    } catch (err) {
+      ReceiptToast.uploadError()
+    } finally {
+      setIsUploadingReceipt(false)
+    }
+  }
+
+  const handleEditReceipt = async () => {
+    if (!receiptDescription.trim()) {
+      ReceiptToast.descriptionRequired()
+      return
+    }
+
+    setIsUploadingReceipt(true)
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      ReceiptToast.updated()
+      setDialogReciptsOpen(false)
+      resetReceiptForm()
+      fetchBillings()
+    } catch (err) {
+      ReceiptToast.uploadError()
+    } finally {
+      setIsUploadingReceipt(false)
+    }
+  }
+
+  const resetReceiptForm = () => {
+    setReceiptFile(null)
+    setReceiptDescription("")
+    setReceiptAmount(0)
+    setSelectedBillingForReceipt(null)
+    setReceiptMode("SELECT")
+  }
+
   // Calcular estatísticas
   const totalIncome =
     billings
@@ -259,283 +477,44 @@ export default function BillingPage() {
       .reduce((sum, b) => sum + (b.amount || 0), 0) || 0
   const balance = totalIncome - totalExpense
 
+  const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters({ ...filters, description: e.target.value } as any)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header com gradiente */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 rounded-2xl shadow-2xl">
-          <div className="absolute inset-0 bg-black/10"></div>
-          <div className="relative p-8 text-white">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="space-y-2">
-                <h1 className="text-4xl font-bold tracking-tight">
-                  Faturamentos
-                </h1>
-                <p className="text-blue-100 text-lg max-w-2xl">
-                  Gerencie todos os seus faturamentos, receitas e despesas de
-                  forma inteligente
-                </p>
-              </div>
-
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="flex items-center gap-3 bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg">
-                    <Plus className="w-5 h-5" />
-                    Novo Faturamento
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">
-                      Criar Novo Faturamento
-                    </DialogTitle>
-                    <DialogDescription className="text-gray-600">
-                      Preencha os dados para criar um novo faturamento.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form
-                    className="space-y-6"
-                    onSubmit={(e) => {
-                      e.preventDefault()
-                      if (!user?.id) {
-                        setError("Usuário não autenticado")
-                        return
-                      }
-                      handleAddNewBilling({
-                        idUser: user?.id as number,
-                        amount: amount,
-                        type: filters?.type as EBillingType,
-                        status: status,
-                        description: description,
-                      })
-                    }}
-                  >
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">
-                        Valor
-                      </label>
-                      <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          required
-                          value={amount}
-                          onChange={(e) => setAmount(Number(e.target.value))}
-                          className="pl-10 h-12 text-lg font-medium"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">
-                        Descrição
-                      </label>
-                      <Input
-                        placeholder="Descrição do faturamento"
-                        required
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="h-12 text-base"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">
-                        Status
-                      </label>
-                      <Select
-                        value={status}
-                        onValueChange={(val) => setStatus(val as typeof status)}
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Selecione o status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem
-                            value={EBillingStatus.PAID}
-                            className="bg-green-50 text-green-800 hover:bg-green-100"
-                          >
-                            Pago
-                          </SelectItem>
-                          <SelectItem
-                            value={EBillingStatus.PENDING}
-                            className="bg-yellow-50 text-yellow-800 hover:bg-yellow-100"
-                          >
-                            Pendente
-                          </SelectItem>
-                          <SelectItem
-                            value={EBillingStatus.CANCELED}
-                            className="bg-red-50 text-red-800 hover:bg-red-100"
-                          >
-                            Cancelado
-                          </SelectItem>
-                          <SelectItem
-                            value={EBillingStatus.FAILED}
-                            className="bg-red-50 text-red-800 hover:bg-red-100"
-                          >
-                            Falhou
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-lg transition-all duration-300 hover:scale-105 shadow-lg"
-                    >
-                      Criar Faturamento
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </div>
+        <BillingHeader dialogOpen={dialogOpen} setDialogOpen={setDialogOpen}>
+          <CreateBillingForm
+            amount={amount}
+            setAmount={setAmount}
+            description={description}
+            setDescription={setDescription}
+            status={status}
+            setStatus={setStatus}
+            filters={filters}
+            user={user}
+            onSubmit={handleAddNewBilling}
+          />
+        </BillingHeader>
 
         {/* Cards de estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-600">Receitas</p>
-                  <p className="text-2xl font-bold text-green-800">
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(totalIncome)}
-                  </p>
-                </div>
-                <div className="p-3 bg-green-200 rounded-full">
-                  <TrendingUp className="w-6 h-6 text-green-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-red-600">Despesas</p>
-                  <p className="text-2xl font-bold text-red-800">
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(totalExpense)}
-                  </p>
-                </div>
-                <div className="p-3 bg-red-200 rounded-full">
-                  <TrendingDown className="w-6 h-6 text-red-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-600">Saldo</p>
-                  <p
-                    className={`text-2xl font-bold ${
-                      balance >= 0 ? "text-blue-800" : "text-red-800"
-                    }`}
-                  >
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(balance)}
-                  </p>
-                </div>
-                <div className="p-3 bg-blue-200 rounded-full">
-                  <DollarSign className="w-6 h-6 text-blue-700" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <BillingStats
+          totalIncome={totalIncome}
+          totalExpense={totalExpense}
+          balance={balance}
+        />
 
         {/* Barra de busca moderna */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <Input
-            placeholder="Buscar faturamentos por descrição, valor ou status..."
-            className="pl-12 pr-4 h-14 text-lg rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 shadow-sm hover:shadow-md"
-          />
-        </div>
+        <BillingSearch onSearch={onSearch} />
 
         {/* Filtros modernos */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 mb-4">
-            <Filter className="w-5 h-5 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-800">Filtros</h3>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <Select
-              value={filters?.status}
-              onValueChange={handleFilterd("status")}
-            >
-              <SelectTrigger className="w-full sm:w-[200px] h-12 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  value={EBillingStatus.PAID}
-                  className="hover:bg-green-50"
-                >
-                  Pago
-                </SelectItem>
-                <SelectItem
-                  value={EBillingStatus.PENDING}
-                  className="hover:bg-yellow-50"
-                >
-                  Pendente
-                </SelectItem>
-                <SelectItem
-                  value={EBillingStatus.CANCELED}
-                  className="hover:bg-red-50"
-                >
-                  Cancelado
-                </SelectItem>
-                <SelectItem
-                  value={EBillingStatus.FAILED}
-                  className="hover:bg-red-50"
-                >
-                  Falhou
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filters?.type} onValueChange={handleFilterd("type")}>
-              <SelectTrigger className="w-full sm:w-[200px] h-12 border-2 border-gray-200 hover:border-blue-300 transition-colors">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  value={EBillingType.INCOME}
-                  className="hover:bg-green-50"
-                >
-                  Entrada
-                </SelectItem>
-                <SelectItem
-                  value={EBillingType.EXPENSE}
-                  className="hover:bg-red-50"
-                >
-                  Saída
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              variant="outline"
-              className="h-12 px-6 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-300"
-              onClick={() => setFilters({} as FilteredBillings)}
-            >
-              Limpar Filtros
-            </Button>
-          </div>
-        </div>
+        <BillingFilters
+          filters={filters}
+          onFilterChange={handleFilterd}
+          onClearFilters={() => setFilters({} as FilteredBillings)}
+        />
 
         {/* Lista de faturamentos */}
         {isLoading ? (
@@ -548,156 +527,31 @@ export default function BillingPage() {
             </div>
           </div>
         ) : billings?.length === 0 ? (
-          <Card className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 shadow-sm border-2 border-dashed border-gray-300">
-            <CardContent>
-              <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-10 h-10 text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                Nenhum faturamento encontrado
-              </h3>
-              <p className="text-gray-500 mb-6">
-                Comece criando seu primeiro faturamento para organizar suas
-                finanças
-              </p>
-              <Button
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-8 py-3 transition-all duration-300 hover:scale-105 shadow-lg"
-                onClick={() => setDialogOpen(true)}
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Criar Primeiro Faturamento
-              </Button>
-            </CardContent>
-          </Card>
+          <BillingEmptyState onCreateFirst={() => setDialogOpen(true)} />
         ) : (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {billings?.map((billing) => (
-                <Card
+                <BillingCard
                   key={billing.key}
-                  className="group hover:shadow-xl transition-all duration-300 cursor-pointer bg-white border-2 border-gray-100 hover:border-blue-200 rounded-2xl overflow-hidden"
-                >
-                  <CardHeader className="p-6 pb-4">
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`p-2 rounded-full ${
-                              billing.type === EBillingType.INCOME
-                                ? "bg-green-100 text-green-600"
-                                : "bg-red-100 text-red-600"
-                            }`}
-                          >
-                            {billing.type === EBillingType.INCOME ? (
-                              <TrendingUp className="w-4 h-4" />
-                            ) : (
-                              <TrendingDown className="w-4 h-4" />
-                            )}
-                          </div>
-                          <Badge
-                            className={`px-3 py-1 text-xs font-medium rounded-full ${
-                              billing.status === "PAID"
-                                ? "bg-green-100 text-green-700 border-green-200"
-                                : billing.status === "PENDING"
-                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                : "bg-red-100 text-red-700 border-red-200"
-                            }`}
-                          >
-                            {{
-                              PAID: "Pago",
-                              PENDING: "Pendente",
-                              CANCELED: "Cancelado",
-                              FAILED: "Falhou",
-                            }[billing?.status as keyof typeof EBillingStatus] ||
-                              "Desconhecido"}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <CardTitle className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                          {new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          }).format(billing?.amount || 0)}
-                        </CardTitle>
-                        <CardDescription className="text-gray-600 text-sm leading-relaxed">
-                          {billing.description}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="p-6 pt-0">
-                    <div className="flex items-center justify-between">
-                      <Badge
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${
-                          billing.type === EBillingType.INCOME
-                            ? "bg-green-100 text-green-700 border-green-200"
-                            : "bg-red-100 text-red-700 border-red-200"
-                        }`}
-                      >
-                        {billing.type === EBillingType.INCOME
-                          ? "ENTRADA"
-                          : "SAÍDA"}
-                      </Badge>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full p-2 transition-all duration-300"
-                        onClick={() => handleEditBilling(billing)}
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span className="">Editar</span>
-                      </Button>
-
-                      <div className="">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full p-2 transition-all duration-300"
-                          onClick={() => {}}
-                        >
-                          <Edit className="h-4 w-4" />
-                          <span className="">Criar ou Editar recibos</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  billing={billing}
+                  onEdit={handleEditBilling}
+                  onReceipt={handleReceiptDialog}
+                  onViewDetails={handleViewDetails}
+                />
               ))}
             </div>
 
             {/* Paginação moderna */}
-            <div className="flex items-center justify-center gap-4 mt-8">
-              <Button
-                variant="outline"
-                onClick={handlePrevPage}
-                className="h-12 px-6 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300"
-                disabled={!filters?.page || filters.page <= 1}
-              >
-                Anterior
-              </Button>
-
-              {filters?.page && (
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white w-12 h-12 flex items-center justify-center rounded-xl font-semibold shadow-lg">
-                  {filters.page}
-                </div>
-              )}
-
-              <Button
-                variant="outline"
-                onClick={handleNextPage}
-                className="h-12 px-6 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-300"
-              >
-                Próximo
-              </Button>
-            </div>
+            <BillingPagination
+              filters={filters}
+              onPrevPage={handlePrevPage}
+              onNextPage={handleNextPage}
+            />
           </div>
         )}
 
-        {/* Dialog de edição comentado */}
+        {/* Dialog de edição */}
         <Dialog open={dialogEditOpen} onOpenChange={setDialogEditOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -708,124 +562,395 @@ export default function BillingPage() {
                 Edite os dados do faturamento para atualizar.
               </DialogDescription>
             </DialogHeader>
-            <form
-              className="space-y-6"
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (!user?.id) {
-                  setError("Usuário não autenticado")
-                  return
-                }
-                handleUpdateBilling()
-              }}
-            >
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">
-                  Valor
-                </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    type="number"
-                    placeholder="0.00"
-                    required
-                    value={editAmount}
-                    onChange={(e) => setEditAmount(Number(e.target.value))}
-                    className="pl-10 h-12 text-lg font-medium"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">
-                  Descrição
-                </label>
-                <Input
-                  placeholder="Descrição do faturamento"
-                  required
-                  value={editDescription}
-                  onChange={(e) => setEditDescription(e.target.value)}
-                  className="h-12 text-base"
-                />
-              </div>
-              <div className="flex w-full gap-4">
-                <div className="space-y-2 flex-1">
-                  <label className="text-sm font-semibold text-gray-700">
-                    Status
-                  </label>
-                  <Select
-                    value={editStatus}
-                    onValueChange={(val) =>
-                      setEditStatus(val as typeof editStatus)
-                    }
-                  >
-                    <SelectTrigger className="h-12 w-full">
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        value={EBillingStatus.PAID}
-                        className="bg-green-50 text-green-800 hover:bg-green-100"
-                      >
-                        Pago
-                      </SelectItem>
-                      <SelectItem
-                        value={EBillingStatus.PENDING}
-                        className="bg-yellow-50 text-yellow-800 hover:bg-yellow-100"
-                      >
-                        Pendente
-                      </SelectItem>
-                      <SelectItem
-                        value={EBillingStatus.CANCELED}
-                        className="bg-red-50 text-red-800 hover:bg-red-100"
-                      >
-                        Cancelado
-                      </SelectItem>
-                      <SelectItem
-                        value={EBillingStatus.FAILED}
-                        className="bg-red-50 text-red-800 hover:bg-red-100"
-                      >
-                        Falhou
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2 flex-1">
-                  <label className="text-sm font-semibold text-gray-700">
-                    Tipo
-                  </label>
-                  <Select
-                    value={editType}
-                    onValueChange={(val) => setEditType(val as typeof editType)}
-                  >
-                    <SelectTrigger className="h-12 w-full">
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        value={EBillingType.INCOME}
-                        className="bg-green-50 text-green-800 hover:bg-green-100"
-                      >
-                        Entrada
-                      </SelectItem>
-                      <SelectItem
-                        value={EBillingType.EXPENSE}
-                        className="bg-red-50 text-red-800 hover:bg-red-100"
-                      >
-                        Saída
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <Button
-                type="submit"
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-lg transition-all duration-300 hover:scale-105 shadow-lg"
-              >
-                Atualizar Faturamento
-              </Button>
-            </form>
+            <EditBillingForm
+              editAmount={editAmount}
+              setEditAmount={setEditAmount}
+              editDescription={editDescription}
+              setEditDescription={setEditDescription}
+              editStatus={editStatus}
+              setEditStatus={setEditStatus}
+              editType={editType}
+              setEditType={setEditType}
+              user={user}
+              onSubmit={handleUpdateBilling}
+            />
           </DialogContent>
         </Dialog>
+
+        {/* Dialog melhorado para Recibos */}
+        {dialogReciptsOpen && (
+          <Dialog open={dialogReciptsOpen} onOpenChange={setDialogReciptsOpen}>
+            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
+                    <Icon name="document" className="text-white" size="lg" />
+                  </div>
+                  Gerenciar Recibos
+                </DialogTitle>
+                <DialogDescription className="text-gray-600 text-lg">
+                  {selectedBillingForReceipt ? (
+                    <>
+                      Escolha uma ação para o faturamento:
+                      <span className="font-bold text-purple-600 ml-2">
+                        {selectedBillingForReceipt.description}
+                      </span>
+                    </>
+                  ) : (
+                    "Selecione um faturamento para gerenciar recibos"
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+
+              {selectedBillingForReceipt && (
+                <div className="space-y-6">
+                  {/* Informações do Faturamento */}
+                  <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-lg font-bold text-blue-800 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5" />
+                        Detalhes do Faturamento
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="space-y-2">
+                          <span className="text-sm text-gray-600 font-medium">
+                            Valor:
+                          </span>
+                          <p className="text-xl font-bold text-blue-600">
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            }).format(selectedBillingForReceipt.amount || 0)}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <span className="text-sm text-gray-600 font-medium">
+                            Tipo:
+                          </span>
+                          <Badge
+                            className={`px-3 py-1 rounded-full font-bold ${
+                              selectedBillingForReceipt.type === "INCOME"
+                                ? "bg-green-100 text-green-700 border-green-300"
+                                : "bg-red-100 text-red-700 border-red-300"
+                            }`}
+                          >
+                            {selectedBillingForReceipt.type === "INCOME"
+                              ? " ENTRADA"
+                              : "💸 SAÍDA"}
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <span className="text-sm text-gray-600 font-medium">
+                            Status:
+                          </span>
+                          <Badge
+                            className={`px-3 py-1 rounded-full font-bold ${
+                              selectedBillingForReceipt.status === "PAID"
+                                ? "bg-green-100 text-green-700 border-green-300"
+                                : selectedBillingForReceipt.status === "PENDING"
+                                ? "bg-yellow-100 text-yellow-700 border-yellow-300"
+                                : "bg-red-100 text-red-700 border-red-300"
+                            }`}
+                          >
+                            {{
+                              PAID: "✅ Pago",
+                              PENDING: "⏳ Pendente",
+                              CANCELED: "❌ Cancelado",
+                              FAILED: "💥 Falhou",
+                            }[
+                              selectedBillingForReceipt.status as keyof typeof EBillingStatus
+                            ] || "Desconhecido"}
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <span className="text-sm text-gray-600 font-medium">
+                            Key:
+                          </span>
+                          <p className="text-xs font-mono font-bold text-gray-700 truncate">
+                            {selectedBillingForReceipt.key}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Seleção de Ação */}
+                  {receiptMode === "SELECT" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Criar Recibo */}
+                      <Card
+                        className="group cursor-pointer bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:border-green-400 hover:shadow-xl transition-all duration-300 hover:scale-105"
+                        onClick={() => setReceiptMode("CREATE")}
+                      >
+                        <CardContent className="p-8 text-center">
+                          <div className="mx-auto w-20 h-20 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                            <Icon
+                              name="plus"
+                              className="text-white"
+                              size="lg"
+                            />
+                          </div>
+                          <h3 className="text-2xl font-bold text-green-800 mb-3">
+                            Criar Novo Recibo
+                          </h3>
+                          <p className="text-green-600 mb-6 leading-relaxed">
+                            Crie um novo recibo para este faturamento. Você
+                            precisará fornecer uma descrição e um arquivo.
+                          </p>
+                          <FeatureList
+                            features={[
+                              "Descrição obrigatória",
+                              "Arquivo obrigatório",
+                              "Valor opcional",
+                            ]}
+                            theme="green"
+                          />
+                        </CardContent>
+                      </Card>
+
+                      {/* Editar Recibo */}
+                      <Card
+                        className="group cursor-pointer bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-400 hover:shadow-xl transition-all duration-300 hover:scale-105"
+                        onClick={() => setReceiptMode("EDIT")}
+                      >
+                        <CardContent className="p-8 text-center">
+                          <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full flex items-center justify-center mb-6 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                            <Icon
+                              name="edit"
+                              className="text-white"
+                              size="lg"
+                            />
+                          </div>
+                          <h3 className="text-2xl font-bold text-blue-800 mb-3">
+                            Editar Recibo Existente
+                          </h3>
+                          <p className="text-blue-600 mb-6 leading-relaxed">
+                            Edite um recibo já existente para este faturamento.
+                            Você pode alterar a descrição e adicionar um novo
+                            arquivo.
+                          </p>
+                          <FeatureList
+                            features={[
+                              "Descrição obrigatória",
+                              "Arquivo opcional",
+                              "Valor opcional",
+                            ]}
+                            theme="blue"
+                          />
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Formulário de Criação */}
+                  {receiptMode === "CREATE" && (
+                    <Card className={themeVariants.card.green}>
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-bold text-green-800 flex items-center gap-2">
+                            <Icon name="plus" />
+                            Criar Novo Recibo
+                          </CardTitle>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setReceiptMode("SELECT")}
+                            className={themeVariants.button.green}
+                          >
+                            ← Voltar
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Descrição */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-gray-700">
+                            Descrição do Recibo *
+                          </label>
+                          <Input
+                            placeholder="Digite a descrição do recibo..."
+                            value={receiptDescription}
+                            onChange={(e) =>
+                              setReceiptDescription(e.target.value)
+                            }
+                            className={themeVariants.input.green}
+                          />
+                        </div>
+
+                        {/* Valor */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-gray-700">
+                            Valor do Recibo
+                          </label>
+                          <div className="relative">
+                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-400" />
+                            <Input
+                              type="number"
+                              placeholder="0.00"
+                              value={receiptAmount}
+                              onChange={(e) =>
+                                setReceiptAmount(Number(e.target.value))
+                              }
+                              className={themeVariants.input.greenNumber}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Upload */}
+                        <FileUpload
+                          file={receiptFile}
+                          onFileSelect={setReceiptFile}
+                          theme="green"
+                          required={true}
+                          id="receipt-file-create"
+                        />
+
+                        {/* Ações */}
+                        <div className="flex justify-end gap-4 pt-4 border-t border-green-200">
+                          <Button
+                            variant="outline"
+                            onClick={() => setReceiptMode("SELECT")}
+                            className="px-6 py-3 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl transition-all duration-300"
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            onClick={handleCreateReceipt}
+                            disabled={
+                              !receiptFile ||
+                              !receiptDescription.trim() ||
+                              isUploadingReceipt
+                            }
+                            className={themeVariants.button.greenPrimary}
+                          >
+                            {isUploadingReceipt ? (
+                              <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                                Criando...
+                              </>
+                            ) : (
+                              <>
+                                <Icon name="plus" className="mr-2" />
+                                Criar Recibo
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Formulário de Edição */}
+                  {receiptMode === "EDIT" && (
+                    <Card className={themeVariants.card.blue}>
+                      <CardHeader className="pb-4">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-bold text-blue-800 flex items-center gap-2">
+                            <Icon name="edit" />
+                            Editar Recibo Existente
+                          </CardTitle>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setReceiptMode("SELECT")}
+                            className={themeVariants.button.blue}
+                          >
+                            ← Voltar
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Descrição */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-gray-700">
+                            Descrição do Recibo *
+                          </label>
+                          <Input
+                            placeholder="Digite a descrição do recibo..."
+                            value={receiptDescription}
+                            onChange={(e) =>
+                              setReceiptDescription(e.target.value)
+                            }
+                            className={themeVariants.input.blue}
+                          />
+                        </div>
+
+                        {/* Valor */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-gray-700">
+                            Valor do Recibo
+                          </label>
+                          <div className="relative">
+                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
+                            <Input
+                              type="number"
+                              placeholder="0.00"
+                              value={receiptAmount}
+                              onChange={(e) =>
+                                setReceiptAmount(Number(e.target.value))
+                              }
+                              className={themeVariants.input.blueNumber}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Upload */}
+                        <FileUpload
+                          file={receiptFile}
+                          onFileSelect={setReceiptFile}
+                          theme="blue"
+                          required={false}
+                          id="receipt-file-edit"
+                        />
+
+                        {/* Ações */}
+                        <div className="flex justify-end gap-4 pt-4 border-t border-blue-200">
+                          <Button
+                            variant="outline"
+                            onClick={() => setReceiptMode("SELECT")}
+                            className="px-6 py-3 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold rounded-xl transition-all duration-300"
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            onClick={handleEditReceipt}
+                            disabled={
+                              !receiptDescription.trim() || isUploadingReceipt
+                            }
+                            className={themeVariants.button.bluePrimary}
+                          >
+                            {isUploadingReceipt ? (
+                              <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                                Atualizando...
+                              </>
+                            ) : (
+                              <>
+                                <Icon name="edit" className="mr-2" />
+                                Atualizar Recibo
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Dialog de Detalhes do Faturamento */}
+        <BillingDetailsDialog
+          billing={selectedBillingForDetails}
+          isOpen={dialogDetailsOpen}
+          onClose={() => setDialogDetailsOpen(false)}
+          onEdit={handleEditBilling}
+          onReceipt={handleReceiptDialog}
+        />
       </div>
     </div>
   )
