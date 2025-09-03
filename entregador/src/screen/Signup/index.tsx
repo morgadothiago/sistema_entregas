@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 import {
   View,
   ScrollView,
@@ -8,25 +8,25 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Text,
-} from "react-native";
+} from "react-native"
 
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm, Controller, SubmitHandler } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
 
-import { signUpSchema, SignUpFormData } from "../../util/schemasValidations";
+import { signUpSchema, SignUpFormData } from "../../util/schemasValidations"
 
-import { styles } from "./styles";
-import Header from "../../components/Header";
-import { Input } from "../../components/Input";
-import Button from "../../components/Button";
-import { theme } from "../../global/theme";
-import { useNavigation } from "@react-navigation/native";
-import { api } from "../../services/api";
-import { showAppToast, showErrorToast } from "../../util/Toast";
-import { VehicleTypeSelect } from "../../components/VehicleTypeSelect";
+import { styles } from "./styles"
+import Header from "../../components/Header"
+import { Input } from "../../components/Input"
+import Button from "../../components/Button"
+import { theme } from "../../global/theme"
+import { useNavigation } from "@react-navigation/native"
+import { api } from "../../services/api"
+import { showAppToast, showErrorToast } from "../../util/Toast"
+import { VehicleTypeSelect } from "../../components/VehicleTypeSelect"
 
 const convertValuesToStrings = (obj: any): any => {
-  const newObj: any = {};
+  const newObj: any = {}
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       if (
@@ -34,23 +34,23 @@ const convertValuesToStrings = (obj: any): any => {
         typeof obj[key] === "object" &&
         !Array.isArray(obj[key])
       ) {
-        newObj[key] = convertValuesToStrings(obj[key]);
+        newObj[key] = convertValuesToStrings(obj[key])
       } else if (Array.isArray(obj[key])) {
         newObj[key] = obj[key].map((item: any) => {
           if (typeof item === "object" && item !== null) {
-            return convertValuesToStrings(item);
+            return convertValuesToStrings(item)
           }
-          return String(item === null || item === undefined ? "" : item);
-        });
+          return String(item === null || item === undefined ? "" : item)
+        })
       } else {
         newObj[key] = String(
           obj[key] === null || obj[key] === undefined ? "" : obj[key]
-        );
+        )
       }
     }
   }
-  return newObj;
-};
+  return newObj
+}
 
 export default function Signup() {
   const {
@@ -60,9 +60,9 @@ export default function Signup() {
     watch,
   } = useForm<SignUpFormData>({
     resolver: yupResolver(signUpSchema),
-  });
+  })
 
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
   const onSubmit: SubmitHandler<SignUpFormData> = async (data) => {
     try {
@@ -73,13 +73,13 @@ export default function Signup() {
             "As senhas não coincidem. Por favor, verifique e tente novamente.",
           type: "danger",
           title: "Atenção ⚠️",
-        });
-        return;
+        })
+        return
       }
 
       // Formata a data para ISO 8601
-      const [day, month, year] = data.dob.split("-");
-      const isoDate = `${year}-${month}-${day}T00:00:00.000Z`;
+      const [day, month, year] = data.dob.split("-")
+      const isoDate = `${year}-${month}-${day}T00:00:00.000Z`
 
       // Prepara os dados no formato exato que a API espera
       const formattedData = {
@@ -101,52 +101,46 @@ export default function Signup() {
         year: data.vehicle.year,
         color: data.vehicle.color,
         vehicleType: data.vehicle.vehicleType,
-      };
+      }
 
       console.log(
         "Dados formatados para envio:",
         JSON.stringify(formattedData, null, 2)
-      );
-      const response = await api.post(
-        "/auth/signup/deliveryman",
-        formattedData
-      );
-      console.log("Resposta da API:", response.data);
+      )
+      const response = await api.post("/auth/signup/deliveryman", formattedData)
+      console.log("Resposta da API:", response.data)
 
-      console.log("Resposta de satus", response.statusText);
+      console.log("Resposta de satus", response.statusText)
 
       showAppToast({
         message: response.data.message || "",
         type: "success",
-      });
+      })
 
-      navigation.navigate("SignIn");
+      navigation.navigate("SignIn")
     } catch (err: any) {
-      console.log(
-        "Erro completo:",
-        JSON.stringify(err.response?.data, null, 2)
-      );
+      console.log("Erro completo:", JSON.stringify(err.response?.data, null, 2))
 
       if (err.response?.status === 422) {
         // Verifica campos vazios nos dados enviados
         const checkEmptyFields = (obj: any, prefix = "") => {
-          const emptyFields: string[] = [];
+          const emptyFields: string[] = []
 
           for (const [key, value] of Object.entries(obj)) {
-            const fieldName = prefix ? `${prefix}.${key}` : key;
+            const fieldName = prefix ? `${prefix}.${key}` : key
 
             if (value === null || value === undefined || value === "") {
-              emptyFields.push(fieldName);
+              emptyFields.push(fieldName)
             } else if (typeof value === "object" && !Array.isArray(value)) {
-              emptyFields.push(...checkEmptyFields(value, fieldName));
+              emptyFields.push(...checkEmptyFields(value, fieldName))
             }
           }
 
-          return emptyFields;
-        };
+          return emptyFields
+        }
 
-        const emptyFields = checkEmptyFields(data);
-        console.log("Campos vazios encontrados:", emptyFields);
+        const emptyFields = checkEmptyFields(data)
+        console.log("Campos vazios encontrados:", emptyFields)
 
         // Mostra os erros de validação da API
         if (err.response.data.message) {
@@ -170,34 +164,34 @@ export default function Signup() {
                         complement: "Complemento",
                         state: "Estado",
                         zipCode: "CEP",
-                      }[field] || field;
+                      }[field] || field
 
                     return `${fieldName}: ${
                       Array.isArray(messages) ? messages.join(", ") : messages
-                    }`;
+                    }`
                   })
-                  .join("\n");
+                  .join("\n")
               }
-              return error;
+              return error
             })
-            .join("\n");
+            .join("\n")
 
           showAppToast({
             message: `Ops! Encontramos alguns problemas:\n\n${errorMessages}`,
             type: "danger",
             title: "Atenção ⚠️",
-          });
+          })
         }
       } else if (err.response?.status === 409) {
         showAppToast({
           message: err.response?.data?.message || "",
           type: "danger",
-        });
+        })
       } else {
-        showErrorToast(err.response?.data?.message || "");
+        showErrorToast(err.response?.data?.message || "")
       }
     }
-  };
+  }
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -280,18 +274,18 @@ export default function Signup() {
                         placeholder="DD-MM-AAAA"
                         value={value}
                         onChangeText={(text) => {
-                          const numbers = text.replace(/\D/g, "");
-                          let formatted = numbers;
+                          const numbers = text.replace(/\D/g, "")
+                          let formatted = numbers
                           if (numbers.length > 2) {
                             formatted = `${numbers.slice(0, 2)}-${numbers.slice(
                               2,
                               4
-                            )}`;
+                            )}`
                             if (numbers.length > 4) {
-                              formatted += `-${numbers.slice(4, 8)}`;
+                              formatted += `-${numbers.slice(4, 8)}`
                             }
                           }
-                          onChange(formatted);
+                          onChange(formatted)
                         }}
                         placeholderTextColor={theme.colors.button}
                         error={errors.dob?.message}
@@ -588,5 +582,5 @@ export default function Signup() {
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
-  );
+  )
 }
