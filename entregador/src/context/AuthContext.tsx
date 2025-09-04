@@ -106,50 +106,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigation?: any
   ): Promise<void> => {
     try {
-      console.log("Dados antes da requicição ", data)
-      const response = await api.post("/auth/login", data)
-      const token = response.data && response.data.token
-      const userFromApi = response.data && response.data.user
-      const apiMessage = response.data && response.data.message
+      const response = await api.post("/auth/login", data, {
+        headers: {
+          "Content-Type": "application/json",
+          userAgent: `MeuApp/1.0 (ReactNative)`,
+        },
+      })
 
-      if (response.status === 401) {
-        console.log("Batendo na api")
-      }
+      const token = response.data?.token
+      const userFromApi = response.data?.user
 
       if (token && userFromApi) {
-        // Cria novo objeto user incluindo o token
-        const userData = {
-          ...userFromApi,
-          token,
-        }
-
-        // Armazena token e user (com token) no AsyncStorage
+        // Salva o token e dados do usuário
         await AsyncStorage.setItem("@auth:token", token)
         await AsyncStorage.setItem("@auth:user", JSON.stringify(userFromApi))
 
-        // Configura o token na API
+        // Configura o token para futuras requisições
         setAuthToken(token)
 
-        // Atualiza o estado
+        // Atualiza o estado de autenticação
         setIsAuthenticated(true)
         setUser({ ...userFromApi, token })
-
-        // Mensagem para outros tipos de usuário
-        if (userFromApi.role !== "delivery") {
-          showAppToast({
-            message: apiMessage || "Usuário de setor logado.",
-          })
-        }
-      } else {
-        showErrorToast("Resposta inesperada da API. Contate o suporte.")
-        setIsAuthenticated(false)
-        setUser(null)
       }
-    } catch (err: any) {
+    } catch (err) {
+      // Trata erros
       showErrorToast("Erro ao fazer login. Tente novamente mais tarde.")
-      setIsAuthenticated(false)
-      setUser(null)
-      setAuthToken(null)
     }
   }
 

@@ -3,7 +3,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Platform } from "react-native"
 
 const baseURL =
-  Platform.OS === "ios" ? "http://localhost:8080" : "http://10.0.2.2:8080" // para Android Emulator
+  Platform.OS === "ios"
+    ? "http://localhost:3000"
+    : "http://192.168.100.101:3000" // para Android Emulator
 
 export const api = Axios.create({
   baseURL,
@@ -36,8 +38,16 @@ api.interceptors.request.use(
       }
       // Adiciona o User-Agent
       config.headers["User-Agent"] = `MeuApp/1.0 (${Platform.OS})`
-      // Mostra no console o User-Agent
-      console.log("User-Agent enviado:", config.headers["User-Agent"])
+      // User-Agent que é reconhecido como dispositivo móvel
+      if (Platform.OS === "ios") {
+        config.headers[
+          "User-Agent"
+        ] = `MeuApp/1.0 (iPhone; iOS 15.0; like Mac OS X)`
+      } else {
+        config.headers[
+          "User-Agent"
+        ] = `MeuApp/1.0 (Linux; Android 12; SM-G991B)`
+      }
     } catch (error) {
       console.error("Erro ao obter token do AsyncStorage:", error)
     }
