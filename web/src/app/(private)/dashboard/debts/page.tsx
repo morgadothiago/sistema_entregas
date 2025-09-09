@@ -69,7 +69,8 @@ import {
   BillingDetailsDialog,
   Icon,
 } from "@/components/billing"
-import { themeVariants } from "@/app/theme/global"
+import { themeVariants, toastConfig } from "@/app/theme/global"
+import { toast } from "sonner"
 
 // Componentes reutilizáveis (movidos para arquivos separados)
 
@@ -240,7 +241,9 @@ export default function BillingPage() {
 
   const fetchBillings = useCallback(async () => {
     console.log("🔄 fetchBillings chamado")
-    if (!token) return
+    if (!token) {
+      toast.error("Token expirado")
+    }
 
     setIsLoading(true)
     try {
@@ -410,8 +413,6 @@ export default function BillingPage() {
       return
     }
 
-    console.log("aqui esta o receiptFile", receiptFile)
-
     if (!receiptDescription.trim()) {
       ReceiptToast.descriptionRequired()
       return
@@ -419,9 +420,18 @@ export default function BillingPage() {
 
     setIsUploadingReceipt(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await api.createRecipetFile(
+        selectedBillingForReceipt.key,
+        receiptFile,
+        token as string
+      )
+
+      if (response && "message" in response) {
+        ReceiptToast.uploadError()
+        return
+      }
+
       ReceiptToast.created()
-      console.log("aqui esta o receiptFile", receiptFile)
       setDialogReciptsOpen(false)
       resetReceiptForm()
       fetchBillings()
@@ -438,9 +448,59 @@ export default function BillingPage() {
       return
     }
 
+    if (!selectedBillingForReceipt) {
+      ReceiptToast.uploadError()
+      return
+    }
+
     setIsUploadingReceipt(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // Sempre atualiza a descrição via PATCH do faturamento
+      const updateData = {
+        ...selectedBillingForReceipt,
+        description: receiptDescription,
+      }
+
+      const updateResponse = await api.upDateBilling(
+        updateData,
+        token as string
+      )
+
+      console.log("aqui esta o response da descrição", updateResponse)
+
+      if (updateResponse && "message" in updateResponse) {
+        ReceiptToast.uploadError()
+        return
+      }
+
+      // Se há um arquivo selecionado, faz upload/atualização do arquivo
+      if (receiptFile) {
+        console.log("📁 Enviando arquivo:", {
+          fileName: receiptFile.name,
+          fileSize: receiptFile.size,
+          fileType: receiptFile.type,
+          billingKey: selectedBillingForReceipt.key,
+        })
+
+        const fileResponse = await api.createRecipetFile(
+          selectedBillingForReceipt.key,
+          receiptFile,
+          token as string
+        )
+
+        console.log("📁 Response do arquivo:", fileResponse)
+
+        if (fileResponse && "message" in fileResponse) {
+          console.log("❌ Erro no upload do arquivo:", fileResponse.message)
+          ReceiptToast.uploadError()
+          return
+        } else {
+          console.log("✅ Arquivo enviado com sucesso!")
+        }
+      } else {
+        console.log("ℹ️ Nenhum arquivo selecionado para upload")
+      }
+
       ReceiptToast.updated()
       setDialogReciptsOpen(false)
       resetReceiptForm()

@@ -283,6 +283,37 @@ class ApiService {
       .catch(this.getError)
   }
 
+  async createRecipetFile(key: string, file: File, token: string) {
+    const authToken = token.startsWith("Bearer ") ? token : `Bearer ${token}`
+
+    const formData = new FormData()
+    formData.append("file", file)
+
+    console.log("🔧 ApiService - Enviando FormData:", {
+      key,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      formDataEntries: Array.from(formData.entries()),
+    })
+
+    return this.api
+      .post(`/billing/${key}`, formData, {
+        headers: {
+          Authorization: authToken,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        console.log("🔧 ApiService - Response recebido:", response.data)
+        return this.getResponse<IBillingResponse>(response)
+      })
+      .catch((error) => {
+        console.log("🔧 ApiService - Erro capturado:", error)
+        return this.getError(error)
+      })
+  }
+
   static getInstance() {
     return (ApiService.instance ??= new ApiService())
   }

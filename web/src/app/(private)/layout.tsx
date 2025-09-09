@@ -7,6 +7,7 @@ import { redirect } from "next/navigation"
 import { useAuth } from "../context"
 import { getSession } from "next-auth/react"
 import { User } from "../types/User"
+import { toast } from "sonner"
 
 interface LayoutProps {
   children: ReactNode
