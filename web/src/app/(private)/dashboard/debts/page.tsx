@@ -243,6 +243,7 @@ export default function BillingPage() {
     console.log("🔄 fetchBillings chamado")
     if (!token) {
       toast.error("Token expirado")
+      return
     }
 
     setIsLoading(true)
@@ -259,6 +260,14 @@ export default function BillingPage() {
       // Verifica se é uma resposta de erro ou sucesso
       if (response && "message" in response && response.message) {
         // É um erro
+        if (response.status === 401) {
+          console.log("🔒 Erro 401 detectado - Token expirado")
+          signOut({
+            callbackUrl: "/signin",
+            redirect: true,
+          })
+          return
+        }
         setBillings([])
       } else if (
         response &&
@@ -267,13 +276,13 @@ export default function BillingPage() {
       ) {
         // É uma resposta de sucesso com dados
         BillingToast.loaded()
-
         setBillings(response.data)
       } else {
         setBillings([])
       }
       setIsLoading(false)
     } catch (err) {
+      console.error("Erro ao carregar faturamentos:", err)
       setError("Erro ao carregar as entregas. Tente novamente.")
       setIsLoading(false)
     }

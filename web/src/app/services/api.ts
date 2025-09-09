@@ -32,6 +32,29 @@ class ApiService {
     this.api = Axios.create({
       baseURL: process.env.NEXT_PUBLIC_NEXTAUTH_API_HOST || "",
     })
+
+    // Interceptador de resposta para tratar erros 401
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          console.log("🔒 Token expirado - Redirecionando para login")
+          // Limpar token
+          this.cleanToken()
+          // Redirecionar para login usando NextAuth
+          if (typeof window !== "undefined") {
+            // Importar signOut dinamicamente para evitar problemas de SSR
+            import("next-auth/react").then(({ signOut }) => {
+              signOut({
+                callbackUrl: "/signin",
+                redirect: true,
+              })
+            })
+          }
+        }
+        return Promise.reject(error)
+      }
+    )
   }
 
   setToken(token: string) {
