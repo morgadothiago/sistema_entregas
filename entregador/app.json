@@ -4,31 +4,27 @@
     "slug": "entregador",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/ios-light.png",
+    "icon": "./src/assets/icon.png",
+
     "userInterfaceStyle": "light",
     "androidStatusBar": {
-      "barStyle": "light-content",
-      "backgroundColor": "#00439A"
+      "barStyle": "light-content"
     },
     "newArchEnabled": true,
-    "splash": {},
+
     "ios": {
       "supportsTablet": true,
-      "icon": "./assets/ios-light.png",
+      "icon": "./src/assets/icon.png",
       "bundleIdentifier": "com.anonymous.entregador",
+
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "permissions": [
-        "ACCESS_NETWORK_STATE",
-        "ACCESS_WIFE_STATE",
-        "INTERNET"
-      ],
+      "permissions": ["ACCESS_NETWORK_STATE", "ACCESS_WIFE_STATE", "INTERNET"],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#00439A"
+        "foregroundImage": "./src/assets/icon.png"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.entregador"

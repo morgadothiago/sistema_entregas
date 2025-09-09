@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
-import { theme } from "../../global/theme";
+import { StyleSheet } from "react-native"
+import { theme } from "../../global/theme"
 
 export const styles = StyleSheet.create({
   container: {
@@ -40,15 +40,10 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   logoImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    marginBottom: 8,
-    shadowColor: "#00387A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 6,
+    width: 120,
+    height: 120,
+    marginBottom: 6,
+    resizeMode: "contain",
   },
   logoText: {
     fontSize: 34,
@@ -70,14 +65,9 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   form: {
-    backgroundColor: "rgba(255,255,255,0.98)",
     borderRadius: 22,
     padding: 26,
     shadowColor: "#00387A",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 18,
-    elevation: 8,
     marginBottom: 18,
   },
   inputWrapper: {
@@ -163,4 +153,4 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.2,
     opacity: 0.92,
   },
-});
+})

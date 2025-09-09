@@ -17,11 +17,11 @@ import { useForm, Controller } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
-import Logo from "../../../assets/ios-light.png"
-import backImg from "../../../assets/SplashScreen.png"
+import Logo from "../../assets/banner.png"
+import backImg from "../../assets/spash.png"
 import { theme } from "../../global/theme"
 import { styles } from "./styles"
-import { api } from "../../services/api"
+
 import { useAuth } from "../../context/AuthContext"
 import { useNavigation } from "@react-navigation/native"
 
@@ -70,13 +70,11 @@ export default function SignIn() {
       >
         <ImageBackground source={backImg as any} style={styles.background}>
           <SafeAreaView style={styles.safeArea}>
-            <View style={styles.overlay} />
             <View style={styles.innerContainer}>
               <View style={styles.logoContainer}>
                 <Image source={Logo as any} style={styles.logoImage} />
-                <Text style={styles.logoText}>Entrar</Text>
               </View>
-              <Text style={styles.subtitle}>Bem-vindo de volta!</Text>
+
               <View style={styles.form}>
                 <Controller
                   control={control}
