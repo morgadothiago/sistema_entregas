@@ -231,23 +231,13 @@ export const BillingDetailsDialog: React.FC<BillingDetailsDialogProps> = ({
                   </p>
                 </div>
 
-                {/* Data de Atualização */}
+                {/* Data de Vencimento */}
                 <div className="space-y-2">
                   <span className="text-sm font-semibold text-gray-600">
-                    Última Atualização:
+                    Data de Vencimento:
                   </span>
                   <p className="text-gray-700">
-                    {formatDate(billing.updatedAt || "")}
-                  </p>
-                </div>
-
-                {/* ID do Usuário */}
-                <div className="space-y-2">
-                  <span className="text-sm font-semibold text-gray-600">
-                    ID do Usuário:
-                  </span>
-                  <p className="text-gray-700 font-mono">
-                    {billing.idUser || "Não informado"}
+                    {formatDate(billing.dueDate || "")}
                   </p>
                 </div>
 
