@@ -54,7 +54,7 @@ export class BillingService {
         throw new NotFoundException('Usuário não encontrado');
       }
 
-      const billing = await tx.billing.create({
+      await tx.billing.create({
         data: {
           amount: body.amount,
           description: body.description,
@@ -70,8 +70,6 @@ export class BillingService {
           body.idUser,
           body.amount,
           ExtractType.DEPOSIT,
-          body.description ?? '',
-          billing.id,
           tx,
         );
       }
@@ -431,8 +429,6 @@ export class BillingService {
     userId: number,
     amount: number,
     type: ExtractType,
-    description: string,
-    billingId?: number,
     tx?: PrismaService,
   ): Promise<void> {
     const prisma = tx ?? this.prisma;
@@ -497,8 +493,6 @@ export class BillingService {
           billing.userId as number,
           amount,
           billing.type === 'EXPENSE' ? 'DEBIT' : 'CREDIT',
-          body.description ?? billing.description ?? 'PAGA',
-          billing.id,
           tx,
         );
       }
