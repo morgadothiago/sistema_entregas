@@ -28,19 +28,19 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       // Erro da API (status code 4xx ou 5xx)
-      console.error("Erro da API:", error.response.data)
+      console.log("Erro da API:", error.response.data)
 
       // exemplo: se for 401, deslogar usuário
       if (error.response.status === 401) {
-        console.warn("Token inválido ou expirado")
+        console.log(error.response.data.message)
         // aqui você pode limpar token, redirecionar login, etc
       }
     } else if (error.request) {
       // Nenhuma resposta do servidor
-      console.error("Sem resposta do servidor:", error.request)
+      console.log("Sem resposta do servidor:", error.request)
     } else {
       // Erro inesperado
-      console.error("Erro inesperado:", error.message)
+      console.log("Erro inesperado:", error.message)
     }
 
     // importante: sempre rejeitar de novo para não "esconder" o erro

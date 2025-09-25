@@ -17,11 +17,12 @@ import {
 import { yupResolver } from "@hookform/resolvers/yup"
 import { Controller, useForm } from "react-hook-form"
 
+import Toast from "react-native-toast-message"
 import fundoLogo from "../assets/funndo.png"
 import Logo from "../assets/logo.png"
 import Input from "../components/Input"
 import { loginSchema } from "../schema/loginSchema"
-import { login } from "../service/api"
+import { api } from "../service/api"
 import { FormData } from "../types/FormData"
 import styles from "./styles"
 
@@ -58,16 +59,36 @@ export default function LoginScreen() {
   const onSubmit = handleSubmit(async (data) => {
     setLoading(true)
     try {
-      const response = await login(data)
+      const response = await api.post("/auth/login", data, {
+        headers: {
+          "X-User-Agent": "MeuApp/1.0",
+        },
+      })
 
-      console.log("Login realizado com sucesso", response.data)
+      if (response.data) {
+        Toast.show({
+          type: "success",
+          text1: "Sucesso!",
+          text2: "Você fez login corretamente 👌",
+        })
 
-      await new Promise((resolve) => setTimeout(resolve, 5000))
+        // espera 2 segundos mostrando loading + toast
+        await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      router.push("/Home")
-    } catch (error) {
+        router.push("/Home")
+
+        setLoading(false)
+      }
+    } catch (error: any) {
       console.log("Erro no login", error)
-    } finally {
+
+      Toast.show({
+        type: "error",
+        text1: "Erro no login",
+        text2: error.response?.data?.message || "Tente novamente.",
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
       setLoading(false)
     }
   })
