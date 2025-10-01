@@ -6,17 +6,17 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { styles } from "./styles"
 import { Button } from "@/app/components/Button"
 
-export default function Acess() {
+export default function VehiclesInfo() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
-        <Header title="Dados de Acesso" />
+        <Header title="Dados dos Veículos" />
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-          <Text>Dados de Acesso</Text>
+          <Text>Dados dos Veículos</Text>
         </KeyboardAvoidingView>
         <Button
-          title="Finalizar Cadastro"
-          onPress={() => router.push("/(auth)/Signin")}
+          title="Ir para proxima etapa"
+          onPress={() => router.push("/(auth)/register/Acess")}
         />
       </SafeAreaView>
     </View>
