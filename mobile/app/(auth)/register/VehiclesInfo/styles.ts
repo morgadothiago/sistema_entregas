@@ -7,4 +7,9 @@ export const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: colors.primary,
   },
+  content: {
+    marginBottom: 20,
+    flex: 1,
+    gap: 10,
+  },
 })

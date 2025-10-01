@@ -12,12 +12,16 @@ export default function VehiclesInfo() {
       <SafeAreaView style={{ flex: 1 }}>
         <Header title="Dados dos Veículos" />
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-          <Text>Dados dos Veículos</Text>
+          <View style={styles.content}>
+            <Text>Modelo:</Text>
+            <Text>Dados dos Veículos</Text>
+          </View>
+
+          <Button
+            title="Ir para proxima etapa"
+            onPress={() => router.push("/(auth)/register/Acess")}
+          />
         </KeyboardAvoidingView>
-        <Button
-          title="Ir para proxima etapa"
-          onPress={() => router.push("/(auth)/register/Acess")}
-        />
       </SafeAreaView>
     </View>
   )
