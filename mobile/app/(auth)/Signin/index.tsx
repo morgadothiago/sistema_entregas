@@ -18,12 +18,12 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import { Controller, useForm } from "react-hook-form"
 
 import Toast from "react-native-toast-message"
-import fundoLogo from "../assets/funndo.png"
-import Logo from "../assets/logo.png"
-import Input from "../components/Input"
-import { loginSchema } from "../schema/loginSchema"
-import { api } from "../service/api"
-import { FormData } from "../types/FormData"
+import fundoLogo from "../../assets/funndo.png"
+import Logo from "../../assets/logo.png"
+import Input from "../../components/Input"
+import { loginSchema } from "../../schema/loginSchema"
+import { api } from "../../service/api"
+import { FormData } from "../../types/FormData"
 import styles from "./styles"
 
 export default function LoginScreen() {
@@ -178,7 +178,9 @@ export default function LoginScreen() {
                     <Text style={styles.linkText}>Esqueci minha senha</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => router.push("/register/UserInfo")}
+                  >
                     <Text style={styles.linkText}>Cadastrar-se</Text>
                   </TouchableOpacity>
                 </View>
@@ -191,7 +193,7 @@ export default function LoginScreen() {
       {loading && (
         <View style={styles.loadingOverlay}>
           <LottieView
-            source={require("../assets/Delivery Truck | Loading | Exporting-2.json")}
+            source={require("../../assets/Delivery Truck | Loading | Exporting-2.json")}
             autoPlay
             loop
             style={styles.cartAnimation}
