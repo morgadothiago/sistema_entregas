@@ -21,9 +21,21 @@ import { useMultiStep } from "@/app/context/MultiStepContext"
 import fundoBg from "@/app/assets/funndo.png"
 
 import Input from "@/app/components/Input"
+import api from "@/app/service/viaCep"
+
+type AndressType = {
+  address: string
+  city: string
+  number: string
+  complement: string
+  state: string
+  zipCode: string
+}
 
 export default function UserInfo() {
   const { userInfo, setUserInfo } = useMultiStep()
+  const [endereco, setEndereco] = useState<AndressType | null>(null)
+
   const [loading, setLoading] = useState(false)
   const schema = yup.object().shape({
     address: yup.string().required("Endereço é obrigatório"),
@@ -36,6 +48,7 @@ export default function UserInfo() {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: userInfo,
@@ -46,9 +59,46 @@ export default function UserInfo() {
     return () => setLoading(false)
   }, [])
 
+  async function handleGetAndressCepApi() {
+    // Pega o valor atual do campo zipCode do react-hook-form
+    const zipCode = control._formValues?.zipCode || ""
+    const cepLimpo = zipCode.replace(/\D/g, "")
+
+    // Só valida se o campo não estiver vazio
+    if (!cepLimpo) return
+
+    if (cepLimpo.length !== 8) {
+      alert("Digite o CEP válido com 8 dígitos")
+      return
+    }
+
+    try {
+      const { data } = await api.get(`${cepLimpo}/json/`)
+
+      if (data.erro) {
+        alert("CEP não encontrado")
+        return
+      }
+
+      // Preenche os campos do formulário com os dados do ViaCEP
+      // Os campos continuam editáveis normalmente
+      if (data.logradouro) setValue("address", data.logradouro)
+      if (data.localidade) setValue("city", data.localidade)
+      if (data.uf) setValue("state", data.uf)
+      if (data.cep) setValue("zipCode", data.cep)
+      // number e complement ficam para o usuário preencher
+      console.log("Retorno da API ViaCEP:", data)
+    } catch (err) {
+      alert("Erro ao buscar CEP. Tente novamente.")
+    }
+  }
+
+  // Removido o useEffect que chama handleGetAndressCepApi no mount
+
   function onSubmit(data: any) {
     setLoading(true)
-    setUserInfo(data)
+    setUserInfo(data) // Salva no contexto global
+    console.log("Dados do step endereço:", data)
     setTimeout(() => {
       router.push("/(auth)/register/StepVehicles")
     }, 1200)
@@ -72,6 +122,29 @@ export default function UserInfo() {
               showsVerticalScrollIndicator={false}
             >
               <View style={{ marginBottom: 8 }}>
+                <Controller
+                  control={control}
+                  name="zipCode"
+                  render={({ field: { onChange, value } }) => (
+                    <>
+                      <Input
+                        icon="map-pin"
+                        placeholder="CEP"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={handleGetAndressCepApi}
+                        keyboardType="numeric"
+                        containerStyle={signinStyles.input}
+                      />
+                      {errors.zipCode && (
+                        <Text style={{ color: "red", marginLeft: 8 }}>
+                          {errors.zipCode.message}
+                        </Text>
+                      )}
+                    </>
+                  )}
+                />
+
                 <Text
                   style={{
                     fontWeight: "bold",
@@ -190,27 +263,6 @@ export default function UserInfo() {
                     />
                   </View>
                 </View>
-                <Controller
-                  control={control}
-                  name="zipCode"
-                  render={({ field: { onChange, value } }) => (
-                    <>
-                      <Input
-                        icon="mail"
-                        placeholder="CEP"
-                        value={value}
-                        onChangeText={onChange}
-                        keyboardType="numeric"
-                        containerStyle={signinStyles.input}
-                      />
-                      {errors.zipCode && (
-                        <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.zipCode.message}
-                        </Text>
-                      )}
-                    </>
-                  )}
-                />
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
