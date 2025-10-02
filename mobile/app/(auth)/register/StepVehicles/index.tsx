@@ -42,7 +42,7 @@ export default function VehiclesInfo() {
   async function handleNextStep() {
     setLoading(true)
     setTimeout(() => {
-      router.push("/(auth)/register/Acess")
+      router.push("/(auth)/register/StepAcess")
       // Não precisa de setLoading(false) aqui
     }, 2500)
   }
@@ -54,7 +54,7 @@ export default function VehiclesInfo() {
           <MultiStep currentStep={1} steps={["Usuário", "Veículo", "Acesso"]} />
           <Header
             title="Dados do Veículo"
-            onBackPress={() => router.replace("/(auth)/register/UserInfo")}
+            onBackPress={() => router.replace("/(auth)/register/StepUser")}
           />
           {/* Removido quadro branco e bloco extra, apenas campos do veículo devem aparecer aqui */}
           <KeyboardAvoidingView

@@ -54,7 +54,7 @@ export default function UserInfo() {
     setLoading(true)
     setUserInfo(data)
     setTimeout(() => {
-      router.push("/(auth)/register/VehiclesInfo")
+      router.push("/(auth)/register/StepAddress")
     }, 1200)
   }
   return (
