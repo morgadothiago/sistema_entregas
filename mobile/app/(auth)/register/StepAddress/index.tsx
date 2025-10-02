@@ -106,6 +106,7 @@ export default function UserInfo() {
   return (
     <View style={styles.container}>
       <ImageBackground source={fundoBg} style={{ flex: 1 }}>
+        <View style={styles.overlay} />
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
           <Header
             title="Dados dos Enderco"

@@ -50,14 +50,15 @@ export default function VehiclesInfo() {
   return (
     <View style={styles.container}>
       <ImageBackground source={fundoBg} style={{ flex: 1 }}>
+        <View style={styles.overlay} />
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
-          <MultiStep
-            currentStep={2}
-            steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
-          />
           <Header
             title="Dados do Veículo"
             onBackPress={() => router.replace("/(auth)/register/StepUser")}
+          />
+          <MultiStep
+            currentStep={2}
+            steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
           />
           {/* Removido quadro branco e bloco extra, apenas campos do veículo devem aparecer aqui */}
           <KeyboardAvoidingView

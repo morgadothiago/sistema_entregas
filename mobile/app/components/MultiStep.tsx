@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
-    marginTop: 8,
+    marginBottom: 58,
+    marginTop: 58,
   },
   stepContainer: {
     flex: 1,

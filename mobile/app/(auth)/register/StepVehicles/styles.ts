@@ -25,4 +25,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 99,
   },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)", // Preto com 50% de opacidade
+  },
 })
