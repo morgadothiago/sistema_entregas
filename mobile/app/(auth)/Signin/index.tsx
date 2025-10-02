@@ -179,7 +179,7 @@ export default function LoginScreen() {
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => router.push("/register/UserInfo")}
+                    onPress={() => router.push("/register/StepUser")}
                   >
                     <Text style={styles.linkText}>Cadastrar-se</Text>
                   </TouchableOpacity>

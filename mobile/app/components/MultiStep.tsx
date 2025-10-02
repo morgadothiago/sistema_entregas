@@ -1,5 +1,6 @@
 import React from "react"
 import { View, Text, StyleSheet } from "react-native"
+import { colors } from "../theme"
 
 interface MultiStepProps {
   currentStep: number
@@ -26,7 +27,7 @@ export const MultiStep: React.FC<MultiStepProps> = ({ currentStep, steps }) => {
             <Text style={[styles.label, isActive && styles.activeLabel]}>
               {step}
             </Text>
-            {idx < steps.length - 1 && <View style={styles.line} />}
+            {idx < steps.length - 1 && <View />}
           </View>
         )
       })}
@@ -43,36 +44,40 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   stepContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
+
     alignItems: "center",
   },
   circle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: colors.support,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 12,
   },
   activeCircle: {
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.buttons,
   },
   completedCircle: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.active,
   },
   stepNumber: {
-    color: "#fff",
+    color: colors.primary,
     fontWeight: "bold",
   },
   label: {
     marginLeft: 6,
     marginRight: 12,
-    color: "#888",
-    fontSize: 13,
+    color: colors.active,
+
+    fontSize: 18,
   },
   activeLabel: {
-    color: "#007AFF",
+    color: colors.active,
     fontWeight: "bold",
+    fontSize: 18,
   },
   line: {
     width: 24,

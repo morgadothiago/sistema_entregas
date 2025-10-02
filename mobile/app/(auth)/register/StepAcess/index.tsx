@@ -34,10 +34,13 @@ export default function Acess() {
     <View style={styles.container}>
       <ImageBackground source={fundoBg} style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
-          <MultiStep currentStep={2} steps={["Usuário", "Veículo", "Acesso"]} />
+          <MultiStep
+            currentStep={3}
+            steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
+          />
           <Header
             title="ACESSO AO APLICATIVO"
-            onBackPress={() => router.replace("/(auth)/register/VehiclesInfo")}
+            onBackPress={() => router.replace("/(auth)/register/StepVehicles")}
           />
           <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
             <View>

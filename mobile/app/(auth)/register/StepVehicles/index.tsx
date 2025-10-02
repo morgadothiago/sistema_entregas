@@ -51,7 +51,10 @@ export default function VehiclesInfo() {
     <View style={styles.container}>
       <ImageBackground source={fundoBg} style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
-          <MultiStep currentStep={1} steps={["Usuário", "Veículo", "Acesso"]} />
+          <MultiStep
+            currentStep={1}
+            steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
+          />
           <Header
             title="Dados do Veículo"
             onBackPress={() => router.replace("/(auth)/register/StepUser")}
