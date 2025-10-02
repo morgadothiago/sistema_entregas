@@ -11,39 +11,72 @@ import { useForm } from "react-hook-form"
 import { ActivityIndicator, KeyboardAvoidingView, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { styles } from "./styles"
+import { RegisterFormData } from "@/app/types/UserData"
+import { AppPicker } from "@/app/components/Select"
+
+type VehicleTypeOption = { label: string; value: string }
 
 export default function VehiclesInfo() {
   const { userInfo, setUserInfo } = useMultiStep()
   const { vehicleInfo, setVehicleInfo } = useMultiStep()
-  const { control, handleSubmit } = useForm({
-    defaultValues: userInfo,
+  const { control, handleSubmit, setValue } = useForm<RegisterFormData>({
+    defaultValues: vehicleInfo || {},
   })
-  // Mostrar no console o que está sendo passado
-  useEffect(() => {
-    console.log("UserInfo recebido no VehiclesInfo:", userInfo)
-  }, [userInfo])
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(100)
-  const [vehicleTypes, setVehicleTypes] = useState<string[]>([])
+
+  const [page] = useState(1)
+  const [limit] = useState(100)
+  const [vehicleTypes, setVehicleTypes] = useState<VehicleTypeOption[]>([])
   const [loading, setLoading] = useState(false)
 
+  const [selected, setSelected] = useState<VehicleTypeOption | undefined>(
+    undefined
+  )
+
   async function loadVehicleData() {
-    const response = await api.get("/vehicle-types", {
-      params: { page, limit },
-    })
-    setVehicleTypes(response.data)
+    try {
+      setLoading(true)
+      const response = await api.get("/vehicle-types", {
+        params: { page, limit },
+      })
+
+      // Corrigido: acessa response.data.data
+      const data = Array.isArray(response.data?.data) ? response.data.data : []
+
+      const formattedOptions = data.map((item: { type: string }) => ({
+        label: item.type,
+        value: item.type,
+      }))
+
+      setVehicleTypes(formattedOptions)
+
+      // Seleciona automaticamente a primeira opção
+      if (formattedOptions.length > 0 && !selected) {
+        setSelected(formattedOptions[0])
+      }
+
+      console.log("Resposta completa da API:", response)
+      console.log("response.data:", response.data)
+      console.log("Tipo de veiculo", formattedOptions)
+    } catch (error) {
+      console.error("Erro ao carregar os tipos de veículo:", error)
+    } finally {
+      setLoading(false)
+    }
   }
+
   useEffect(() => {
-    setLoading(false)
     loadVehicleData()
-    // Garantir que o loading sempre seja resetado ao montar
-    return () => setLoading(false)
   }, [])
+
   async function handleNextStep() {
+    if (selected) {
+      // Salva o objeto completo no contexto
+      setVehicleInfo({ ...vehicleTypes, vehicleType: selected })
+    }
+
     setLoading(true)
     setTimeout(() => {
       router.push("/(auth)/register/StepAcess")
-      // Não precisa de setLoading(false) aqui
     }, 2500)
   }
 
@@ -60,15 +93,22 @@ export default function VehiclesInfo() {
             currentStep={2}
             steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
           />
-          {/* Removido quadro branco e bloco extra, apenas campos do veículo devem aparecer aqui */}
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior="padding"
-          ></KeyboardAvoidingView>
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+            {vehicleTypes.length > 0 ? (
+              <AppPicker
+                label="Selecione o tipo de veículo"
+                selectedValue={selected}
+                onValueChange={(v: VehicleTypeOption) => setSelected(v)}
+                options={vehicleTypes}
+              />
+            ) : (
+              <ActivityIndicator size="small" color="#fff" />
+            )}
+          </KeyboardAvoidingView>
           <Button
             title="Ir para Informações de Acesso"
             onPress={handleNextStep}
-            disabled={loading}
+            disabled={loading || vehicleTypes.length === 0}
           />
           {loading && (
             <View style={styles.loadingOverlay}>
