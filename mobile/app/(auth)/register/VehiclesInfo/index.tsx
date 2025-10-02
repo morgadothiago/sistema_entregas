@@ -1,23 +1,16 @@
+import fundoBg from "@/app/assets/funndo.png"
+import { Button } from "@/app/components/Button"
 import { Header } from "@/app/components/Header"
 import { MultiStep } from "@/app/components/MultiStep"
+import { useMultiStep } from "@/app/context/MultiStepContext"
+import { api } from "@/app/service/api"
+import { ImageBackground } from "expo-image"
 import { router } from "expo-router"
 import React, { useEffect, useState } from "react"
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  View,
-  Text,
-} from "react-native"
-import { styles } from "./styles"
+import { useForm } from "react-hook-form"
+import { ActivityIndicator, KeyboardAvoidingView, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Button } from "@/app/components/Button"
-import { ImageBackground } from "expo-image"
-import { Controller, useForm, useFormContext } from "react-hook-form"
-import fundoBg from "@/app/assets/funndo.png"
-import { UserInfoData } from "../../../types/UserData"
-import Input from "@/app/components/Input"
-import { api } from "@/app/service/api"
-import { useMultiStep } from "@/app/context/MultiStepContext"
+import { styles } from "./styles"
 
 export default function VehiclesInfo() {
   const { userInfo, setUserInfo } = useMultiStep()
@@ -64,23 +57,10 @@ export default function VehiclesInfo() {
             onBackPress={() => router.replace("/(auth)/register/UserInfo")}
           />
           {/* Removido quadro branco e bloco extra, apenas campos do veículo devem aparecer aqui */}
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-            {/* Adicione aqui os campos do veículo normalmente, exemplo: */}
-            {/*
-            <Controller
-              control={control}
-              name="licensePlate"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  icon="truck"
-                  placeholder="Placa do Veículo"
-                  value={value}
-                  onChangeText={onChange}
-                />
-              )}
-            />
-            */}
-          </KeyboardAvoidingView>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior="padding"
+          ></KeyboardAvoidingView>
           <Button
             title="Ir para Informações de Acesso"
             onPress={handleNextStep}
