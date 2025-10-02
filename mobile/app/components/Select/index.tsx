@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     maxHeight: "50%",
   },
   option: { padding: 16, borderBottomWidth: 1, borderBottomColor: "#eee" },
-  optionText: { fontSize: 16 },
+  optionText: { fontSize: 16, color: colors.buttons, fontWeight: "600" },
   cancel: { padding: 16, alignItems: "center" },
   cancelText: { color: "red", fontWeight: "600" },
 })

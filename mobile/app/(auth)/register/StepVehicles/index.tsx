@@ -1,6 +1,7 @@
 import fundoBg from "@/app/assets/funndo.png"
 import { Button } from "@/app/components/Button"
 import { Header } from "@/app/components/Header"
+import Input from "@/app/components/Input"
 import { MultiStep } from "@/app/components/MultiStep"
 import { useMultiStep } from "@/app/context/MultiStepContext"
 import { api } from "@/app/service/api"
@@ -13,11 +14,13 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { styles } from "./styles"
 import { AppPicker } from "@/app/components/Select"
+import signinStyles from "../../Signin/styles"
 
 type VehicleTypeOption = {
   label: string
@@ -35,7 +38,15 @@ export default function VehiclesInfo() {
   const [vehicleTypes, setVehicleTypes] = useState<VehicleTypeOption[]>([])
   const [loading, setLoading] = useState(false)
 
-  const selectedVehicleType = watch("vehicleType")
+  // Observa os campos para habilitar o botão de avançar
+  const selectedVehicleType = watch("vehicleType.value")
+  const licensePlate = watch("licensePlate")
+  const brand = watch("brand")
+  const model = watch("model")
+  const year = watch("year")
+  const color = watch("color")
+  const isButtonDisabled =
+    !selectedVehicleType || !licensePlate || !brand || !model || !year || !color
 
   async function loadVehicleData() {
     try {
@@ -73,16 +84,10 @@ export default function VehiclesInfo() {
     setUserInfo(data)
 
     // 2. Mostra no console todos os dados coletados até agora
-    console.log(
-      "dados do step ate agora",
-      "Dados coletados até o StepVehicles:",
-      data
-    )
+    console.log("Dados coletados até o StepVehicles:", data)
 
-    setLoading(false)
-
-    // 3. Navega para o próximo passo
-    // router.push("/(auth)/register/StepAcess")
+    // 3. Navega para o próximo passo (descomente para ativar)
+    router.push("/(auth)/register/StepAcess")
   }
 
   return (
@@ -92,7 +97,7 @@ export default function VehiclesInfo() {
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
           <Header
             title="Dados do Veículo"
-            onBackPress={() => router.replace("/(auth)/register/StepUser")}
+            onBackPress={() => router.replace("/(auth)/register/StepAddress")}
           />
           <MultiStep
             currentStep={2}
@@ -102,30 +107,118 @@ export default function VehiclesInfo() {
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            {loading && vehicleTypes.length === 0 ? (
-              <ActivityIndicator size="large" color="#fff" />
-            ) : (
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: 20 }}
+              showsVerticalScrollIndicator={false}
+            >
+              {loading && vehicleTypes.length === 0 ? (
+                <ActivityIndicator size="large" color="#fff" />
+              ) : (
+                <Controller
+                  control={control}
+                  name="vehicleType"
+                  rules={{ required: "Selecione um tipo de veículo" }}
+                  render={({ field: { onChange, value } }) => (
+                    <AppPicker
+                      label="Selecione o tipo de veículo"
+                      selectedValue={value?.value?.toString()}
+                      onValueChange={(itemValue: string) =>
+                        onChange({ label: itemValue, value: itemValue })
+                      }
+                      options={vehicleTypes}
+                    />
+                  )}
+                />
+              )}
               <Controller
                 control={control}
-                name="vehicleType" // Nome do campo no formulário
-                rules={{ required: "Selecione um tipo de veículo" }}
-                render={({ field: { onChange, value } }) => (
-                  <AppPicker
-                    label="Selecione o tipo de veículo"
-                    selectedValue={value?.value?.toString()}
-                    onValueChange={(itemValue: string) =>
-                      onChange({ label: itemValue, value: itemValue })
-                    }
-                    options={vehicleTypes}
+                name="licensePlate"
+                rules={{ required: "A placa é obrigatória" }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    icon="credit-card"
+                    placeholder="Placa do Veículo"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    autoCapitalize="characters"
+                    containerStyle={signinStyles.input}
                   />
                 )}
               />
-            )}
+              <Controller
+                control={control}
+                name="brand"
+                rules={{ required: "A marca é obrigatória" }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    icon="tag"
+                    placeholder="Marca"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    containerStyle={signinStyles.input}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="model"
+                rules={{ required: "O modelo é obrigatório" }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    icon="truck"
+                    placeholder="Modelo"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    containerStyle={signinStyles.input}
+                  />
+                )}
+              />
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <View style={{ flex: 1 }}>
+                  <Controller
+                    control={control}
+                    name="year"
+                    rules={{ required: "O ano é obrigatório" }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input
+                        icon="calendar"
+                        placeholder="Ano"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        keyboardType="numeric"
+                        containerStyle={signinStyles.input}
+                      />
+                    )}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Controller
+                    control={control}
+                    name="color"
+                    rules={{ required: "A cor é obrigatória" }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input
+                        icon="droplet"
+                        placeholder="Cor"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        containerStyle={signinStyles.input}
+                      />
+                    )}
+                  />
+                </View>
+              </View>
+            </ScrollView>
           </KeyboardAvoidingView>
           <Button
             title="Ir para Informações de Acesso"
             onPress={handleSubmit(handleNextStep)}
-            disabled={loading || !selectedVehicleType}
+            disabled={loading || isButtonDisabled}
           />
           {loading && (
             <View style={styles.loadingOverlay}>
