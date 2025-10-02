@@ -15,7 +15,7 @@ import {
 type Option = { label: string; value: string }
 type Props = {
   label?: string
-  selectedValue?: string | null
+  selectedValue?: string
   onValueChange: (value: string) => void
   options: Option[]
   placeholder?: string

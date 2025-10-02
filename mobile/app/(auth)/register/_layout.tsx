@@ -24,7 +24,7 @@ export default function RegisterLayout() {
       model: "",
       year: "",
       color: "",
-      vehicleType: "",
+      vehicleType: { label: "", value: "" },
     },
   })
 

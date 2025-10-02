@@ -34,7 +34,6 @@ type AndressType = {
 
 export default function UserInfo() {
   const { userInfo, setUserInfo } = useMultiStep()
-  const [endereco, setEndereco] = useState<AndressType | null>(null)
 
   const [loading, setLoading] = useState(false)
   const schema = yup.object().shape({
@@ -86,8 +85,6 @@ export default function UserInfo() {
       if (data.localidade) setValue("city", data.localidade)
       if (data.uf) setValue("state", data.uf)
       if (data.cep) setValue("zipCode", data.cep)
-      // number e complement ficam para o usuário preencher
-      console.log("Retorno da API ViaCEP:", data)
     } catch (err) {
       alert("Erro ao buscar CEP. Tente novamente.")
     }
@@ -98,7 +95,7 @@ export default function UserInfo() {
   function onSubmit(data: any) {
     setLoading(true)
     setUserInfo(data) // Salva no contexto global
-    console.log("Dados do step endereço:", data)
+    // Aqui fazer a conexao com api
     setTimeout(() => {
       router.push("/(auth)/register/StepVehicles")
     }, 1200)
