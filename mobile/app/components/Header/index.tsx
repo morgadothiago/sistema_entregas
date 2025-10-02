@@ -7,17 +7,13 @@ import { router } from "expo-router"
 
 type HeaderProps = {
   title?: string
+  onBackPress?: () => void
 }
 
-export function Header({ title }: HeaderProps) {
+export function Header({ title, onBackPress }: HeaderProps) {
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          router.back()
-        }}
-      >
+      <TouchableOpacity style={styles.button} onPress={onBackPress}>
         <Feather name="arrow-left" size={35} color={colors.buttons} />
       </TouchableOpacity>
       <Text style={styles.title}>{title}</Text>

@@ -5,24 +5,30 @@ import { KeyboardAvoidingView, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { styles } from "./styles"
 import { Button } from "@/app/components/Button"
+import { ImageBackground } from "expo-image"
+
+import fundoBg from "@/app/assets/funndo.png"
 
 export default function VehiclesInfo() {
   return (
     <View style={styles.container}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Header title="Dados dos Veículos" />
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-          <View style={styles.content}>
-            <Text>Modelo:</Text>
-            <Text>Dados dos Veículos</Text>
-          </View>
-
+      <ImageBackground source={fundoBg} style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, padding: 16 }}>
+          <Header
+            title="Dados dos Veiculo"
+            onBackPress={() => router.replace("/(auth)/register/UserInfo")}
+          />
+          <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+            <View>
+              <Text>Cadastrado os dados do veículo</Text>
+            </View>
+          </KeyboardAvoidingView>
           <Button
-            title="Ir para proxima etapa"
+            title="Ir para Informações dos Veículos"
             onPress={() => router.push("/(auth)/register/Acess")}
           />
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+        </SafeAreaView>
+      </ImageBackground>
     </View>
   )
 }
