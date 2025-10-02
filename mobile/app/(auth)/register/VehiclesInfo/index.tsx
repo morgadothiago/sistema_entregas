@@ -2,20 +2,33 @@ import { Header } from "@/app/components/Header"
 import { MultiStep } from "@/app/components/MultiStep"
 import { router } from "expo-router"
 import React, { useEffect, useState } from "react"
-import { ActivityIndicator } from "react-native"
-import { KeyboardAvoidingView, View } from "react-native"
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  View,
+  Text,
+} from "react-native"
 import { styles } from "./styles"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Button } from "@/app/components/Button"
 import { ImageBackground } from "expo-image"
-import { useFormContext } from "react-hook-form"
+import { Controller, useForm, useFormContext } from "react-hook-form"
 import fundoBg from "@/app/assets/funndo.png"
 import { UserInfoData } from "../../../types/UserData"
 import Input from "@/app/components/Input"
 import { api } from "@/app/service/api"
+import { useMultiStep } from "@/app/context/MultiStepContext"
 
 export default function VehiclesInfo() {
-  const { register, setValue } = useFormContext<UserInfoData>()
+  const { userInfo, setUserInfo } = useMultiStep()
+  const { vehicleInfo, setVehicleInfo } = useMultiStep()
+  const { control, handleSubmit } = useForm({
+    defaultValues: userInfo,
+  })
+  // Mostrar no console o que está sendo passado
+  useEffect(() => {
+    console.log("UserInfo recebido no VehiclesInfo:", userInfo)
+  }, [userInfo])
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(100)
   const [vehicleTypes, setVehicleTypes] = useState<string[]>([])
@@ -26,7 +39,6 @@ export default function VehiclesInfo() {
       params: { page, limit },
     })
     setVehicleTypes(response.data)
-    console.log("Tipos de veículos carregados:", response.data)
   }
   useEffect(() => {
     setLoading(false)
@@ -34,8 +46,6 @@ export default function VehiclesInfo() {
     // Garantir que o loading sempre seja resetado ao montar
     return () => setLoading(false)
   }, [])
-
-  console.log("Tipos de veículos disponíveis:", vehicleTypes)
   async function handleNextStep() {
     setLoading(true)
     setTimeout(() => {
@@ -53,9 +63,23 @@ export default function VehiclesInfo() {
             title="Dados do Veículo"
             onBackPress={() => router.replace("/(auth)/register/UserInfo")}
           />
+          {/* Removido quadro branco e bloco extra, apenas campos do veículo devem aparecer aqui */}
           <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-            {/* Área do formulário Veículo */}
-            {/* ... campos de veículo */}
+            {/* Adicione aqui os campos do veículo normalmente, exemplo: */}
+            {/*
+            <Controller
+              control={control}
+              name="licensePlate"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  icon="truck"
+                  placeholder="Placa do Veículo"
+                  value={value}
+                  onChangeText={onChange}
+                />
+              )}
+            />
+            */}
           </KeyboardAvoidingView>
           <Button
             title="Ir para Informações de Acesso"
