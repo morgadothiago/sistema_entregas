@@ -52,7 +52,7 @@ export default function VehiclesInfo() {
       <ImageBackground source={fundoBg} style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
           <MultiStep
-            currentStep={1}
+            currentStep={2}
             steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
           />
           <Header

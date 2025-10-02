@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   stepContainer: {
+    flex: 1,
     flexDirection: "column",
 
     alignItems: "center",
@@ -76,8 +77,8 @@ const styles = StyleSheet.create({
   },
   activeLabel: {
     color: colors.active,
-    fontWeight: "bold",
-    fontSize: 18,
+    fontWeight: "900",
+    fontSize: 16,
   },
   line: {
     width: 24,

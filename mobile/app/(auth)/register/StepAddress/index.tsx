@@ -107,13 +107,13 @@ export default function UserInfo() {
     <View style={styles.container}>
       <ImageBackground source={fundoBg} style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
-          <MultiStep
-            currentStep={2}
-            steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
-          />
           <Header
             title="Dados dos Enderco"
-            onBackPress={() => router.replace("/(auth)/Signin")}
+            onBackPress={() => router.replace("/(auth)/register/StepUser")}
+          />
+          <MultiStep
+            currentStep={1}
+            steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
           />
           <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
             <ScrollView
