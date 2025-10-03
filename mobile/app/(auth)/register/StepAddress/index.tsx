@@ -22,6 +22,7 @@ import fundoBg from "@/app/assets/funndo.png"
 
 import Input from "@/app/components/Input"
 import api from "@/app/service/viaCep"
+import { schema } from "@/app/schema/accouts"
 
 type AndressType = {
   address: string
@@ -36,14 +37,7 @@ export default function UserInfo() {
   const { userInfo, setUserInfo } = useMultiStep()
 
   const [loading, setLoading] = useState(false)
-  const schema = yup.object().shape({
-    address: yup.string().required("Endereço é obrigatório"),
-    city: yup.string().required("Cidade é obrigatória"),
-    number: yup.string().required("Número é obrigatório"),
-    complement: yup.string(),
-    state: yup.string().required("Estado é obrigatório"),
-    zipCode: yup.string().required("CEP é obrigatório"),
-  })
+
   const {
     control,
     handleSubmit,
@@ -59,11 +53,8 @@ export default function UserInfo() {
   }, [])
 
   async function handleGetAndressCepApi() {
-    // Pega o valor atual do campo zipCode do react-hook-form
     const zipCode = control._formValues?.zipCode || ""
     const cepLimpo = zipCode.replace(/\D/g, "")
-
-    // Só valida se o campo não estiver vazio
     if (!cepLimpo) return
 
     if (cepLimpo.length !== 8) {
@@ -78,9 +69,6 @@ export default function UserInfo() {
         alert("CEP não encontrado")
         return
       }
-
-      // Preenche os campos do formulário com os dados do ViaCEP
-      // Os campos continuam editáveis normalmente
       if (data.logradouro) setValue("address", data.logradouro)
       if (data.localidade) setValue("city", data.localidade)
       if (data.uf) setValue("state", data.uf)
@@ -89,13 +77,9 @@ export default function UserInfo() {
       alert("Erro ao buscar CEP. Tente novamente.")
     }
   }
-
-  // Removido o useEffect que chama handleGetAndressCepApi no mount
-
   function onSubmit(data: any) {
     setLoading(true)
-    setUserInfo(data) // Salva no contexto global
-    // Aqui fazer a conexao com api
+    setUserInfo(data)
     setTimeout(() => {
       router.push("/(auth)/register/StepVehicles")
     }, 1200)
