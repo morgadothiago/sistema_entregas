@@ -1,11 +1,12 @@
-import React from "react"
 import { Stack } from "expo-router"
+import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
-import { RegisterFormData } from "@/app/types/UserData"
+
 import { MultiStepProvider } from "@/app/context/MultiStepContext"
+import { UserInfoData } from "@/app/types/UserData"
 
 export default function RegisterLayout() {
-  const methods = useForm<RegisterFormData>({
+  const methods = useForm<UserInfoData>({
     defaultValues: {
       email: "",
       password: "",
@@ -24,7 +25,7 @@ export default function RegisterLayout() {
       model: "",
       year: "",
       color: "",
-      vehicleType: { label: "", value: "" },
+      vehicleType: "",
     },
   })
 

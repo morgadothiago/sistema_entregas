@@ -1,36 +1,18 @@
-export interface AccessData {
+export type UserInfoData = {
+  name: string
+  dob: Date | { day: number; month: number; year: number } | string
   email: string
   password: string
+  address?: string
+  city?: string
+  state?: string
+  zipCode?: string
+  number?: string
+  complement?: string
+  vehicleType?: string
+  licensePlate?: string
+  brand?: string
+  model?: string
+  year?: string | number
+  color?: string
 }
-
-export interface UserInfoData {
-  name: string
-  dob: string
-  cpf: string
-  phone: string
-  address: string
-  city: string
-  number: string
-  complement: string
-  state: string
-  zipCode: string
-}
-
-// Tipo para opções de tipo de veículo no picker
-export type VehicleTypeOption = {
-  label: string
-  value: string | number
-}
-
-// Dados do veículo
-export interface VehicleInfoData {
-  licensePlate: string
-  brand: string
-  model: string
-  year: string
-  color: string
-  vehicleType: VehicleTypeOption // ← correto agora
-}
-
-// Formulário completo com todas as etapas
-export type RegisterFormData = AccessData & UserInfoData & VehicleInfoData

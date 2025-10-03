@@ -4,6 +4,7 @@ import { Header } from "@/app/components/Header"
 import { MultiStep } from "@/app/components/MultiStep"
 import { useMultiStep } from "@/app/context/MultiStepContext"
 import { yupResolver } from "@hookform/resolvers/yup"
+
 import { ImageBackground } from "expo-image"
 import { router } from "expo-router"
 import React, { useEffect, useState } from "react"
@@ -13,6 +14,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -25,18 +27,60 @@ import Input from "@/app/components/Input"
 export default function UserInfo() {
   const { userInfo, setUserInfo } = useMultiStep()
   const [loading, setLoading] = useState(false)
+
   const schema = yup.object().shape({
     name: yup.string().required("Nome é obrigatório"),
-    dob: yup.string().required("Data de nascimento é obrigatória"),
+    dob: yup
+      .mixed()
+      .required("Data de nascimento é obrigatória")
+      .test('is-valid-date', 'Data inválida ou futura', function(value) {
+        // Se não tiver valor, é inválido
+        if (!value) return false;
+        
+        // Se for string vazia, é inválido
+        if (typeof value === 'string' && value.trim() === '') return false;
+        
+        // Se for string no formato DD/MM/YYYY, converte para Date
+        if (typeof value === 'string') {
+          const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
+          const match = value.match(dateRegex)
+          
+          if (match) {
+            const day = parseInt(match[1])
+            const month = parseInt(match[2]) - 1
+            const year = parseInt(match[3])
+            
+            const date = new Date(year, month, day)
+            return (
+              date.getFullYear() === year &&
+              date.getMonth() === month &&
+              date.getDate() === day &&
+              date <= new Date()
+            )
+          }
+          return false;
+        }
+        
+        // Se for uma data válida, verifica se não é futura
+        if (value instanceof Date) {
+          return !isNaN(value.getTime()) && value <= new Date();
+        }
+        
+        return false;
+      }),
     cpf: yup.string().required("CPF é obrigatório"),
     phone: yup.string().required("Telefone é obrigatório"),
   })
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
-    defaultValues: userInfo,
+    defaultValues: {
+      ...userInfo,
+      dob: userInfo.dob ? new Date(userInfo.dob) : new Date(),
+    },
     resolver: yupResolver(schema),
   })
   useEffect(() => {
@@ -104,20 +148,88 @@ export default function UserInfo() {
                 <Controller
                   control={control}
                   name="dob"
-                  render={({ field: { onChange, value } }) => (
-                    <>
-                      <Input
-                        icon="calendar"
-                        placeholder="Data de Nascimento"
-                        value={value}
-                        onChangeText={onChange}
-                        containerStyle={signinStyles.input}
-                      />
-                      {errors.dob && (
-                        <Text style={styles.error}>{errors.dob.message}</Text>
-                      )}
-                    </>
-                  )}
+                  render={({ field: { onChange, value } }) => {
+                    // Estado local para controlar o texto do input
+                    const [inputText, setInputText] = useState(
+                      value instanceof Date
+                        ? `${value.getDate().toString().padStart(2, "0")}/${(
+                            value.getMonth() + 1
+                          )
+                            .toString()
+                            .padStart(2, "0")}/${value.getFullYear()}`
+                        : ""
+                    )
+                    
+                    // Função para validar e converter o texto para objeto Date
+                    const handleDateChange = (text: string) => {
+                      // Verifica se o formato é válido (DD/MM/YYYY)
+                      const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
+                      const match = text.match(dateRegex)
+                      
+                      if (match) {
+                        // Se o formato for válido, converte para Date
+                        const day = parseInt(match[1])
+                        const month = parseInt(match[2]) - 1 // Mês em JS é 0-indexed
+                        const year = parseInt(match[3])
+                        
+                        // Verifica se a data é válida
+                        const date = new Date(year, month, day)
+                        if (
+                          date.getFullYear() === year &&
+                          date.getMonth() === month &&
+                          date.getDate() === day &&
+                          date <= new Date() // Não permite datas futuras
+                        ) {
+                          onChange(date) // Atualiza o valor do formulário com o objeto Date
+                        }
+                      }
+                    }
+
+                    return (
+                      <>
+                        <Input
+                          icon="calendar"
+                          placeholder="Data de Nascimento (DD/MM/AAAA)"
+                          value={inputText}
+                          onChangeText={(text) => {
+                            // Remove caracteres não numéricos, exceto barras
+                            let cleanText = text.replace(/[^\d\/]/g, '')
+                            
+                            // Formata automaticamente com as barras
+                            if (cleanText.length > 0) {
+                              // Remove barras existentes e mantém apenas números
+                              const numbers = cleanText.replace(/\//g, '')
+                              
+                              // Reformata com barras nas posições corretas
+                              if (numbers.length > 4) {
+                                cleanText = `${numbers.substring(0, 2)}/${numbers.substring(2, 4)}/${numbers.substring(4, 8)}`
+                              } else if (numbers.length > 2) {
+                                cleanText = `${numbers.substring(0, 2)}/${numbers.substring(2)}`
+                              } else {
+                                cleanText = numbers
+                              }
+                            }
+                            
+                            // Limita a 10 caracteres (DD/MM/AAAA)
+                            if (cleanText.length <= 10) {
+                              setInputText(cleanText)
+                              
+                              // Tenta converter para Date se estiver no formato completo
+                              if (cleanText.length === 10) {
+                                handleDateChange(cleanText)
+                              }
+                            }
+                          }}
+                          keyboardType="numeric"
+                          containerStyle={signinStyles.input}
+                        />
+
+                        {errors.dob && (
+                          <Text style={styles.error}>{errors.dob.message}</Text>
+                        )}
+                      </>
+                    )
+                  }}
                 />
                 <Controller
                   control={control}

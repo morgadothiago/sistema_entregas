@@ -28,8 +28,14 @@ export function AppPicker({
   options,
   placeholder = "Selecione",
 }: Props) {
+  // Converter apenas o label para minúsculo, mantendo o value original
+  const processedOptions = options.map(option => ({
+    label: option.label.toLowerCase(),
+    value: option.value // Mantém o valor original para compatibilidade com o backend
+  }))
+  
   const [visible, setVisible] = React.useState(false)
-  const selectedLabel = options.find((o) => o.value === selectedValue)?.label
+  const selectedLabel = processedOptions.find((o) => o.value === selectedValue)?.label
 
   return (
     <View style={styles.container}>
@@ -62,7 +68,7 @@ export function AppPicker({
         >
           <View style={styles.modal}>
             <FlatList
-              data={options}
+              data={processedOptions}
               keyExtractor={(item) => item.value}
               renderItem={({ item }) => (
                 <TouchableOpacity

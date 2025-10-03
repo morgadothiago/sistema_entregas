@@ -47,7 +47,7 @@ export default function VehiclesInfo() {
   const color = watch("color")
 
   // 🔹 Verifica se é bike
-  const isBike = selectedVehicleTypeObj?.value.toLowerCase() === "bike"
+  const isBike = selectedVehicleTypeObj?.value === "Bike"
 
   // 🔹 Define se deve mostrar os inputs
   const showVehicleInputs = selectedVehicleTypeObj && !isBike
