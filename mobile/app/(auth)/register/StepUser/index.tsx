@@ -1,24 +1,24 @@
+import fundoBg from "@/app/assets/funndo.png"
+import { Button } from "@/app/components/Button"
 import { Header } from "@/app/components/Header"
 import { MultiStep } from "@/app/components/MultiStep"
+import { useMultiStep } from "@/app/context/MultiStepContext"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { ImageBackground } from "expo-image"
 import { router } from "expo-router"
 import React, { useEffect, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 import {
-  KeyboardAvoidingView,
-  View,
   ActivityIndicator,
+  KeyboardAvoidingView,
   ScrollView,
   Text,
+  View,
 } from "react-native"
-import { styles } from "./styles"
-import signinStyles from "../../Signin/styles"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Button } from "@/app/components/Button"
-import { ImageBackground } from "expo-image"
-import { Controller, useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
-import { useMultiStep } from "@/app/context/MultiStepContext"
-import fundoBg from "@/app/assets/funndo.png"
+import signinStyles from "../../Signin/styles"
+import { styles } from "./styles"
 
 import Input from "@/app/components/Input"
 
@@ -96,9 +96,7 @@ export default function UserInfo() {
                         containerStyle={signinStyles.input}
                       />
                       {errors.name && (
-                        <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.name.message}
-                        </Text>
+                        <Text style={styles.error}>{errors.name.message}</Text>
                       )}
                     </>
                   )}
@@ -116,9 +114,7 @@ export default function UserInfo() {
                         containerStyle={signinStyles.input}
                       />
                       {errors.dob && (
-                        <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.dob.message}
-                        </Text>
+                        <Text style={styles.error}>{errors.dob.message}</Text>
                       )}
                     </>
                   )}
@@ -137,9 +133,7 @@ export default function UserInfo() {
                         containerStyle={signinStyles.input}
                       />
                       {errors.cpf && (
-                        <Text style={{ color: "red", marginLeft: 2 }}>
-                          {errors.cpf.message}
-                        </Text>
+                        <Text style={styles.error}>{errors.cpf.message}</Text>
                       )}
                     </>
                   )}
@@ -171,9 +165,7 @@ export default function UserInfo() {
                         containerStyle={signinStyles.input}
                       />
                       {errors.phone && (
-                        <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.phone.message}
-                        </Text>
+                        <Text style={styles.error}>{errors.phone.message}</Text>
                       )}
                     </>
                   )}
@@ -182,7 +174,7 @@ export default function UserInfo() {
             </ScrollView>
           </KeyboardAvoidingView>
           <Button
-            title="Ir para Informações dos Veículos"
+            title="Endereco "
             onPress={handleSubmit(onSubmit)}
             disabled={loading}
           />

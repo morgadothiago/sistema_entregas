@@ -3,6 +3,7 @@ import { Button } from "@/app/components/Button"
 import { Header } from "@/app/components/Header"
 import Input from "@/app/components/Input"
 import { MultiStep } from "@/app/components/MultiStep"
+import { AppPicker } from "@/app/components/Select"
 import { useMultiStep } from "@/app/context/MultiStepContext"
 import { api } from "@/app/service/api"
 import { RegisterFormData } from "@/app/types/UserData"
@@ -18,9 +19,8 @@ import {
   View,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { styles } from "./styles"
-import { AppPicker } from "@/app/components/Select"
 import signinStyles from "../../Signin/styles"
+import { styles } from "./styles"
 
 type VehicleTypeOption = {
   label: string
@@ -38,33 +38,39 @@ export default function VehiclesInfo() {
   const [vehicleTypes, setVehicleTypes] = useState<VehicleTypeOption[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Observa os campos para habilitar o botão de avançar
-  const selectedVehicleType = watch("vehicleType.value")
+  // Observa o objeto selecionado
+  const selectedVehicleTypeObj = watch("vehicleType")
   const licensePlate = watch("licensePlate")
   const brand = watch("brand")
   const model = watch("model")
   const year = watch("year")
   const color = watch("color")
+
+  // 🔹 Verifica se é bike
+  const isBike = selectedVehicleTypeObj?.value.toLowerCase() === "bike"
+
+  // 🔹 Define se deve mostrar os inputs
+  const showVehicleInputs = selectedVehicleTypeObj && !isBike
+
+  // 🔹 Regra do botão
   const isButtonDisabled =
-    !selectedVehicleType || !licensePlate || !brand || !model || !year || !color
+    !selectedVehicleTypeObj ||
+    (!isBike && (!licensePlate || !brand || !model || !year || !color))
 
   async function loadVehicleData() {
     try {
       setLoading(true)
-
       const response = await api.get("/vehicle-types", {
         params: { page, limit },
       })
-
       const data = Array.isArray(response.data?.data) ? response.data.data : []
 
       const formattedOptions = data.map(
         (item: { id: number; type: string }) => ({
           label: item.type,
-          value: item.type, // Usar o nome como valor simplifica o controle
+          value: item.type,
         })
       )
-
       setVehicleTypes(formattedOptions)
     } catch (error) {
       console.error("Erro ao carregar os tipos de veículo:", error)
@@ -77,16 +83,10 @@ export default function VehiclesInfo() {
     loadVehicleData()
   }, [])
 
-  // Esta função será chamada pelo react-hook-form com os dados atualizados
   function handleNextStep(data: RegisterFormData) {
     setLoading(true)
-    // 1. Atualiza o contexto com os dados do formulário
     setUserInfo(data)
-
-    // 2. Mostra no console todos os dados coletados até agora
     console.log("Dados coletados até o StepVehicles:", data)
-
-    // 3. Navega para o próximo passo (descomente para ativar)
     router.push("/(auth)/register/StepAcess")
   }
 
@@ -121,7 +121,7 @@ export default function VehiclesInfo() {
                   render={({ field: { onChange, value } }) => (
                     <AppPicker
                       label="Selecione o tipo de veículo"
-                      selectedValue={value?.value?.toString()}
+                      selectedValue={value?.value}
                       onValueChange={(itemValue: string) =>
                         onChange({ label: itemValue, value: itemValue })
                       }
@@ -130,80 +130,34 @@ export default function VehiclesInfo() {
                   )}
                 />
               )}
-              <Controller
-                control={control}
-                name="licensePlate"
-                rules={{ required: "A placa é obrigatória" }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    icon="credit-card"
-                    placeholder="Placa do Veículo"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    autoCapitalize="characters"
-                    containerStyle={signinStyles.input}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="brand"
-                rules={{ required: "A marca é obrigatória" }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    icon="tag"
-                    placeholder="Marca"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    containerStyle={signinStyles.input}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="model"
-                rules={{ required: "O modelo é obrigatório" }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    icon="truck"
-                    placeholder="Modelo"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    containerStyle={signinStyles.input}
-                  />
-                )}
-              />
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <View style={{ flex: 1 }}>
+
+              {/* Inputs só aparecem se o veículo selecionado NÃO for bike */}
+              {showVehicleInputs && (
+                <>
                   <Controller
                     control={control}
-                    name="year"
-                    rules={{ required: "O ano é obrigatório" }}
+                    name="licensePlate"
+                    rules={{ required: "A placa é obrigatória" }}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Input
-                        icon="calendar"
-                        placeholder="Ano"
+                        icon="credit-card"
+                        placeholder="Placa do Veículo"
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        keyboardType="numeric"
+                        autoCapitalize="characters"
                         containerStyle={signinStyles.input}
                       />
                     )}
                   />
-                </View>
-                <View style={{ flex: 1 }}>
                   <Controller
                     control={control}
-                    name="color"
-                    rules={{ required: "A cor é obrigatória" }}
+                    name="brand"
+                    rules={{ required: "A marca é obrigatória" }}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Input
-                        icon="droplet"
-                        placeholder="Cor"
+                        icon="tag"
+                        placeholder="Marca"
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
@@ -211,8 +165,60 @@ export default function VehiclesInfo() {
                       />
                     )}
                   />
-                </View>
-              </View>
+                  <Controller
+                    control={control}
+                    name="model"
+                    rules={{ required: "O modelo é obrigatório" }}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input
+                        icon="truck"
+                        placeholder="Modelo"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        containerStyle={signinStyles.input}
+                      />
+                    )}
+                  />
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <View style={{ flex: 1 }}>
+                      <Controller
+                        control={control}
+                        name="year"
+                        rules={{ required: "O ano é obrigatório" }}
+                        render={({ field: { onChange, onBlur, value } }) => (
+                          <Input
+                            icon="calendar"
+                            placeholder="Ano"
+                            value={value}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            keyboardType="numeric"
+                            containerStyle={signinStyles.input}
+                          />
+                        )}
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Controller
+                        control={control}
+                        name="color"
+                        rules={{ required: "A cor é obrigatória" }}
+                        render={({ field: { onChange, onBlur, value } }) => (
+                          <Input
+                            icon="droplet"
+                            placeholder="Cor"
+                            value={value}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            containerStyle={signinStyles.input}
+                          />
+                        )}
+                      />
+                    </View>
+                  </View>
+                </>
+              )}
             </ScrollView>
           </KeyboardAvoidingView>
           <Button

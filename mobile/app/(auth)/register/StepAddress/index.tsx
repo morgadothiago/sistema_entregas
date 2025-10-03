@@ -1,28 +1,27 @@
+import fundoBg from "@/app/assets/funndo.png"
+import { Button } from "@/app/components/Button"
 import { Header } from "@/app/components/Header"
 import { MultiStep } from "@/app/components/MultiStep"
+import { useMultiStep } from "@/app/context/MultiStepContext"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { ImageBackground } from "expo-image"
 import { router } from "expo-router"
 import React, { useEffect, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 import {
-  KeyboardAvoidingView,
-  View,
   ActivityIndicator,
+  KeyboardAvoidingView,
   ScrollView,
   Text,
+  View,
 } from "react-native"
-import { styles } from "./styles"
-import signinStyles from "../../Signin/styles"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Button } from "@/app/components/Button"
-import { ImageBackground } from "expo-image"
-import { Controller, useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
-import { useMultiStep } from "@/app/context/MultiStepContext"
-import fundoBg from "@/app/assets/funndo.png"
+import signinStyles from "../../Signin/styles"
+import { styles } from "./styles"
 
 import Input from "@/app/components/Input"
-import api from "@/app/service/viaCep"
 import { schema } from "@/app/schema/accouts"
+import api from "@/app/service/viaCep"
 
 type AndressType = {
   address: string
@@ -249,7 +248,7 @@ export default function UserInfo() {
             </ScrollView>
           </KeyboardAvoidingView>
           <Button
-            title="Ir para Informações dos Veículos"
+            title="Veiculo"
             onPress={handleSubmit(onSubmit)}
             disabled={loading}
           />

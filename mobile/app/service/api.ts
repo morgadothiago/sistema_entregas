@@ -8,6 +8,7 @@ async function login(data: { email: string; password: string }) {
   try {
     const response = await api.post("/auth/login", data, {
       headers: {
+        Authorization: "Bearer token",
         "User-Agent": "MeuApp/1.0", // pode não ser aceito no RN
         "X-User-Agent": "MeuApp/1.0", // alternativa recomendada
       },

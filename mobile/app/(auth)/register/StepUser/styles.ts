@@ -20,4 +20,11 @@ export const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.4)", // Preto com 50% de opacidade
   },
+  error: {
+    color: colors.secondary,
+    marginLeft: 8,
+    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 })
