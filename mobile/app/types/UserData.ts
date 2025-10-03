@@ -1,6 +1,8 @@
 export type UserInfoData = {
   name: string
   dob: Date | { day: number; month: number; year: number } | string
+  cpf: string
+  phone: string
   email: string
   password: string
   address?: string

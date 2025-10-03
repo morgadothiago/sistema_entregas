@@ -44,7 +44,7 @@ export default function UserInfo() {
     formState: { errors },
   } = useForm({
     defaultValues: userInfo,
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
   })
   useEffect(() => {
     setLoading(false)
