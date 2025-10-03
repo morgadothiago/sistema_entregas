@@ -3,13 +3,13 @@ import { colors } from "@/app/theme"
 import { Feather } from "@expo/vector-icons"
 import React from "react"
 import {
-  View,
-  Text,
+  FlatList,
   Modal,
   Pressable,
-  FlatList,
-  TouchableOpacity,
   StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native"
 
 type Option = { label: string; value: string }
@@ -29,13 +29,15 @@ export function AppPicker({
   placeholder = "Selecione",
 }: Props) {
   // Converter apenas o label para minúsculo, mantendo o value original
-  const processedOptions = options.map(option => ({
+  const processedOptions = options.map((option) => ({
     label: option.label.toLowerCase(),
-    value: option.value // Mantém o valor original para compatibilidade com o backend
+    value: option.value, // Mantém o valor original para compatibilidade com o backend
   }))
-  
+
   const [visible, setVisible] = React.useState(false)
-  const selectedLabel = processedOptions.find((o) => o.value === selectedValue)?.label
+  const selectedLabel = processedOptions.find(
+    (o) => o.value === selectedValue
+  )?.label
 
   return (
     <View style={styles.container}>

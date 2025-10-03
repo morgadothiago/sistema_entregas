@@ -71,12 +71,12 @@ const styles = StyleSheet.create({
   label: {
     marginLeft: 6,
     marginRight: 12,
-    color: colors.active,
+    color: colors.secondary,
 
     fontSize: 18,
   },
   activeLabel: {
-    color: colors.active,
+    color: colors.buttons,
     fontWeight: "900",
     fontSize: 16,
   },

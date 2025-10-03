@@ -30,7 +30,7 @@ function normalizeData(data: UserInfoData) {
   if (data.dob instanceof Date) {
     // Usar toISOString() para obter o formato completo que a API espera
     formattedDob = data.dob.toISOString()
-  } else if (typeof data.dob === "object" && 'year' in data.dob) {
+  } else if (typeof data.dob === "object" && "year" in data.dob) {
     // se for {day, month, year}, criar um objeto Date e converter para ISO
     const date = new Date(
       Number(data.dob.year),
@@ -40,7 +40,7 @@ function normalizeData(data: UserInfoData) {
     formattedDob = date.toISOString()
   } else if (data.dob) {
     // Se já for uma string, verificar se já está no formato ISO
-    if (String(data.dob).includes('T')) {
+    if (String(data.dob).includes("T")) {
       formattedDob = String(data.dob)
     } else {
       // Tentar converter para Date e depois para ISO
@@ -56,11 +56,15 @@ function normalizeData(data: UserInfoData) {
     // Caso não tenha data, usar data atual no formato ISO
     formattedDob = new Date().toISOString()
   }
-  
+
   // Verifica se vehicleType é um objeto e extrai o valor
   let vehicleTypeValue = data.vehicleType
-  if (vehicleTypeValue && typeof vehicleTypeValue === 'object' && 'value' in vehicleTypeValue) {
-    vehicleTypeValue = vehicleTypeValue.value
+  if (
+    vehicleTypeValue &&
+    typeof vehicleTypeValue === "object" &&
+    "value" in vehicleTypeValue
+  ) {
+    vehicleTypeValue = (vehicleTypeValue as { value: string | undefined }).value
   }
 
   return {
@@ -78,7 +82,13 @@ export async function newAccount(data: UserInfoData) {
     // Envia os dados para o endpoint
     const response = await api.post("/auth/signup/deliveryman", normalizedData)
 
-    console.log("Conta criada com sucesso:", response.data)
+    if (response.data) {
+      Toast.show({
+        type: "success",
+        text1: "Sucesso!",
+        text2: "Conta criada com sucesso 👌",
+      })
+    }
 
     return response.data
   } catch (error: any) {
