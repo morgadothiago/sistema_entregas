@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity } from "react-native"
 import React from "react"
+import { Text, TouchableOpacity } from "react-native"
 import { styles } from "./styles"
 
 type ButtonProps = {
@@ -14,7 +14,7 @@ export function Button({ title, onPress, disabled }: ButtonProps) {
       style={[styles.container, disabled && { opacity: 0.6 }]}
       disabled={disabled}
     >
-      <Text>{title}</Text>
+      <Text style={styles.title}>{title}</Text>
     </TouchableOpacity>
   )
 }

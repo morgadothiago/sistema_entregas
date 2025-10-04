@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     alignSelf: "center",
     paddingVertical: 12,
     paddingHorizontal: 24,
-    backgroundColor: colors.buttons,
+    backgroundColor: colors.active,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
@@ -15,4 +15,10 @@ export const styles = StyleSheet.create({
     marginVertical: 8,
   },
   default: {},
+
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.secondary,
+  },
 })

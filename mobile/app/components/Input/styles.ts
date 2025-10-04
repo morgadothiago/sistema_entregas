@@ -1,3 +1,4 @@
+import { colors } from "@/app/theme"
 import { StyleSheet } from "react-native"
 
 export const styles = StyleSheet.create({
@@ -16,7 +17,7 @@ export const styles = StyleSheet.create({
     fontSize: 16, // Tamanho da fonte
   },
   errorText: {
-    color: "#ff3333", // Cor do texto de erro
+    color: colors.secondary, // Cor do texto de erro
     fontSize: 12, // Tamanho da fonte do erro
     marginTop: 5, // Margem superior
     marginLeft: 5, // Margem esquerda

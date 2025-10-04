@@ -1,70 +1,100 @@
+import fundoBg from "@/app/assets/funndo.png"
+import { Button } from "@/app/components/Button"
 import { Header } from "@/app/components/Header"
 import { MultiStep } from "@/app/components/MultiStep"
+import { useMultiStep } from "@/app/context/MultiStepContext"
+import { yupResolver } from "@hookform/resolvers/yup"
+import { ImageBackground } from "expo-image"
 import { router } from "expo-router"
 import React, { useEffect, useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 import {
-  KeyboardAvoidingView,
-  View,
   ActivityIndicator,
+  KeyboardAvoidingView,
   ScrollView,
   Text,
+  View,
 } from "react-native"
-import { styles } from "./styles"
-import signinStyles from "../../Signin/styles"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { Button } from "@/app/components/Button"
-import { ImageBackground } from "expo-image"
-import { Controller, useForm } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
-import { useMultiStep } from "@/app/context/MultiStepContext"
-import fundoBg from "@/app/assets/funndo.png"
+import signinStyles from "../../Signin/styles"
+import { styles } from "./styles"
 
 import Input from "@/app/components/Input"
+import { schema } from "@/app/schema/accouts"
+import api from "@/app/service/viaCep"
+
+type AndressType = {
+  address: string
+  city: string
+  number: string
+  complement: string
+  state: string
+  zipCode: string
+}
 
 export default function UserInfo() {
   const { userInfo, setUserInfo } = useMultiStep()
+
   const [loading, setLoading] = useState(false)
-  const schema = yup.object().shape({
-    name: yup.string().required("Nome é obrigatório"),
-    dob: yup.string().required("Data de nascimento é obrigatória"),
-    cpf: yup.string().required("CPF é obrigatório"),
-    phone: yup.string().required("Telefone é obrigatório"),
-    address: yup.string().required("Endereço é obrigatório"),
-    city: yup.string().required("Cidade é obrigatória"),
-    number: yup.string().required("Número é obrigatório"),
-    complement: yup.string(),
-    state: yup.string().required("Estado é obrigatório"),
-    zipCode: yup.string().required("CEP é obrigatório"),
-  })
+
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: userInfo,
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
   })
   useEffect(() => {
     setLoading(false)
     return () => setLoading(false)
   }, [])
 
+  async function handleGetAndressCepApi() {
+    const zipCode = control._formValues?.zipCode || ""
+    const cepLimpo = zipCode.replace(/\D/g, "")
+    if (!cepLimpo) return
+
+    if (cepLimpo.length !== 8) {
+      alert("Digite o CEP válido com 8 dígitos")
+      return
+    }
+
+    try {
+      const { data } = await api.get(`${cepLimpo}/json/`)
+
+      if (data.erro) {
+        alert("CEP não encontrado")
+        return
+      }
+      if (data.logradouro) setValue("address", data.logradouro)
+      if (data.localidade) setValue("city", data.localidade)
+      if (data.uf) setValue("state", data.uf)
+      if (data.cep) setValue("zipCode", data.cep)
+    } catch (err) {
+      alert("Erro ao buscar CEP. Tente novamente.")
+    }
+  }
   function onSubmit(data: any) {
     setLoading(true)
     setUserInfo(data)
     setTimeout(() => {
-      router.push("/(auth)/register/VehiclesInfo")
+      router.push("/(auth)/register/StepVehicles")
     }, 1200)
   }
   return (
     <View style={styles.container}>
       <ImageBackground source={fundoBg} style={{ flex: 1 }}>
+        <View style={styles.overlay} />
         <SafeAreaView style={{ flex: 1, padding: 16 }}>
-          <MultiStep currentStep={0} steps={["Usuário", "Veículo", "Acesso"]} />
           <Header
-            title="Dados dos Usuários"
-            onBackPress={() => router.replace("/(auth)/Signin")}
+            title="Dados dos Enderco"
+            onBackPress={() => router.replace("/(auth)/register/StepUser")}
+          />
+          <MultiStep
+            currentStep={1}
+            steps={["Usuário", "Endereco", "Veículo", "Acesso"]}
           />
           <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
             <ScrollView
@@ -72,116 +102,30 @@ export default function UserInfo() {
               showsHorizontalScrollIndicator={false}
               showsVerticalScrollIndicator={false}
             >
-              {/* Agrupamento visual dos campos para melhor UX */}
-              <View style={{ marginBottom: 18 }}>
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: 16,
-                    marginBottom: 20,
-                    marginTop: 20,
-                    color: "#00FFB3",
-                  }}
-                >
-                  Dados Pessoais
-                </Text>
+              <View style={{ marginBottom: 8 }}>
                 <Controller
                   control={control}
-                  name="name"
+                  name="zipCode"
                   render={({ field: { onChange, value } }) => (
                     <>
                       <Input
-                        icon="user"
-                        placeholder="Nome"
+                        icon="map-pin"
+                        placeholder="CEP"
                         value={value}
                         onChangeText={onChange}
-                        containerStyle={signinStyles.input}
-                      />
-                      {errors.name && (
-                        <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.name.message}
-                        </Text>
-                      )}
-                    </>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="dob"
-                  render={({ field: { onChange, value } }) => (
-                    <>
-                      <Input
-                        icon="calendar"
-                        placeholder="Data de Nascimento"
-                        value={value}
-                        onChangeText={onChange}
-                        containerStyle={signinStyles.input}
-                      />
-                      {errors.dob && (
-                        <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.dob.message}
-                        </Text>
-                      )}
-                    </>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="cpf"
-                  render={({ field: { onChange, value } }) => (
-                    <>
-                      <Input
-                        icon="credit-card"
-                        placeholder="CPF"
-                        value={value}
-                        onChangeText={onChange}
+                        onBlur={handleGetAndressCepApi}
                         keyboardType="numeric"
                         containerStyle={signinStyles.input}
                       />
-                      {errors.cpf && (
-                        <Text style={{ color: "red", marginLeft: 2 }}>
-                          {errors.cpf.message}
-                        </Text>
-                      )}
-                    </>
-                  )}
-                />
-              </View>
-              <View style={{ marginBottom: 18 }}>
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: 16,
-                    marginBottom: 2,
-                    marginTop: 1,
-                    color: "#00FFB3",
-                  }}
-                >
-                  Contato
-                </Text>
-                <Controller
-                  control={control}
-                  name="phone"
-                  render={({ field: { onChange, value } }) => (
-                    <>
-                      <Input
-                        icon="phone"
-                        placeholder="Telefone"
-                        value={value}
-                        onChangeText={onChange}
-                        keyboardType="phone-pad"
-                        containerStyle={signinStyles.input}
-                      />
-                      {errors.phone && (
+                      {errors.zipCode && (
                         <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.phone.message}
+                          {errors.zipCode.message}
                         </Text>
                       )}
                     </>
                   )}
                 />
-              </View>
-              <View style={{ marginBottom: 8 }}>
+
                 <Text
                   style={{
                     fontWeight: "bold",
@@ -300,32 +244,11 @@ export default function UserInfo() {
                     />
                   </View>
                 </View>
-                <Controller
-                  control={control}
-                  name="zipCode"
-                  render={({ field: { onChange, value } }) => (
-                    <>
-                      <Input
-                        icon="mail"
-                        placeholder="CEP"
-                        value={value}
-                        onChangeText={onChange}
-                        keyboardType="numeric"
-                        containerStyle={signinStyles.input}
-                      />
-                      {errors.zipCode && (
-                        <Text style={{ color: "red", marginLeft: 8 }}>
-                          {errors.zipCode.message}
-                        </Text>
-                      )}
-                    </>
-                  )}
-                />
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
           <Button
-            title="Ir para Informações dos Veículos"
+            title="Veiculo"
             onPress={handleSubmit(onSubmit)}
             disabled={loading}
           />
