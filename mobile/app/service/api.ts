@@ -7,11 +7,9 @@ const api = Axios.create({
 
 async function login(data: { email: string; password: string }) {
   try {
-    const response = await api.post("/auth/login", data, {
+    const response = await Axios.post("/auth/login", data, {
       headers: {
-        Authorization: "Bearer token",
-        "User-Agent": "MeuApp/1.0", // pode não ser aceito no RN
-        "X-User-Agent": "MeuApp/1.0", // alternativa recomendada
+        "User-Agent": "MeuApp/1.0", // header de identificação do cliente
       },
     })
 

@@ -53,12 +53,12 @@ export default function AccessStep() {
       email: data.email,
       password: data.password,
     }
+    console.log(data)
 
     // envia para a API
     newAccount(completeData)
       .then((res) => {
-        console.log("Cadastro realizado com sucesso:", res)
-        // router.replace("/(auth)/Signin")
+        router.replace("/(auth)/Signin")
       })
       .catch((err) => {
         console.log("Erro no cadastro:", err.message)

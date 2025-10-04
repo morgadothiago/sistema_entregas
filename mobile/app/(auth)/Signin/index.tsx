@@ -22,7 +22,7 @@ import fundoLogo from "../../assets/funndo.png"
 import Logo from "../../assets/logo.png"
 import Input from "../../components/Input"
 import { loginSchema } from "../../schema/loginSchema"
-import { api } from "../../service/api"
+import { api, login } from "../../service/api"
 import { FormData } from "../../types/FormData"
 import styles from "./styles"
 
@@ -61,7 +61,9 @@ export default function LoginScreen() {
     try {
       const response = await api.post("/auth/login", data, {
         headers: {
-          "X-User-Agent": "MeuApp/1.0",
+          "Content-Type": "application/json",
+          "User-Agent": "MeuApp/1.0",
+          accept: "application/json",
         },
       })
 
