@@ -26,6 +26,11 @@ import { api, login } from "../../service/api"
 import { FormData } from "../../types/FormData"
 import styles from "./styles"
 
+interface LoginData {
+  email: string
+  password: string
+}
+
 export default function LoginScreen() {
   const {
     control,
@@ -56,18 +61,14 @@ export default function LoginScreen() {
     }
   }, [])
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: LoginData) => {
     setLoading(true)
     try {
-      const response = await api.post("/auth/login", data, {
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": "MeuApp/1.0",
-          accept: "application/json",
-        },
-      })
+      const response = await login(data)
 
-      if (response.data) {
+      console.log("Menssagem", response.user)
+
+      if (response) {
         Toast.show({
           type: "success",
           text1: "Sucesso!",

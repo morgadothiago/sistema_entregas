@@ -1,23 +1,54 @@
-import Axios from "axios"
+import Axios, { AxiosResponse } from "axios"
 import { UserInfoData } from "../types/UserData"
+import Toast from "react-native-toast-message"
+
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+interface LoginResponse {
+  token: string
+  user: User
+}
+
+interface LoginData {
+  email: string
+  password: string
+}
 
 const api = Axios.create({
   baseURL: "http://localhost:3000",
 })
 
-async function login(data: { email: string; password: string }) {
+async function login(data: LoginData): Promise<LoginResponse> {
   try {
-    const response = await Axios.post("/auth/login", data, {
-      headers: {
-        "User-Agent": "MeuApp/1.0", // header de identificação do cliente
-      },
-    })
+    const response: AxiosResponse<LoginResponse> = await api.post(
+      "/auth/login",
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "MeuApp/1.0",
+          Accept: "application/json",
+        },
+      }
+    )
 
-    console.log("Aqui e a resposta do api -> ", response.data)
-    console.log(response.headers)
-    return response.data
-  } catch (error) {
-    console.error("Erro no login:", error)
+    // Supondo que o backend retorne token e usuário
+    const { token, user } = response.data
+
+    // Salvar token no AsyncStorage (React Native) ou localStorage (Web)
+    // await AsyncStorage.setItem("token", token);
+
+    return { token, user }
+  } catch (error: any) {
+    if (error.response) {
+      console.log("Erro no login:", error.response.data)
+    } else {
+      console.log("Erro inesperado:", error.message)
+    }
     throw error
   }
 }
@@ -94,6 +125,11 @@ export async function newAccount(data: UserInfoData) {
       "Erro ao criar nova conta:",
       error.response?.data || error.message
     )
+
+    Toast.show({
+      type: "error",
+      text1: "Erro!",
+    })
 
     throw new Error(
       error.response?.data?.message ||
