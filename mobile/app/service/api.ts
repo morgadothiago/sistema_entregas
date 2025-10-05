@@ -1,31 +1,27 @@
 import Axios, { AxiosResponse } from "axios"
-import { UserInfoData } from "../types/UserData"
 import Toast from "react-native-toast-message"
+import { UserInfoData } from "../types/UserData"
 import { ApiResponse } from "../types/ApiResponse"
-
-interface User {
-  id: string
-  name: string
-  email: string
-}
-
-interface LoginResponse {
-  token: string
-  user: User
-}
 
 interface LoginData {
   email: string
   password: string
 }
 
+// Resposta esperada do backend
+interface LoginResponse {
+  token: string
+  user: ApiResponse
+}
+
 const api = Axios.create({
   baseURL: "http://localhost:3000",
 })
 
+// -------------------- LOGIN --------------------
 async function login(data: LoginData): Promise<LoginResponse> {
   try {
-    const response: AxiosResponse<ApiResponse> = await api.post(
+    const response: AxiosResponse<LoginResponse> = await api.post(
       "/auth/login",
       data,
       {
@@ -37,64 +33,72 @@ async function login(data: LoginData): Promise<LoginResponse> {
       }
     )
 
-    // Supondo que o backend retorne token e usuário
-    const user = response.data
+    const { token, user } = response.data
 
-    // Salvar token no AsyncStorage (React Native) ou localStorage (Web)
+    if (!token || !user) {
+      throw new Error("Resposta inválida do servidor.")
+    }
+
+    // Define token global no axios
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`
+
+    // Aqui você pode salvar no AsyncStorage:
     // await AsyncStorage.setItem("token", token);
+    // await AsyncStorage.setItem("user", JSON.stringify(user));
 
     return { token, user }
   } catch (error: any) {
     if (error.response) {
       console.log("Erro no login:", error.response.data)
+      Toast.show({
+        type: "error",
+        text1: "Erro no login",
+        text2: error.response.data.message || "Verifique suas credenciais.",
+      })
     } else {
       console.log("Erro inesperado:", error.message)
+      Toast.show({
+        type: "error",
+        text1: "Erro inesperado",
+        text2: "Não foi possível se conectar ao servidor.",
+      })
     }
     throw error
   }
 }
 
+// -------------------- NORMALIZAÇÃO DE DADOS --------------------
 function normalizeData(data: UserInfoData) {
-  // Formata a data de nascimento para o formato ISO completo (YYYY-MM-DDTHH:MM:SS.sssZ)
   let formattedDob = ""
+
   if (data.dob instanceof Date) {
-    // Usar toISOString() para obter o formato completo que a API espera
     formattedDob = data.dob.toISOString()
   } else if (typeof data.dob === "object" && "year" in data.dob) {
-    // se for {day, month, year}, criar um objeto Date e converter para ISO
     const date = new Date(
       Number(data.dob.year),
-      Number(data.dob.month) - 1, // mês em JS é 0-indexed
+      Number(data.dob.month) - 1,
       Number(data.dob.day)
     )
     formattedDob = date.toISOString()
   } else if (data.dob) {
-    // Se já for uma string, verificar se já está no formato ISO
-    if (String(data.dob).includes("T")) {
-      formattedDob = String(data.dob)
-    } else {
-      // Tentar converter para Date e depois para ISO
-      try {
-        const date = new Date(String(data.dob))
-        formattedDob = date.toISOString()
-      } catch (e) {
-        // Fallback para data atual
-        formattedDob = new Date().toISOString()
-      }
+    try {
+      const date = new Date(String(data.dob))
+      formattedDob = date.toISOString()
+    } catch {
+      formattedDob = new Date().toISOString()
     }
   } else {
-    // Caso não tenha data, usar data atual no formato ISO
     formattedDob = new Date().toISOString()
   }
 
-  // Verifica se vehicleType é um objeto e extrai o valor
+  // Extrai valor do vehicleType, se for objeto
   let vehicleTypeValue = data.vehicleType
   if (
     vehicleTypeValue &&
     typeof vehicleTypeValue === "object" &&
     "value" in vehicleTypeValue
   ) {
-    vehicleTypeValue = (vehicleTypeValue as { value: string | undefined }).value
+    vehicleTypeValue = (vehicleTypeValue as { value?: string }).value
   }
 
   return {
@@ -105,11 +109,10 @@ function normalizeData(data: UserInfoData) {
   }
 }
 
+// -------------------- NOVA CONTA --------------------
 export async function newAccount(data: UserInfoData) {
   try {
     const normalizedData = normalizeData(data)
-
-    // Envia os dados para o endpoint
     const response = await api.post("/auth/signup/deliveryman", normalizedData)
 
     if (response.data) {
@@ -130,6 +133,7 @@ export async function newAccount(data: UserInfoData) {
     Toast.show({
       type: "error",
       text1: "Erro!",
+      text2: error.response?.data?.message || "Verifique os dados enviados.",
     })
 
     throw new Error(
@@ -138,28 +142,24 @@ export async function newAccount(data: UserInfoData) {
     )
   }
 }
-// Intercepta respostas de erro
+
+// -------------------- INTERCEPTOR GLOBAL --------------------
 api.interceptors.response.use(
-  (response) => response, // se deu certo, só retorna
+  (response) => response,
   (error) => {
     if (error.response) {
-      // Erro da API (status code 4xx ou 5xx)
       console.log("Erro da API:", error.response.data)
 
-      // exemplo: se for 401, deslogar usuário
       if (error.response.status === 401) {
-        console.log(error.response.data.message)
-        // aqui você pode limpar token, redirecionar login, etc
+        console.log("Token expirado ou inválido:", error.response.data.message)
+        // aqui você pode limpar AsyncStorage e redirecionar para login
       }
     } else if (error.request) {
-      // Nenhuma resposta do servidor
       console.log("Sem resposta do servidor:", error.request)
     } else {
-      // Erro inesperado
       console.log("Erro inesperado:", error.message)
     }
 
-    // importante: sempre rejeitar de novo para não "esconder" o erro
     return Promise.reject(error)
   }
 )
