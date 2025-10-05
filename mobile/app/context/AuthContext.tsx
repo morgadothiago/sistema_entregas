@@ -1,16 +1,10 @@
-// context/AuthContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { api } from "../service/api"
-
-type User = {
-  id: string
-  name: string
-  email: string
-}
+import { ApiResponse } from "../types/ApiResponse"
 
 type AuthContextData = {
-  user: User | null
+  user: ApiResponse | null
   token: string | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
@@ -20,7 +14,7 @@ type AuthContextData = {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<ApiResponse | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -64,8 +58,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login
   async function signIn(email: string, password: string) {
     try {
-      // 👉 Se tiver API real, usa isso
-      const response = await api.post(
+      const response = await api.post<{
+        token: string
+        user: ApiResponse
+      }>(
         "/auth/login",
         { email, password },
         {
@@ -76,20 +72,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         }
       )
-      const { token, user } = response.data
 
-      console.log("Aqui", response)
+      const { token: responseToken, user: userData } = response.data
 
-      // 👉 Para teste sem API, descomenta isso:
-      // const token = "fake-token-123"
-      // const user = { id: "1", name: "Usuário Teste", email }
+      // Atualiza estado
+      setUser(userData)
+      setToken(responseToken)
 
-      setToken(token)
-      setUser(user)
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`
+      // Adiciona token no header do axios
+      api.defaults.headers.common["Authorization"] = `Bearer ${responseToken}`
 
-      await saveItem("token", token)
-      await saveItem("user", JSON.stringify(user))
+      // Salva no AsyncStorage
+      await saveItem("token", responseToken)
+      await saveItem("user", JSON.stringify(userData))
     } catch (error: any) {
       console.log("Erro no login:", error)
       throw error
@@ -102,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null)
     await removeItem("token")
     await removeItem("user")
+    delete api.defaults.headers.common["Authorization"]
   }
 
   return (

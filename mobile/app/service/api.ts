@@ -1,6 +1,7 @@
 import Axios, { AxiosResponse } from "axios"
 import { UserInfoData } from "../types/UserData"
 import Toast from "react-native-toast-message"
+import { ApiResponse } from "../types/ApiResponse"
 
 interface User {
   id: string
@@ -24,7 +25,7 @@ const api = Axios.create({
 
 async function login(data: LoginData): Promise<LoginResponse> {
   try {
-    const response: AxiosResponse<LoginResponse> = await api.post(
+    const response: AxiosResponse<ApiResponse> = await api.post(
       "/auth/login",
       data,
       {
@@ -37,7 +38,7 @@ async function login(data: LoginData): Promise<LoginResponse> {
     )
 
     // Supondo que o backend retorne token e usuário
-    const { token, user } = response.data
+    const user = response.data
 
     // Salvar token no AsyncStorage (React Native) ou localStorage (Web)
     // await AsyncStorage.setItem("token", token);
