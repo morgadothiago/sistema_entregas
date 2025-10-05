@@ -1,46 +1,16 @@
-import React, { useEffect, useState } from "react"
-import { StyleSheet } from "react-native"
-import { SafeAreaProvider } from "react-native-safe-area-context"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import Signin from "./(auth)/Signin"
+import React from "react"
 
-import Loading from "./components/Loading"
-import Home from "./(tabs)/home"
+import { useAuth } from "@/app/context/AuthContext"
+import { Redirect } from "expo-router"
 
-export default function App() {
-  const [loading, setLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+export default function Index() {
+  const { user, loading } = useAuth()
 
-  useEffect(() => {
-    async function checkToken() {
-      try {
-        const token = await AsyncStorage.getItem("token")
-        setIsAuthenticated(!!token) // true se token existir
-      } catch (error) {
-        console.log("Erro ao verificar token:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  if (loading) return null
 
-    checkToken()
-  }, [])
-
-  if (loading) {
-    return <Loading /> // Splash screen
+  if (user) {
+    return <Redirect href="/(tabs)/home" />
+  } else {
+    return <Redirect href="/(auth)/Signin" />
   }
-
-  return (
-    <SafeAreaProvider>
-      {isAuthenticated ? <Home /> : <Signin />}
-    </SafeAreaProvider>
-  )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-})

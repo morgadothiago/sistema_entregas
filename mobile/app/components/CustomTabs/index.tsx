@@ -67,7 +67,7 @@ export function CustomTabs({ state, navigation }: CustomTabBarProps) {
               >
                 <Feather
                   name={tab.icon}
-                  size={isDelivery ? 35 : 24}
+                  size={isDelivery ? 28 : 24}
                   color={
                     isDelivery
                       ? colors.primary
