@@ -25,6 +25,7 @@ import { loginSchema } from "../../schema/loginSchema"
 import { api, login } from "../../service/api"
 import { FormData } from "../../types/FormData"
 import styles from "./styles"
+import { useAuth } from "@/app/context/AuthContext"
 
 interface LoginData {
   email: string
@@ -32,6 +33,7 @@ interface LoginData {
 }
 
 export default function LoginScreen() {
+  const { signIn } = useAuth()
   const {
     control,
     handleSubmit,
@@ -64,24 +66,19 @@ export default function LoginScreen() {
   const onSubmit = handleSubmit(async (data: LoginData) => {
     setLoading(true)
     try {
-      const response = await login(data)
+      await signIn(data.email, data.password)
+      Toast.show({
+        type: "success",
+        text1: "Sucesso!",
+        text2: "Você fez login corretamente 👌",
+      })
 
-      console.log("Menssagem", response.user)
+      // espera 2 segundos mostrando loading + toast
+      await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      if (response) {
-        Toast.show({
-          type: "success",
-          text1: "Sucesso!",
-          text2: "Você fez login corretamente 👌",
-        })
+      router.push("/Home")
 
-        // espera 2 segundos mostrando loading + toast
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-
-        router.push("/Home")
-
-        setLoading(false)
-      }
+      setLoading(false)
     } catch (error: any) {
       console.log("Erro no login", error)
 

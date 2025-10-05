@@ -20,6 +20,8 @@ const defaultUserInfo: UserInfoData = {
   complement: "",
   state: "",
   zipCode: "",
+  email: "",
+  password: "",
 }
 
 const MultiStepContext = createContext<MultiStepContextProps | undefined>(

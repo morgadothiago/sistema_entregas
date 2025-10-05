@@ -30,7 +30,7 @@ async function login(data: LoginData): Promise<LoginResponse> {
       {
         headers: {
           "Content-Type": "application/json",
-          "User-Agent": "MeuApp/1.0",
+          "User-Agent": "IEMobile",
           Accept: "application/json",
         },
       }

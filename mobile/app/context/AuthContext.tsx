@@ -65,8 +65,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signIn(email: string, password: string) {
     try {
       // 👉 Se tiver API real, usa isso
-      const response = await api.post("/auth/login", { email, password })
+      const response = await api.post(
+        "/auth/login",
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "IEMobile",
+            Accept: "application/json",
+          },
+        }
+      )
       const { token, user } = response.data
+
+      console.log("Aqui", response)
 
       // 👉 Para teste sem API, descomenta isso:
       // const token = "fake-token-123"

@@ -1,26 +1,37 @@
 import React, { useEffect, useState } from "react"
 import { StyleSheet } from "react-native"
 import { SafeAreaProvider } from "react-native-safe-area-context"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import Signin from "./(auth)/Signin"
+import Home from "./Home"
 import Loading from "./components/Loading"
-import { MultiStepProvider } from "./context/MultiStepContext"
 
 export default function App() {
   const [loading, setLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000)
-    return () => clearTimeout(timer)
+    async function checkToken() {
+      try {
+        const token = await AsyncStorage.getItem("token")
+        setIsAuthenticated(!!token) // true se token existir
+      } catch (error) {
+        console.log("Erro ao verificar token:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkToken()
   }, [])
 
-  return loading ? (
-    // Splash Screen
-    <Loading />
-  ) : (
-    // Tela principal
+  if (loading) {
+    return <Loading /> // Splash screen
+  }
 
+  return (
     <SafeAreaProvider>
-      <Signin />
+      {isAuthenticated ? <Home /> : <Signin />}
     </SafeAreaProvider>
   )
 }
