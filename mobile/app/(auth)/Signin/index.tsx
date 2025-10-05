@@ -76,7 +76,7 @@ export default function LoginScreen() {
       // espera 2 segundos mostrando loading + toast
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      router.push("/Home")
+      router.push("/(tabs)/home")
 
       setLoading(false)
     } catch (error: any) {

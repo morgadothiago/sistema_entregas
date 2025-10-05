@@ -6,7 +6,7 @@ import { MultiStep } from "@/app/components/MultiStep"
 import { useMultiStep } from "@/app/context/MultiStepContext"
 import { newAccount } from "@/app/service/api"
 import { ImageBackground } from "expo-image"
-import { router } from "expo-router"
+
 import React, { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import {
@@ -20,6 +20,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import signinStyles from "../../Signin/styles"
 import { styles } from "./styles"
+import { Route } from "expo-router"
+import { router } from "expo-router"
 
 type AccessFormData = {
   email: string

@@ -2,7 +2,7 @@ import { Redirect, router } from "expo-router"
 import React from "react"
 
 import { Pressable, Text, View } from "react-native"
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "@/app/context/AuthContext"
 
 export default function Home() {
   const { user, signOut } = useAuth()

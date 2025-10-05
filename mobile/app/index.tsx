@@ -3,8 +3,9 @@ import { StyleSheet } from "react-native"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import Signin from "./(auth)/Signin"
-import Home from "./Home"
+
 import Loading from "./components/Loading"
+import Home from "./(tabs)/home"
 
 export default function App() {
   const [loading, setLoading] = useState(true)
