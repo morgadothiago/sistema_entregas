@@ -1,8 +1,8 @@
-import React from "react"
-import { View, TouchableOpacity, Animated } from "react-native"
-import { Feather } from "@expo/vector-icons"
-import { styles } from "./styles"
 import { colors } from "@/app/theme"
+import { Feather } from "@expo/vector-icons"
+import React from "react"
+import { Animated, TouchableOpacity, View } from "react-native"
+import { styles } from "./styles"
 
 interface TabItem {
   name: string // deve bater com o nome da rota (case-insensitive)
@@ -18,9 +18,9 @@ interface CustomTabBarProps {
 
 const tabs: TabItem[] = [
   { name: "home", label: "Início", icon: "home" },
-  { name: "chat", label: "Chat", icon: "bar-chart" },
+  { name: "charts", label: "Chat", icon: "bar-chart" },
   { name: "delivery", label: "Delivery", icon: "truck", highlight: true },
-  { name: "wallet", label: "Wallet", icon: "dollar-sign" },
+  { name: "payments", label: "Pagamentos", icon: "dollar-sign" },
   { name: "profile", label: "Perfil", icon: "user" },
 ]
 

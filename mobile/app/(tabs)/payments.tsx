@@ -1,6 +1,6 @@
 import React from "react"
 import { View } from "react-native"
 
-export default function Charts() {
+export default function Payments() {
   return <View />
 }

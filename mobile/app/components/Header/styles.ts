@@ -5,7 +5,8 @@ export const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+
+    paddingVertical: 12,
   },
   button: {
     padding: 8,
@@ -13,6 +14,17 @@ export const styles = StyleSheet.create({
   title: {
     color: colors.buttons,
     fontSize: 22,
+    fontWeight: "bold",
+  },
+  tabs: {
+    backgroundColor: colors.primary,
+
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  tabsTitile: {
+    color: colors.buttons,
+    fontSize: 18,
     fontWeight: "bold",
   },
 })

@@ -1,6 +1,6 @@
-import React from "react"
-import { Slot, Tabs } from "expo-router"
 import { CustomTabs } from "@/app/components/CustomTabs"
+import { Tabs } from "expo-router"
+import React from "react"
 
 export default function TabsLayout() {
   return (

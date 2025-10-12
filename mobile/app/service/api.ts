@@ -1,7 +1,7 @@
 import Axios, { AxiosResponse } from "axios"
 import Toast from "react-native-toast-message"
-import { UserInfoData } from "../types/UserData"
 import { ApiResponse } from "../types/ApiResponse"
+import { UserInfoData } from "../types/UserData"
 
 interface LoginData {
   email: string
@@ -15,7 +15,7 @@ interface LoginResponse {
 }
 
 const api = Axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://192.168.100.97:3000",
 })
 
 // -------------------- LOGIN --------------------
