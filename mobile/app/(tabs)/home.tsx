@@ -1,8 +1,8 @@
-import { Redirect, router } from "expo-router"
+import { router } from "expo-router"
 import React from "react"
 
-import { Pressable, Text, View } from "react-native"
 import { useAuth } from "@/app/context/AuthContext"
+import { Pressable, Text, View } from "react-native"
 
 export default function Home() {
   const { user, signOut } = useAuth()
@@ -23,6 +23,7 @@ export default function Home() {
       <Text>Tela Home: {user?.DeliveryMan?.name}</Text>
       <Pressable onPress={() => router.back()}>
         <Text>Voltar</Text>
+        <Text>{user?.DeliveryMan?.Address?.city}</Text>
       </Pressable>
 
       <Pressable onPress={handleLogout}>

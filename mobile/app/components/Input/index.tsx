@@ -15,6 +15,7 @@ interface InputProps extends TextInputProps {
   isPassword?: boolean
   style?: StyleProp<TextInputProps> // estilo do TextInput
   containerStyle?: StyleProp<ViewStyle> // estilo do container externo
+  mask?: (value: string) => string // Adiciona a propriedade mask
 }
 
 export default function Input({
@@ -22,8 +23,19 @@ export default function Input({
   isPassword,
   style,
   containerStyle,
+  mask,
+  onChangeText,
+  value,
   ...rest
 }: InputProps) {
+  const handleChangeText = (text: string) => {
+    if (mask) {
+      onChangeText?.(mask(text))
+    } else {
+      onChangeText?.(text)
+    }
+  }
+
   return (
     <View style={[styles.container, containerStyle]}>
       <Feather
@@ -36,6 +48,8 @@ export default function Input({
         style={[styles.input, style]}
         secureTextEntry={isPassword}
         placeholderTextColor={colors.support}
+        onChangeText={handleChangeText}
+        value={value}
         {...rest}
       />
     </View>

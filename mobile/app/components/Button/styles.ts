@@ -15,7 +15,11 @@ export const styles = StyleSheet.create({
     marginVertical: 8,
   },
   default: {},
-
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: colors.primary,
+  },
   title: {
     fontSize: 18,
     fontWeight: "bold",

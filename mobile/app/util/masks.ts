@@ -28,3 +28,29 @@ export function maskDate(value: string): string {
   if (result.length > 10) result = result.slice(0,10);
   return result;
 }
+
+export function formatDateToBR(date: string | Date | undefined): string {
+  if (!date) return "";
+
+  let d: Date;
+  if (typeof date === "string") {
+    // Extrai apenas a parte da data (YYYY-MM-DD) de uma string ISO
+    const datePart = date.split('T')[0];
+    if (datePart) {
+      d = new Date(datePart + 'T00:00:00Z'); // Reconstrói como data UTC para parsing consistente
+    } else {
+      return ""; // Formato de string de data inválido
+    }
+  } else {
+    d = date;
+  }
+
+  if (isNaN(d.getTime())) return ""; // Data inválida
+
+  return d.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC', // Garante que a data seja interpretada como UTC
+  });
+}

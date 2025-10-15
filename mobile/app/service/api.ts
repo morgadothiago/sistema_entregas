@@ -1,7 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import Axios, { AxiosResponse } from "axios"
 import Toast from "react-native-toast-message"
 import { ApiResponse } from "../types/ApiResponse"
-import { UserInfoData } from "../types/UserData"
 
 interface LoginData {
   email: string
@@ -14,23 +14,21 @@ interface LoginResponse {
   user: ApiResponse
 }
 
+// -------------------- INSTÂNCIA AXIOS --------------------
 const api = Axios.create({
   baseURL: "http://192.168.100.97:3000",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
 })
 
 // -------------------- LOGIN --------------------
-async function login(data: LoginData): Promise<LoginResponse> {
+export async function login(data: LoginData): Promise<LoginResponse> {
   try {
     const response: AxiosResponse<LoginResponse> = await api.post(
       "/auth/login",
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": "IEMobile",
-          Accept: "application/json",
-        },
-      }
+      data
     )
 
     const { token, user } = response.data
@@ -42,86 +40,40 @@ async function login(data: LoginData): Promise<LoginResponse> {
     // Define token global no axios
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`
 
-    // Aqui você pode salvar no AsyncStorage:
-    // await AsyncStorage.setItem("token", token);
-    // await AsyncStorage.setItem("user", JSON.stringify(user));
+    // Salva no AsyncStorage
+    await AsyncStorage.setItem("@token", token)
+    await AsyncStorage.setItem("@user", JSON.stringify(user))
+
+    Toast.show({
+      type: "success",
+      text1: "Login bem-sucedido!",
+      text2: `Bem-vindo, ${user.name || "usuário"} 👋`,
+    })
 
     return { token, user }
   } catch (error: any) {
-    if (error.response) {
-      console.log("Erro no login:", error.response.data)
-      Toast.show({
-        type: "error",
-        text1: "Erro no login",
-        text2: error.response.data.message || "Verifique suas credenciais.",
-      })
-    } else {
-      console.log("Erro inesperado:", error.message)
-      Toast.show({
-        type: "error",
-        text1: "Erro inesperado",
-        text2: "Não foi possível se conectar ao servidor.",
-      })
-    }
+    console.log("Erro no login:", error.response?.data || error.message)
+
+    Toast.show({
+      type: "error",
+      text1: "Erro no login",
+      text2: error.response?.data?.message || "Verifique suas credenciais.",
+    })
+
     throw error
   }
 }
 
-// -------------------- NORMALIZAÇÃO DE DADOS --------------------
-function normalizeData(data: UserInfoData) {
-  let formattedDob = ""
-
-  if (data.dob instanceof Date) {
-    formattedDob = data.dob.toISOString()
-  } else if (typeof data.dob === "object" && "year" in data.dob) {
-    const date = new Date(
-      Number(data.dob.year),
-      Number(data.dob.month) - 1,
-      Number(data.dob.day)
-    )
-    formattedDob = date.toISOString()
-  } else if (data.dob) {
-    try {
-      const date = new Date(String(data.dob))
-      formattedDob = date.toISOString()
-    } catch {
-      formattedDob = new Date().toISOString()
-    }
-  } else {
-    formattedDob = new Date().toISOString()
-  }
-
-  // Extrai valor do vehicleType, se for objeto
-  let vehicleTypeValue = data.vehicleType
-  if (
-    vehicleTypeValue &&
-    typeof vehicleTypeValue === "object" &&
-    "value" in vehicleTypeValue
-  ) {
-    vehicleTypeValue = (vehicleTypeValue as { value?: string }).value
-  }
-
-  return {
-    ...data,
-    dob: formattedDob,
-    year: data.year?.toString() || "",
-    vehicleType: vehicleTypeValue,
-  }
-}
-
-// -------------------- NOVA CONTA --------------------
-export async function newAccount(data: UserInfoData) {
+// -------------------- CRIAÇÃO DE CONTA --------------------
+export async function newAccount(data: any) {
   try {
-    const normalizedData = normalizeData(data)
-    const response = await api.post("/auth/signup/deliveryman", normalizedData)
+    const response = await api.post("/auth/signup/deliveryman", data)
 
-    if (response.data) {
-      Toast.show({
-        type: "success",
-        text1: "Sucesso!",
-        text2: "Conta criada com sucesso 👌",
-      })
-    }
+    Toast.show({
+      type: "success",
+      text1: "Sucesso!",
+      text2: "Conta criada com sucesso 👌",
+    })
 
     return response.data
   } catch (error: any) {
@@ -143,25 +95,68 @@ export async function newAccount(data: UserInfoData) {
   }
 }
 
-// -------------------- INTERCEPTOR GLOBAL --------------------
+// -------------------- INTERCEPTORES GLOBAIS --------------------
+api.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem("@token")
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    console.error("Erro ao enviar requisição:", error)
+    return Promise.reject(error)
+  }
+)
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response) {
-      console.log("Erro da API:", error.response.data)
+      const status = error.response.status
+      const message = error.response.data?.message
 
-      if (error.response.status === 401) {
-        console.log("Token expirado ou inválido:", error.response.data.message)
-        // aqui você pode limpar AsyncStorage e redirecionar para login
+      console.log(`Erro da API [${status}]:`, message || error.response.data)
+
+      // 🔒 Token inválido ou expirado
+      if (status === 401) {
+        Toast.show({
+          type: "error",
+          text1: "Sessão expirada",
+          text2: "Faça login novamente.",
+        })
+
+        await AsyncStorage.multiRemove(["@token", "@user"])
+        // Aqui você pode redirecionar o usuário para a tela de login
+      }
+
+      // ⚠️ Erros de validação ou requisição
+      if (status >= 400 && status < 500) {
+        Toast.show({
+          type: "error",
+          text1: "Erro",
+          text2: message || "Algo deu errado na sua solicitação.",
+        })
       }
     } else if (error.request) {
       console.log("Sem resposta do servidor:", error.request)
+      Toast.show({
+        type: "error",
+        text1: "Falha na conexão",
+        text2: "Não foi possível se conectar ao servidor.",
+      })
     } else {
       console.log("Erro inesperado:", error.message)
+      Toast.show({
+        type: "error",
+        text1: "Erro inesperado",
+        text2: error.message,
+      })
     }
 
     return Promise.reject(error)
   }
 )
 
-export { api, login }
+export { api }

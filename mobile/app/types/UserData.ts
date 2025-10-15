@@ -1,4 +1,4 @@
-export type UserInfoData = {
+export interface RegisterFormData {
   name: string
   dob: Date | { day: number; month: number; year: number } | string
   cpf: string

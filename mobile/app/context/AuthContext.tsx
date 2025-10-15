@@ -73,6 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       )
 
+      console.log(token)
+
       const { token: responseToken, user: userData } = response.data
 
       // Atualiza estado
