@@ -17,4 +17,5 @@ export interface RegisterFormData {
   model?: string
   year?: string | number
   color?: string
+  document?: string
 }

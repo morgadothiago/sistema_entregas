@@ -28,7 +28,7 @@ export default function EditProfile() {
     setValue,
   } = useForm<FormData>({
     defaultValues: {
-      name: user?.DeliveryMan?.name ?? "",
+      name: user?.DeliveryMan?.name || "",
       cpf: user?.DeliveryMan?.cpf || "",
       dateOfBirth: user?.DeliveryMan?.dob || "",
       email: user?.email || "",
@@ -111,6 +111,7 @@ export default function EditProfile() {
                   icon: "user",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: false,
                 },
                 {
                   label: "CPF",
@@ -118,6 +119,7 @@ export default function EditProfile() {
                   icon: "id-card",
                   secureTextEntry: false,
                   keyboardType: "numeric",
+                  disabled: true,
                 },
                 {
                   label: "Data de Nascimento",
@@ -125,6 +127,7 @@ export default function EditProfile() {
                   icon: "calendar",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: true,
                 },
                 {
                   label: "Email",
@@ -136,9 +139,10 @@ export default function EditProfile() {
                 {
                   label: "Telefone",
                   name: "phone",
-                  keyboardType: "phone-pad",
                   icon: "phone",
                   secureTextEntry: false,
+                  keyboardType: "phone-pad",
+                  disabled: false,
                 },
               ],
             },
@@ -151,6 +155,7 @@ export default function EditProfile() {
                   icon: "map-pin",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: false,
                 },
                 {
                   label: "Número",
@@ -158,6 +163,8 @@ export default function EditProfile() {
                   keyboardType: "numeric",
                   icon: "hash",
                   secureTextEntry: false,
+
+                  disabled: false,
                 },
                 {
                   label: "Complemento",
@@ -165,12 +172,14 @@ export default function EditProfile() {
                   icon: "info",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: false,
                 },
                 {
                   label: "Bairro",
                   name: "neighborhood",
                   icon: "map",
                   secureTextEntry: false,
+                  disabled: true,
                   keyboardType: "default",
                 },
                 {
@@ -179,6 +188,7 @@ export default function EditProfile() {
                   icon: "map-pin",
                   secureTextEntry: false,
                   keyboardType: "numeric",
+                  disabled: true,
                 },
                 {
                   label: "Cidade",
@@ -186,6 +196,7 @@ export default function EditProfile() {
                   icon: "globe",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: true,
                 },
                 {
                   label: "Estado",
@@ -193,6 +204,7 @@ export default function EditProfile() {
                   icon: "map",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: true,
                 },
               ],
             },
@@ -205,6 +217,7 @@ export default function EditProfile() {
                   icon: "truck",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: false,
                 },
                 {
                   label: "Modelo",
@@ -212,6 +225,7 @@ export default function EditProfile() {
                   icon: "truck",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: false,
                 },
                 {
                   label: "Ano",
@@ -219,6 +233,7 @@ export default function EditProfile() {
                   icon: "calendar",
                   secureTextEntry: false,
                   keyboardType: "numeric",
+                  disabled: false,
                 },
                 {
                   label: "Placa",
@@ -226,6 +241,7 @@ export default function EditProfile() {
                   icon: "tag",
                   secureTextEntry: false,
                   keyboardType: "default",
+                  disabled: false,
                 },
                 {
                   label: "Cor",
