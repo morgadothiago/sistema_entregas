@@ -3,10 +3,10 @@ import React from "react"
 import { FormProvider, useForm } from "react-hook-form"
 
 import { MultiStepProvider } from "@/app/context/MultiStepContext"
-import { UserInfoData } from "@/app/types/UserData"
+import { RegisterFormData } from "@/app/types/UserData"
 
 export default function RegisterLayout() {
-  const methods = useForm<UserInfoData>({
+  const methods = useForm<RegisterFormData>({
     defaultValues: {
       email: "",
       password: "",

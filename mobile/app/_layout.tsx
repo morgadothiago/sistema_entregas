@@ -21,3 +21,26 @@ export default function RootLayout() {
     </SafeAreaProvider>
   )
 }
+
+export const unstable_settings = {
+  _ignore: [
+    '**/*.styles.ts',
+    '**/*.d.ts',
+    'assets/**/*',
+    'components/**/*',
+    'context/**/*',
+    'mocks/**/*',
+    'schema/**/*',
+    'service/**/*',
+    'tabs/**/*',
+    'theme/**/*',
+    'types/**/*',
+    'util/**/*',
+    'components/Header/styles.ts',
+    'components/Input/styles.ts',
+    'components/Loading/styles.ts',
+    'components/MultiStep.tsx',
+    'components/Select/index.tsx',
+    'components/Select/styles.ts',
+  ],
+}

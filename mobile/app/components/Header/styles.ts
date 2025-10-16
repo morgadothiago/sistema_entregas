@@ -1,3 +1,5 @@
+import React from "react"
+
 import { colors } from "@/app/theme"
 import { StyleSheet } from "react-native"
 

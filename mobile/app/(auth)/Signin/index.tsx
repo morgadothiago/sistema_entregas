@@ -38,7 +38,7 @@ export default function LoginScreen() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<LoginData>({
     resolver: yupResolver(loginSchema),
   })
   const [loading, setLoading] = useState(false)
@@ -76,9 +76,8 @@ export default function LoginScreen() {
       // espera 2 segundos mostrando loading + toast
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      router.push("/(tabs)/home")
-
       setLoading(false)
+      router.push("/(tabs)/home")
     } catch (error: any) {
       console.log("Erro no login", error)
 

@@ -1,6 +1,6 @@
 import { colors } from "@/app/theme"
 import { StyleSheet } from "react-native"
-
+import React from "react"
 export const styles = StyleSheet.create({
   container: {
     width: "100%", // Ocupa toda a largura disponível

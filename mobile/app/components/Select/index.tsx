@@ -1,7 +1,7 @@
-// components/AppPicker.tsx
+import React from "react"
 import { colors } from "@/app/theme"
 import { Feather } from "@expo/vector-icons"
-import React from "react"
+
 import {
   FlatList,
   Modal,
@@ -21,7 +21,7 @@ type Props = {
   placeholder?: string
 }
 
-export function AppPicker({
+export default function AppPicker({
   label,
   selectedValue,
   onValueChange,
