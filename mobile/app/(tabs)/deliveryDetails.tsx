@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { Text, View, StyleSheet } from "react-native"
+import { Text, View, StyleSheet, Pressable } from "react-native"
 import { colors } from "../theme"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Header } from "../components/Header"
@@ -48,6 +48,12 @@ export default function DeliveryDetails() {
               : "Entregue"}
           </Text>
         </View>
+
+        <View>
+          <Pressable>
+            <Text>Ir para o mapa</Text>
+          </Pressable>
+        </View>
       </View>
     </SafeAreaView>
   )
@@ -68,7 +74,7 @@ const localStyles = StyleSheet.create({
 
   message: {
     fontSize: 18,
-    color: colors.secondary,
+    color: colors.text,
 
     lineHeight: 24,
   },
