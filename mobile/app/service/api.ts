@@ -69,7 +69,7 @@ export async function newAccount(data: any) {
   try {
     // Tenta normalizar os dados antes de enviar para a API
     // Se houver erro de validação, será capturado no catch
-    
+
     const response = await api.post("/auth/signup/deliveryman", data)
 
     Toast.show({
@@ -84,7 +84,7 @@ export async function newAccount(data: any) {
       "Erro ao criar nova conta:",
       error.response?.data || error.message
     )
-    
+
     // Verifica se é um erro de validação local (do normalizeData)
     if (error.message && !error.response) {
       Toast.show({
@@ -92,14 +92,14 @@ export async function newAccount(data: any) {
         text1: "Erro de validação",
         text2: error.message,
       })
-      return;
+      return
     }
-    
-    let errorMessage = "Verifique os dados enviados.";
-    
+
+    let errorMessage = "Verifique os dados enviados."
+
     if (error.response?.data?.message) {
-      const errorData = error.response.data.message;
-      
+      const errorData = error.response.data.message
+
       // Mapeamento de campos para nomes amigáveis em português
       const fieldNames: Record<string, string> = {
         name: "Nome",
@@ -117,32 +117,34 @@ export async function newAccount(data: any) {
         color: "Cor do veículo",
         vehicleType: "Tipo de veículo",
         email: "E-mail",
-        password: "Senha"
-      };
-      
+        password: "Senha",
+      }
+
       if (Array.isArray(errorData) && errorData.length > 0) {
         // Coletar todos os campos com erro
-        const invalidFields: string[] = [];
-        
+        const invalidFields: string[] = []
+
         errorData.forEach((item: any) => {
-          const fieldName = Object.keys(item)[0];
+          const fieldName = Object.keys(item)[0]
           if (fieldName) {
-            const friendlyName = fieldNames[fieldName] || fieldName;
-            invalidFields.push(friendlyName);
+            const friendlyName = fieldNames[fieldName] || fieldName
+            invalidFields.push(friendlyName)
           }
-        });
-        
+        })
+
         if (invalidFields.length > 0) {
           if (invalidFields.length === 1) {
-            errorMessage = `O campo ${invalidFields[0]} está inválido. Por favor, verifique.`;
+            errorMessage = `O campo ${invalidFields[0]} está inválido. Por favor, verifique.`
           } else if (invalidFields.length <= 3) {
-            errorMessage = `Os campos ${invalidFields.join(", ")} estão inválidos. Por favor, verifique.`;
+            errorMessage = `Os campos ${invalidFields.join(
+              ", "
+            )} estão inválidos. Por favor, verifique.`
           } else {
-            errorMessage = `Vários campos estão inválidos. Por favor, verifique todos os campos obrigatórios.`;
+            errorMessage = `Vários campos estão inválidos. Por favor, verifique todos os campos obrigatórios.`
           }
         }
-      } else if (typeof errorData === 'string') {
-        errorMessage = errorData;
+      } else if (typeof errorData === "string") {
+        errorMessage = errorData
       }
     }
 

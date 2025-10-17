@@ -57,10 +57,10 @@ export default function AccessStep() {
         email: data.email,
         password: data.password,
       }
-      
+
       // Normaliza e valida os dados antes de enviar
-      const normalizedData = normalizeData(userInfo, accessData);
-      
+      const normalizedData = normalizeData(userInfo, accessData)
+
       // envia para a API
       newAccount(normalizedData)
         .then((res) => {
@@ -71,13 +71,13 @@ export default function AccessStep() {
         })
         .finally(() => setLoading(false))
     } catch (error: any) {
-      console.log("Erro na validação:", error.message);
+      console.log("Erro na validação:", error.message)
       Toast.show({
-        type: 'error',
-        text1: 'Erro na validação',
+        type: "error",
+        text1: "Erro na validação",
         text2: error.message,
-      });
-      setLoading(false);
+      })
+      setLoading(false)
     }
   }
 
