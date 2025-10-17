@@ -5,7 +5,9 @@ import Input from "@/app/components/Input"
 import { MultiStep } from "@/app/components/MultiStep"
 import { useMultiStep } from "@/app/context/MultiStepContext"
 import { newAccount } from "@/app/service/api"
+import { normalizeData } from "@/app/util/nomalizer"
 import { ImageBackground } from "expo-image"
+import Toast from "react-native-toast-message"
 
 import React, { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
@@ -49,23 +51,34 @@ export default function AccessStep() {
   function handleFinish(data: AccessFormData) {
     setLoading(true)
 
-    // pega todos os dados coletados nos steps anteriores
-    const completeData = {
-      ...userInfo, // dados dos steps anteriores
-      email: data.email,
-      password: data.password,
+    try {
+      // pega todos os dados coletados nos steps anteriores
+      const accessData = {
+        email: data.email,
+        password: data.password,
+      }
+      
+      // Normaliza e valida os dados antes de enviar
+      const normalizedData = normalizeData(userInfo, accessData);
+      
+      // envia para a API
+      newAccount(normalizedData)
+        .then((res) => {
+          router.replace("/(auth)/Signin")
+        })
+        .catch((err) => {
+          console.log("Erro no cadastro:", err.message)
+        })
+        .finally(() => setLoading(false))
+    } catch (error: any) {
+      console.log("Erro na validação:", error.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Erro na validação',
+        text2: error.message,
+      });
+      setLoading(false);
     }
-    console.log(data)
-
-    // envia para a API
-    newAccount(completeData)
-      .then((res) => {
-        router.replace("/(auth)/Signin")
-      })
-      .catch((err) => {
-        console.log("Erro no cadastro:", err.message)
-      })
-      .finally(() => setLoading(false))
   }
 
   return (

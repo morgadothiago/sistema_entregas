@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native"
+
 // import LottieView from "lottie-react-native"
 import { useAuth } from "../context/AuthContext"
 import { useRouter } from "expo-router"
@@ -18,6 +19,8 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import ListItemPayments from "../components/ListItemPayments"
 import { cashFlowData } from "../mocks/paymentsData"
 import { MaterialIcons } from "@expo/vector-icons"
+import ConfirmationModal from "../components/ConfirmationModal"
+import Toast from "react-native-toast-message"
 
 export default function Payments() {
   const { user } = useAuth()
@@ -27,8 +30,36 @@ export default function Payments() {
     "all" | "entrada" | "saida"
   >("all")
   const insets = useSafeAreaInsets()
+  const [isConfirmationModalVisible, setIsConfirmationModalVisible] =
+    useState(false)
+  const [data, setData] = useState(null)
+  const [transactions, setTransactions] = useState(cashFlowData)
 
-  const filteredCashFlowData = cashFlowData.filter((item) => {
+  const handleConfirmPayment = (paymentData: any) => {
+    // Implementação da lógica de confirmação de pagamento
+    setIsLoading(true)
+
+    // Simulação de processamento (remover na implementação real)
+    setTimeout(() => {
+      setIsLoading(false)
+      
+      // Limpar a lista de transações após o saque
+      setTransactions([])
+      
+      // Exibindo o Toast somente após o loading terminar
+      Toast.show({
+        type: "success",
+        text1: "Saque realizado com sucesso",
+        text2: `Valor: ${paymentData?.value || "R$ 0,00"}`,
+        visibilityTime: 4000,
+        autoHide: true,
+        topOffset: 30,
+      })
+      // Aqui você pode adicionar a chamada à API ou outra lógica necessária
+    }, 1500)
+  }
+
+  const filteredCashFlowData = transactions.filter((item) => {
     if (selectedFilter === "all") {
       return true
     }
@@ -70,7 +101,10 @@ export default function Payments() {
               styles.withdrawButton,
               { opacity: pressed ? 0.9 : 1 },
             ]}
-            onPress={() => console.log("Sacar")}
+            onPress={() => {
+              setData({ value: "R$ 1.000,00" } as any)
+              setIsConfirmationModalVisible(true)
+            }}
           >
             <MaterialIcons name="arrow-circle-down" size={18} color="#fff" />
             <Text style={styles.withdrawText}>Sacar</Text>
@@ -163,6 +197,29 @@ export default function Payments() {
               <ActivityIndicator size="large" color={colors.active} />
               <Text style={styles.overlayText}>Processando...</Text>
             </View>
+          </View>
+        </Modal>
+
+        <Modal
+          transparent
+          animationType="fade"
+          visible={isConfirmationModalVisible}
+        >
+          <View style={styles.overlay}>
+            <ConfirmationModal
+              title="Confirmar Pagamento"
+              message={`Deseja confirmar o pagamento de ${
+                (data as unknown as { value: string })?.value || "R$ 0,00"
+              }?`}
+              onConfirm={() => {
+                // Implementação da lógica de confirmação no componente pai
+                handleConfirmPayment(data)
+                setIsConfirmationModalVisible(false)
+              }}
+              onCancel={() => {
+                setIsConfirmationModalVisible(false)
+              }}
+            />
           </View>
         </Modal>
       </View>
