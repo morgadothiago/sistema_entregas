@@ -6,98 +6,58 @@ import { Header } from "../components/Header"
 import { colors } from "../theme"
 import { DeliveryItem, Order } from "../components/DeliveryItem"
 import * as Location from "expo-location"
+import { api } from "../service/api"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export default function Delivery() {
+  const [token, setToken] = useState("")
   const router = useRouter()
-
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "ORD-001",
-      customer: "Mariana Silva",
-      address: "Rua das Flores, 123",
-      message: "Entregar antes das 18:00",
-      items: ["Sushi Box", "Ginger Tea"],
-      fee: 6.5,
-      status: "pending",
-    },
-    {
-      id: "ORD-002",
-      customer: "Carlos Almeida",
-      address: "Av. Brasil, 987",
-      message: "Tocar campainha, entregar para porteiro",
-      items: ["Pizza Pepperoni"],
-      fee: 4.0,
-      status: "pending",
-    },
-    {
-      id: "ORD-003",
-      customer: "João Pereira",
-      address: "Praça Central, 5",
-      message: "Cliente prefere contato via telefone",
-      items: ["Caesar Salad", "Iced Coffee"],
-      fee: 5.0,
-      status: "enroute",
-    },
-  ])
-
-  const [currentLocation, setCurrentLocation] = useState<Location.LocationObject | null>(null)
+  const [orders, setOrders] = useState<Order[]>([])
 
   useEffect(() => {
-    ;(async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync()
-      if (status !== "granted") {
-        console.error("Permission to access location was denied")
-        return
-      }
-
-      let location = await Location.getCurrentPositionAsync({})
-      setCurrentLocation(location)
-    })()
+    const loadToken = async () => {
+      const storedToken = await AsyncStorage.getItem("token")
+      if (storedToken) setToken(storedToken)
+    }
+    loadToken()
   }, [])
 
-  const handleOpenDetails = (order: Order) => {
-    router.push({
-      pathname: "/deliveryDetails",
-      params: { ...order, currentLocation: JSON.stringify(currentLocation) },
+  const getAllDeliverys = async () => {
+    const response = await api.get("/delivery", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
+    setOrders(response.data)
   }
+  console.log()
 
-  const handleAccept = (acceptedOrder: Order) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === acceptedOrder.id ? { ...order, status: "enroute" } : order
-      )
-    )
-  }
-
-  const handleDecline = (declinedOrder: Order) => {
-    setOrders((prevOrders) =>
-      prevOrders.filter((order) => order.id !== declinedOrder.id)
-    )
-  }
+  // const handleOpenDetails = (order: Order) => {
+  //   router.push({
+  //     pathname: "/deliveryDetails",
+  //     params: { ...order },
+  //   })
+  // }
 
   return (
     <SafeAreaView style={styles.container}>
       <Header onBackPress={() => router.back()} title="Minhas Entregas" />
 
-      <FlatList
-        data={orders}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <DeliveryItem
-            item={item}
-            onPress={handleOpenDetails}
-            onAccept={handleAccept}
-            onDecline={handleDecline}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhuma entrega disponível</Text>
-          </View>
-        )}
-      />
+      <View style={styles.listContainer}>
+        <FlatList
+          data={orders}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <DeliveryItem item={item} onPress={() => {}} />
+          )}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Nenhuma entrega disponível</Text>
+            </View>
+          )}
+        />
+      </View>
     </SafeAreaView>
   )
 }
@@ -107,8 +67,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.primary,
   },
+  listContainer: {
+    flex: 1,
+    backgroundColor: colors.secondary,
+  },
   listContent: {
     padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
   },
   emptyContainer: {
     alignItems: "center",

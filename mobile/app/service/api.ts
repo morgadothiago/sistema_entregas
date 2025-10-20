@@ -16,7 +16,7 @@ interface LoginResponse {
 
 // -------------------- INSTÂNCIA AXIOS --------------------
 const api = Axios.create({
-  baseURL: "http://192.168.100.100:3000",
+  baseURL: "http://192.168.100.102:3000",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
