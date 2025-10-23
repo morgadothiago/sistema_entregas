@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import React, { createContext, useContext, useEffect, useState } from "react"
-import { api } from "../service/api"
+import { api, login } from "../service/api"
 import { ApiResponse } from "../types/ApiResponse"
 
 type AuthContextData = {
@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Helpers para AsyncStorage
+  // Helpers do AsyncStorage
   async function saveItem(key: string, value: string) {
     await AsyncStorage.setItem(key, value)
   }
@@ -31,12 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.removeItem(key)
   }
 
-  // Carrega token e usuário do AsyncStorage ao iniciar o app
+  // 🔹 Carrega token e usuário do AsyncStorage ao iniciar o app
   useEffect(() => {
     async function loadStorageData() {
       try {
-        const storagedToken = await getItem("token")
-        const storagedUser = await getItem("user")
+        const storagedToken = await getItem("@token")
+        const storagedUser = await getItem("@user")
 
         if (storagedToken && storagedUser) {
           api.defaults.headers.common[
@@ -55,51 +55,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadStorageData()
   }, [])
 
-  // Login
+  // 🔹 Login
   async function signIn(email: string, password: string) {
     try {
-      const response = await api.post<{
-        token: string
-        user: ApiResponse
-      }>(
-        "/auth/login",
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "User-Agent": "IEMobile",
-            Accept: "application/json",
-          },
-        }
-      )
+      const { token: responseToken, user: userData } = await login({
+        email,
+        password,
+      })
 
-      console.log(token)
-
-      const { token: responseToken, user: userData } = response.data
+      console.log("Dados vindo da api:", responseToken, userData)
 
       // Atualiza estado
       setUser(userData)
       setToken(responseToken)
 
-      // Adiciona token no header do axios
+      // Atualiza header global do Axios
       api.defaults.headers.common["Authorization"] = `Bearer ${responseToken}`
 
-      // Salva no AsyncStorage
-      await saveItem("token", responseToken)
-      await saveItem("user", JSON.stringify(userData))
+      // Persiste no AsyncStorage (chaves padronizadas com '@')
+      await saveItem("@token", responseToken)
+      await saveItem("@user", JSON.stringify(userData))
+
+      console.log("Token salvo com sucesso:", responseToken)
     } catch (error: any) {
-      console.log("Erro no login:", error)
+      console.log("Erro no login:", error.response?.data || error.message)
       throw error
     }
   }
 
-  // Logout
+  // 🔹 Logout
   async function signOut() {
-    setUser(null)
-    setToken(null)
-    await removeItem("token")
-    await removeItem("user")
-    delete api.defaults.headers.common["Authorization"]
+    try {
+      setUser(null)
+      setToken(null)
+      await removeItem("@token")
+      await removeItem("@user")
+      delete api.defaults.headers.common["Authorization"]
+    } catch (error) {
+      console.log("Erro ao fazer logout:", error)
+    }
   }
 
   return (

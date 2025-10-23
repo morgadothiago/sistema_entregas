@@ -1,52 +1,41 @@
 import { colors } from "@/app/theme"
 import React from "react"
 import { Pressable, StyleSheet, Text, View } from "react-native"
-
-export interface Order {
-  id: string
-  customer: string
-  address: string
-  message: string
-  items: string[]
-  fee: number
-  status: "pending" | "enroute" | "delivered"
-}
+import { ApiOrder } from "@/app/types/order"
 
 interface DeliveryItemProps {
-  item: Order
-  onPress: (order: Order) => void
+  item: ApiOrder
+  onPress: (order: ApiOrder) => void
 }
 
 export function DeliveryItem({ item, onPress }: DeliveryItemProps) {
   const statusLabel =
-    item.status === "pending"
+    item.status === "PENDING"
       ? "Pendente"
-      : item.status === "enroute"
+      : item.status === "IN_TRANSIT"
       ? "A caminho"
       : "Entregue"
 
   const statusColor =
-    item.status === "pending"
+    item.status === "PENDING"
       ? colors.buttons
-      : item.status === "enroute"
+      : item.status === "IN_TRANSIT"
       ? colors.active
       : colors.stars
 
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.orderId}>{item.id}</Text>
+        <Text style={styles.orderId}>{item.code}</Text>
         <Text style={[styles.status, { color: statusColor }]}>
           {statusLabel}
         </Text>
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.customer}>{item.customer}</Text>
-        <Text style={styles.address}>{item.address}</Text>
-        <Text style={styles.message}>{item.message}</Text>
-        <Text style={styles.items}>Itens: {item.items.join(", ")}</Text>
-        <Text style={styles.fee}>Taxa: R$ {item.fee.toFixed(2)}</Text>
+        <Text style={styles.customer}>{item.Company.name}</Text>
+        <Text style={styles.message}>{item.information}</Text>
+        <Text style={styles.fee}>Taxa: R$ {item.price}</Text>
       </View>
 
       <Pressable style={styles.button} onPress={() => onPress(item)}>
@@ -58,14 +47,15 @@ export function DeliveryItem({ item, onPress }: DeliveryItemProps) {
 
 const styles = StyleSheet.create({
   card: {
+    width: "100%",
     backgroundColor: colors.secondary,
     borderRadius: 10,
     padding: 16,
-    marginBottom: 14,
+    marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
     elevation: 3,
   },
   header: {
@@ -101,11 +91,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginTop: 4,
     fontStyle: "italic",
-  },
-  items: {
-    fontSize: 13,
-    color: colors.text,
-    marginTop: 4,
   },
   fee: {
     fontSize: 13,

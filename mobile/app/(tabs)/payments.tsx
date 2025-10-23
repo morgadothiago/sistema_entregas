@@ -1,26 +1,26 @@
 import React, { useState } from "react"
 import {
+  ActivityIndicator,
+  FlatList,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
   View,
-  Modal,
-  ActivityIndicator,
-  FlatList,
 } from "react-native"
 
 // import LottieView from "lottie-react-native"
-import { useAuth } from "../context/AuthContext"
 import { useRouter } from "expo-router"
+import { useAuth } from "../context/AuthContext"
 import { colors } from "../theme"
 
-import { Header } from "../components/Header"
+import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
+import Toast from "react-native-toast-message"
+import ConfirmationModal from "../components/ConfirmationModal"
+import { Header } from "../components/Header"
 import ListItemPayments from "../components/ListItemPayments"
 import { cashFlowData } from "../mocks/paymentsData"
-import { MaterialIcons } from "@expo/vector-icons"
-import ConfirmationModal from "../components/ConfirmationModal"
-import Toast from "react-native-toast-message"
 
 export default function Payments() {
   const { user } = useAuth()
@@ -42,10 +42,10 @@ export default function Payments() {
     // Simulação de processamento (remover na implementação real)
     setTimeout(() => {
       setIsLoading(false)
-      
+
       // Limpar a lista de transações após o saque
       setTransactions([])
-      
+
       // Exibindo o Toast somente após o loading terminar
       Toast.show({
         type: "success",
@@ -73,7 +73,7 @@ export default function Payments() {
           paddingHorizontal: 10,
         }}
       >
-        <Header onBackPress={() => routes.back()} title="Minha Carteira" />
+        <Header title="Minha Carteira" />
       </View>
       <View
         style={{

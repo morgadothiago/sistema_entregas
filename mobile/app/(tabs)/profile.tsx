@@ -72,12 +72,7 @@ export default function Profile() {
   return (
     <View style={styles.container}>
       <SafeAreaView>
-        <Header
-          title="Perfil"
-          onBackPress={() => router.back()}
-          tabs={true}
-          tabsTitle="Meu Perfil"
-        />
+        <Header title="Perfil" tabs={true} tabsTitle="Meu Perfil" />
 
         <View style={styles.content}>
           <View style={styles.imageContainer}>

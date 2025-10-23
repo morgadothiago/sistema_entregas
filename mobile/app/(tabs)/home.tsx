@@ -5,7 +5,7 @@ import { useAuth } from "@/app/context/AuthContext"
 import { Pressable, Text, View } from "react-native"
 
 export default function Home() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, token } = useAuth()
 
   const handleLogout = async () => {
     await signOut() // limpa token e usuário
@@ -24,6 +24,7 @@ export default function Home() {
       <Pressable onPress={() => router.back()}>
         <Text>Voltar</Text>
         <Text>{user?.DeliveryMan?.Address?.city}</Text>
+        <Text>{token}</Text>
       </Pressable>
 
       <Pressable onPress={handleLogout}>

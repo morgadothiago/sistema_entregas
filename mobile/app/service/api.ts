@@ -20,6 +20,7 @@ const api = Axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    "User-Agent": "IEMobile",
   },
 })
 
@@ -31,7 +32,11 @@ export async function login(data: LoginData): Promise<LoginResponse> {
       data
     )
 
+    console.log(response.data.token)
+
     const { token, user } = response.data
+
+    console.log("Meu token da api ", token)
 
     if (!token || !user) {
       throw new Error("Resposta inválida do servidor.")

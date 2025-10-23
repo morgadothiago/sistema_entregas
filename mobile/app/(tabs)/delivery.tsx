@@ -1,54 +1,79 @@
+import { useRouter } from "expo-router"
 import React, { useEffect, useState } from "react"
 import { FlatList, StyleSheet, Text, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { useRouter } from "expo-router"
+import { DeliveryItem } from "../components/DeliveryItem"
 import { Header } from "../components/Header"
-import { colors } from "../theme"
-import { DeliveryItem, Order } from "../components/DeliveryItem"
-import * as Location from "expo-location"
+import { useAuth } from "../context/AuthContext"
 import { api } from "../service/api"
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import { colors } from "../theme"
+import { ApiOrder } from "../types/order"
 
 export default function Delivery() {
-  const [token, setToken] = useState("")
-  const router = useRouter()
-  const [orders, setOrders] = useState<Order[]>([])
+  const { token } = useAuth()
 
   useEffect(() => {
-    const loadToken = async () => {
-      const storedToken = await AsyncStorage.getItem("token")
-      if (storedToken) setToken(storedToken)
+    if (!token) {
+      return router.replace("/(auth)/Signin")
     }
-    loadToken()
-  }, [])
+    getAllDeliverys()
+  }, [token])
+
+  const testeToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzYxMTg4OTE4LCJleHAiOjE3NjEyMTc3MTh9.CqLeXF4QcSMDHNCnrSyS-09dsh2Ncn0w74xb5hZsBss"
+
+  const router = useRouter()
+  const [orders, setOrders] = useState<ApiOrder[]>([])
+
+  console.log("token:", token)
 
   const getAllDeliverys = async () => {
-    const response = await api.get("/delivery", {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    try {
+      const response = await api.get("/delivery", {
+        headers: {
+          Authorization: `Bearer ${testeToken}`,
+        },
+      })
+      console.log("response:", response.data)
+      // setOrders(response.data.data)
+    } catch (error) {
+      console.error("Erro ao buscar entregas:", error)
+    }
+  }
+
+  console.log("orders:", orders)
+
+  const handleOpenDetails = (order: ApiOrder) => {
+    router.push({
+      pathname: "/deliveryDetails",
+      params: {
+        code: order.code,
+        email: order.email,
+        price: order.price,
+        length: String(order.length),
+        width: String(order.width),
+        height: String(order.height),
+        weight: String(order.weight),
+        isFragile: String(order.isFragile),
+        information: order.information,
+        completedAt: order.completedAt ?? "",
+        companyName: order.Company?.name ?? "",
+        companyPhone: order.phone ?? "",
+        companyAddress: order.andress ?? "",
       },
     })
-    setOrders(response.data)
   }
-  console.log()
-
-  // const handleOpenDetails = (order: Order) => {
-  //   router.push({
-  //     pathname: "/deliveryDetails",
-  //     params: { ...order },
-  //   })
-  // }
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header onBackPress={() => router.back()} title="Minhas Entregas" />
+      <Header title="Minhas Entregas" />
 
       <View style={styles.listContainer}>
         <FlatList
           data={orders}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.code}
           renderItem={({ item }) => (
-            <DeliveryItem item={item} onPress={() => {}} />
+            <DeliveryItem item={item} onPress={() => handleOpenDetails(item)} />
           )}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={() => (
@@ -73,9 +98,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    justifyContent: "center",
-    alignItems: "center",
+
     flex: 1,
+    backgroundColor: colors.secondary,
   },
   emptyContainer: {
     alignItems: "center",

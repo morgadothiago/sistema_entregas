@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { DeliveryStatus, User } from '@prisma/client';
+import { ApiProperty } from "@nestjs/swagger"
+import { DeliveryStatus, User } from "@prisma/client"
 import {
   IsBooleanString,
   IsDateString,
@@ -8,120 +8,120 @@ import {
   IsOptional,
   IsString,
   Min,
-} from 'class-validator';
+} from "class-validator"
 
 export class DeliveryQueryParams {
   @ApiProperty({
     type: String,
-    description: 'Tipo de veiculo',
+    description: "Tipo de veiculo",
     required: false,
   })
   @IsOptional()
   @IsString()
-  vehicleType?: string;
+  vehicleType?: string
 
   @ApiProperty({
     type: Boolean,
-    description: 'é Fragil?',
+    description: "é Fragil?",
     required: false,
   })
   @IsOptional()
   @IsBooleanString()
-  isFragile?: string;
+  isFragile?: string
 
   @ApiProperty({
     type: String,
-    description: 'Data de conclusão - início',
+    description: "Data de conclusão - início",
     required: false,
-    example: '2024-01-01',
+    example: "2024-01-01",
   })
   @IsOptional()
   @IsDateString()
-  completedFrom?: string;
+  completedFrom?: string
 
   @ApiProperty({
     type: String,
-    description: 'Data de conclusão - fim',
+    description: "Data de conclusão - fim",
     required: false,
-    example: '2024-12-31',
+    example: "2024-12-31",
   })
   @IsOptional()
   @IsDateString()
-  completedTo?: string;
+  completedTo?: string
 
   @ApiProperty({
     type: String,
-    description: 'Preço máximo',
+    description: "Preço máximo",
     required: false,
   })
   @IsOptional()
   @IsNumberString()
-  maxPrice?: string;
+  maxPrice?: string
 
   @ApiProperty({
     type: String,
-    description: 'Preço mínimo',
+    description: "Preço mínimo",
     required: false,
   })
   @IsOptional()
   @IsNumberString()
-  minPrice?: string;
+  minPrice?: string
 
   @ApiProperty({
     type: String,
-    description: 'Código completo ou parcial',
+    description: "Código completo ou parcial",
     required: false,
   })
   @IsOptional()
   @IsString()
-  code?: string;
+  code?: string
 
   @ApiProperty({
     type: String,
-    description: 'Cidade de origem',
+    description: "Cidade de origem",
     required: false,
   })
   @IsOptional()
   @IsString()
-  originCity?: string;
+  originCity?: string
 
   @ApiProperty({
     type: String,
-    description: 'Cidade do cliente',
+    description: "Cidade do cliente",
     required: false,
   })
   @IsOptional()
   @IsString()
-  clientCity?: string;
+  clientCity?: string
 
   @ApiProperty({
-    description: 'Status da entrega',
+    description: "Status da entrega",
     required: false,
     enum: DeliveryStatus,
   })
   @IsOptional()
   @IsIn(Object.values(DeliveryStatus))
-  status?: DeliveryStatus;
+  status?: DeliveryStatus
 
   @ApiProperty({
-    description: 'Número da página',
+    description: "Número da página",
     required: false,
-    default: '1',
+    default: "1",
   })
   @IsOptional()
   @IsNumberString()
   @Min(1)
-  page?: string;
+  page?: string
 
   @ApiProperty({
-    description: 'Itens por página',
+    description: "Itens por página",
     required: false,
-    default: '100',
+    default: "100",
   })
   @IsOptional()
   @IsNumberString()
   @Min(1)
-  limit?: string;
+  limit?: string
 
-  user: User;
+  user: User
 }
