@@ -28,28 +28,42 @@ export default function Charts() {
   return (
     <SafeAreaView style={styles.container}>
       <Header title="Relatorios" tabs={true} tabsTitle="Relatorios" />
-      <View style={styles.fixedContent}>
-        <ChartExample selectedDay={selectedDay} />
-        <AppPicker
-          label="Filtrar por dia da semana"
-          selectedValue={selectedDay}
-          onValueChange={setSelectedDay}
-          options={dayOptions}
-          placeholder="Selecione um dia"
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.secondary,
+        }}
+      >
+        <View style={styles.fixedContent}>
+          <ChartExample selectedDay={selectedDay} />
+          <AppPicker
+            label="Filtrar por dia da semana"
+            selectedValue={selectedDay}
+            onValueChange={setSelectedDay}
+            options={dayOptions}
+            placeholder="Selecione um dia"
+          />
+          <Text style={styles.deliveryListTitle}>
+            {selectedDay
+              ? `Entregas do dia ${
+                  dayOptions.find((option) => option.value === selectedDay)
+                    ?.label
+                }`
+              : "Todas as Entregas"}
+          </Text>
+        </View>
+        <FlatList
+          data={filteredDeliveries}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <DeliveryCard item={item as DeliveryItem} />
+          )}
+          contentContainerStyle={styles.flatListContentContainer}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Nenhuma entrega encontrada.</Text>
+          }
         />
-        <Text style={styles.deliveryListTitle}>
-          {selectedDay ? `Entregas do dia ${selectedDay}` : "Todas as Entregas"}
-        </Text>
       </View>
-      <FlatList
-        data={filteredDeliveries}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <DeliveryCard item={item as DeliveryItem} />}
-        contentContainerStyle={styles.flatListContentContainer}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhuma entrega encontrada.</Text>
-        }
-      />
     </SafeAreaView>
   )
 }

@@ -56,7 +56,9 @@ export default function ChartExample({ selectedDay }: ChartExampleProps) {
         justifyContent: "center",
       }}
     >
-      <Text style={{ fontSize: 18, marginBottom: 10 }}>{chartTitle}</Text>
+      <Text style={{ fontSize: 18, marginBottom: 10, color: colors.text }}>
+        {chartTitle}
+      </Text>
       <View
         style={{
           backgroundColor: "white",

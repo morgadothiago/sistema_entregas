@@ -103,7 +103,7 @@ export default function AppPicker({
 
 const styles = StyleSheet.create({
   container: { marginVertical: 8 },
-  label: { marginBottom: 6, color: colors.buttons, fontWeight: "900" },
+  label: { marginBottom: 6, color: colors.text, fontWeight: "900" },
   selector: {
     backgroundColor: colors.primary,
     paddingHorizontal: 12,
