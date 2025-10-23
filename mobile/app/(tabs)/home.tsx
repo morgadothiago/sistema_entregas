@@ -1,35 +1,49 @@
-import { router } from "expo-router"
 import React from "react"
-
-import { useAuth } from "@/app/context/AuthContext"
-import { Pressable, Text, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { colors } from "../theme"
+import { Header } from "../components/Header"
+import UserWarpper from "../components/UserWarpper"
+import { useAuth } from "../context/AuthContext"
 
 export default function Home() {
-  const { user, signOut, token } = useAuth()
+  const { user } = useAuth()
 
-  const handleLogout = async () => {
-    await signOut() // limpa token e usuário
-    router.replace("/(auth)/Signin") // redireciona para login
-  }
+  const { DeliveryMan } = user || {}
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Tela Home: {user?.DeliveryMan?.name}</Text>
-      <Pressable onPress={() => router.back()}>
-        <Text>Voltar</Text>
-        <Text>{user?.DeliveryMan?.Address?.city}</Text>
-        <Text>{token}</Text>
-      </Pressable>
-
-      <Pressable onPress={handleLogout}>
-        <Text>Logout</Text>
-      </Pressable>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <Header title="Home" tabs={false} />
+      <View style={styles.content}>
+        {DeliveryMan && user && <UserWarpper deliveryMan={DeliveryMan} />}
+        <Text style={styles.welcomeText}>
+          Bem-vindo, {DeliveryMan?.name || "Usuário"}!
+        </Text>
+        <Text style={styles.paymentText}>Formas de pagamento: R$ 1000.00</Text>
+      </View>
+    </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.primary,
+  },
+  content: {
+    flex: 1,
+    backgroundColor: colors.secondary,
+    padding: 16,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.text,
+    marginTop: 20,
+  },
+  paymentText: {
+    fontSize: 18,
+    color: colors.text,
+    marginTop: 10,
+  },
+})
